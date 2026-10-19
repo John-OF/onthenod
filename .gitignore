@@ -1,0 +1,16 @@
+# Reglas que valen para todo el repo.
+# Las de cada herramienta están en blender/.gitignore y unity/.gitignore.
+
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+
+# Editores
+.vs/
+.vscode/
+.idea/

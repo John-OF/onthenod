@@ -1,0 +1,12 @@
+# Copias de seguridad que Blender crea al guardar (x.blend1, x.blend2...)
+*.blend[0-9]*
+
+# Temporales de render. Los scripts los borran al terminar;
+# solo quedan si un render se corta a la mitad.
+# Ojo: renders/pasillo_raw.png SÍ se sube (es una salida del script).
+renders/_*
+renders/4b_*_raw.png
+renders/brazos_estado*_raw.png
+
+# Python
+__pycache__/
