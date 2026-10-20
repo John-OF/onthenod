@@ -26,6 +26,10 @@ Salidas (dentro de la carpeta blender/):
   scenes/brazos_primera_persona.blend
   renders/brazos_estado0..3.png    un render PS1 por estado (1920x1080)
   renders/brazos_estados.png       los cuatro estados juntos
+
+A Unity no exporta este script sino brazos_animaciones.py, que junta los brazos con sus
+clips. Este guarda en el objeto Brazos la propiedad "estados" (textura y delgadez de cada
+estado) para que aquel la pase al JSON de Unity.
 """
 import math
 import os
@@ -851,13 +855,16 @@ def box(name, mn, mx, mat):
 
 
 def build_room():
-    # El piso lo genera departamento_4b.py; si ya existe, se usa el mismo.
+    # El piso lo genera departamento_4b.py; si ya existe, se usa el mismo. Se calcula
+    # igual, para que la pared (que sale del mismo generador aleatorio) no cambie segun
+    # el orden en que se corran los scripts.
     floor_path = os.path.join(TEX_DIR, "piso_madera_4b.png")
+    floor_rgb = tex_floor()
     if os.path.exists(floor_path):
         floor_img = bpy.data.images.load(floor_path)
         floor_img.name = "piso_madera_4b"
     else:
-        floor_img = save_texture("piso_madera_4b", tex_floor())
+        floor_img = save_texture("piso_madera_4b", floor_rgb)
     wall_img = save_texture("pared_4b", tex_wall())
     piso = mat_surface("Piso4B", image=floor_img, rough=0.75, spec=0.25)
     pared = mat_surface("Pared4B", image=wall_img, rough=0.95)
@@ -1057,6 +1064,10 @@ def main():
     # estado: (iluminacion, delgadez, rugosidad: mas sudor = mas brillo)
     looks = {0: ("efecto", 0.0, 0.72), 1: ("abstinencia", 0.0, 0.62),
              2: ("abstinencia", 0.45, 0.52), 3: ("abstinencia", 1.0, 0.40)}
+    # Para Unity: textura y delgadez de cada estado. Quedan en el .blend y las lee
+    # brazos_animaciones.py, que es el que exporta los brazos con sus clips.
+    arms["estados"] = {str(st): {"textura": f"brazos_estado{st}", "consumido": v[1]}
+                       for st, v in looks.items()}
     panels = {}
     for st in only:
         mode, thin_v, rough = looks[st]

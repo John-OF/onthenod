@@ -28,6 +28,16 @@ Salidas (dentro de la carpeta blender/):
   renders/anim_<clip>.mp4              vista previa PS1 (con el temblor sumado)
   renders/anim_<clip>_claves.png       seis cuadros del clip
   renders/anim_todas.mp4               todas las vistas previas seguidas
+
+Y en el proyecto de Unity (ver exportar_unity.py):
+  unity/Assets/Art/BrazosElias/brazos_elias.fbx          esqueleto, malla, forma "consumido"
+                                                         y los siete clips (con mirar_brazos)
+  unity/Assets/Art/BrazosElias/brazos_elias_escena.json  luz de los brazos, camara, los cuatro
+                                                         estados, los clips y, por clip, el
+                                                         movimiento de la cabeza, la puerta y
+                                                         el auricular
+  unity/Assets/Art/BrazosElias/Textures/brazos_estado0..3.png
+  Para exportar sin renderizar las vistas previas: ... -- blender reposo
 """
 import math
 import os
@@ -39,6 +49,9 @@ import time
 import bpy
 import numpy as np
 from mathutils import Euler, Matrix, Vector
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import exportar_unity  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Configuracion
@@ -817,7 +830,90 @@ def main():
         bpy.ops.wm.save_mainfile()
     except Exception as e:
         print(f"[aviso] rutas relativas: {e}")
+
+    exportar_a_unity(rig, head, door, handset, infos, clips)
     print(f"[info] listo en {time.time() - t0:.0f} s")
+
+
+# ---------------------------------------------------------------------------
+# Unity
+# ---------------------------------------------------------------------------
+def muestrear(ob, accion, n):
+    """Matriz del objeto en cada cuadro de la accion (12 numeros por cuadro)."""
+    ob.animation_data_create()
+    ob.animation_data.action = accion
+    datos = []
+    for f in range(1, n + 1):
+        scene.frame_set(f)
+        datos += exportar_unity.matriz(ob)
+    ob.animation_data.action = None
+    return datos
+
+
+def cargar_imagen(nombre):
+    ruta = os.path.normcase(os.path.join(ROOT, "textures", nombre + ".png"))
+    for img in bpy.data.images:
+        if img.filepath and os.path.normcase(os.path.abspath(bpy.path.abspath(img.filepath))) == ruta:
+            return img
+    return bpy.data.images.load(ruta)
+
+
+def exportar_a_unity(rig, head, door, handset, infos, clips):
+    """Un solo FBX con el esqueleto, la malla y los clips. En Unity los brazos cuelgan de la
+    camara, asi que se exportan con la cabeza en el origen. El movimiento de la cabeza (la
+    camara de Unity), de la puerta y del auricular en cada clip va en el JSON, cuadro a cuadro:
+    lo usa la camara de interaccion."""
+    arms = bpy.data.objects["Brazos"]
+    rig.animation_data.action = None
+    for tr in list(rig.animation_data.nla_tracks):
+        rig.animation_data.nla_tracks.remove(tr)
+    reset_pose(rig)
+
+    # Puerta y auricular en reposo: las pistas se aplican como cambio desde aqui
+    for ob in (door, handset):
+        if ob.animation_data:
+            ob.animation_data.action = None
+    door.rotation_euler.z = R(DOOR_REST)
+    handset.matrix_world = HS["rest"]
+    bpy.context.view_layer.update()
+    reposo = {door.name: exportar_unity.matriz(door), handset.name: exportar_unity.matriz(handset)}
+
+    pistas = []
+    for name, info in infos.items():
+        n = info["frames"]
+        pistas.append({"clip": name, "objeto": head.name, "reposo": [], "matrices": muestrear(head, info["head"], n)})
+        moviles = [(door, info["door"]), (handset, bpy.data.actions.get("auricular_" + name))]
+        for ob, accion in moviles:
+            if accion is not None:
+                pistas.append({"clip": name, "objeto": ob.name, "reposo": reposo[ob.name],
+                               "matrices": muestrear(ob, accion, n)})
+    door.rotation_euler.z = R(DOOR_REST)
+    handset.matrix_world = HS["rest"]
+
+    # La cabeza en el origen: la luz y la camara quedan relativas a ella
+    head.animation_data.action = None
+    head.matrix_world = Matrix()
+    rig.parent = None
+    rig.matrix_world = Matrix()
+    bpy.context.view_layer.update()
+
+    # Los cuatro estados de los brazos (los define brazos_primera_persona.py)
+    lamp, cam = bpy.data.objects["luz_brazos"], bpy.data.objects["Cam_Elias"]
+    tex = arms.active_material.node_tree.nodes["Textura"]
+    forma = arms.data.shape_keys.key_blocks["consumido"]
+    cfg = arms["estados"].to_dict()
+    estados = {}
+    for st in sorted(cfg):
+        tex.image = cargar_imagen(cfg[st]["textura"])
+        forma.value = cfg[st]["consumido"]
+        estados["estado" + st] = exportar_unity.foto_estado([lamp, cam, arms])
+    tex.image = cargar_imagen(cfg["1"]["textura"])  # el FBX queda en el estado 1 (Noche 1)
+    forma.value = 0.0
+
+    anims = [{"nombre": n, "loop": bool(clips[n].get("loop"))} for n in CLIPS]
+    anims += [{"nombre": "temblor", "loop": True, "aditivo": True}, {"nombre": "mirar_brazos"}]
+    exportar_unity.exportar(ROOT, "BrazosElias", "brazos_elias", objetos=[rig, arms],
+                            animaciones=anims, estados=estados, extra={"pistas": pistas})
 
 
 main()

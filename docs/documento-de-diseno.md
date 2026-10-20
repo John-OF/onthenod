@@ -465,6 +465,13 @@ Primer asset del juego (18 de octubre de 2026). Se generan con `blender/scripts/
 - **Cámara de interacción:** abrir una puerta o contestar el teléfono mueve la cámara a un punto fijo frente al objeto (inclinado sobre la mesita, frente a la perilla), y desde ahí corre la animación. Así la mano siempre llega al objeto.
 - **Luz de los brazos:** una luz tenue pegada a la cámara, que solo ilumina los brazos, para que se lean en los cuartos oscuros.
 
+**En Unity** (19 de octubre de 2026). Los exporta `brazos_animaciones.py` (no `brazos_primera_persona.py`), porque es el que junta el modelo con los clips: `Assets/Art/BrazosElias/` tiene `brazos_elias.fbx`, las cuatro texturas y `brazos_elias_escena.json`. La escena de prueba es `Assets/Scenes/PruebaBrazosElias.unity`: el 4B con los brazos colgando de la cámara.
+- **El FBX:** esqueleto genérico con su *Avatar*, la malla con la forma `consumido` y los siete clips (`reposo`, `temblor`, `mirar_manos`, `abrir_puerta`, `telefono_contestar`, `telefono_colgar` y la pose `mirar_brazos`). `reposo` y `temblor` van en bucle.
+- **El temblor:** va en una capa aditiva. El clip trae un cuadro de reposo antes del primero, y Unity lo usa como referencia de la capa; así el temblor se suma sin mover la pose de base.
+- **Los cuatro estados** están en el JSON: la textura de cada uno y el valor de `consumido` (0, 0, 0,45 y 1; en Unity el *blendshape* va de 0 a 100). Los define `brazos_primera_persona.py`, que los guarda en el `.blend`.
+- **La cámara de interacción:** el JSON trae, para cada clip y cuadro a cuadro, dónde está la cabeza (la cámara de Unity), y cómo se mueven la puerta del dormitorio y el auricular. La cabeza está en las coordenadas del 4B. La luz de los brazos y la cámara van relativas a la cabeza.
+- **Comparación con Blender:** cuatro cuadros de las vistas previas (`anim_*_claves.png`), con la cámara, la puerta y el auricular siguiendo esas pistas y el temblor sumado. Cada píxel difiere en promedio entre 4 y 6 niveles de 255; las manos y los dedos coinciden, y lo único distinto es la luz que falta en el fondo del pasillo (la precalculada del 4B).
+
 ### Tomás
 Tercer asset (18 de octubre de 2026). Se genera con `blender/scripts/tomas.py`; los cinco estados están en `blender/renders/tomas_estados.png`.
 
@@ -579,7 +586,7 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 - Sofá, cama, mesa, sillas, refrigerador, tele vieja, ventanas tapadas con cartón y periódicos, basura, botellas.
 
 **Personajes**
-- Elías: brazos en primera persona (**hecho**: cuatro estados, ver sección 10) y cuerpo completo para espejos y cinemáticas.
+- Elías: brazos en primera persona (**hecho**: cuatro estados, ya exportados a Unity con sus clips; ver sección 10) y cuerpo completo para espejos y cinemáticas.
 - Tomás vivo y muerto (**hecho**: un modelo con cinco estados, del vivo sonriente a la calavera; ver sección 10).
 - Doña Carmen y su plato tapado (**hecho**: dos vestuarios y las vistas por la mirilla; ver sección 10). En la demo solo se ve por la mirilla.
 

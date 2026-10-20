@@ -19,6 +19,8 @@ public class EscenaBlender
     public Luz[] luces;
     public Camara[] camaras;
     public Estado[] estados;
+    public Animacion[] animaciones;
+    public Pista[] pistas;
 
     [Serializable]
     public class Luz
@@ -55,8 +57,44 @@ public class EscenaBlender
         public string nombre;
         public LuzEstado[] luces;
         public MaterialEstado[] materiales;
+        public Forma[] formas;
         public string[] colecciones_ocultas;
         public Mundo mundo;
+    }
+
+    [Serializable]
+    public class Forma
+    {
+        public string objeto;
+        public string forma; // shape key de Blender = blendshape de Unity
+        public float valor; // de 0 a 1 (en Unity, de 0 a 100)
+    }
+
+    /// <summary>Un clip del FBX. Lo usa el importador para el bucle y la capa aditiva.</summary>
+    [Serializable]
+    public class Animacion
+    {
+        public string nombre;
+        public int cuadros;
+        public float fps;
+        public bool loop;
+        public bool aditivo; // va en una capa aditiva; su referencia es un cuadro de reposo
+    }
+
+    /// <summary>
+    /// Cómo se mueve un objeto durante un clip, cuadro a cuadro: la cabeza (en Unity, la
+    /// cámara), una puerta, el auricular... Las matrices son las de Blender en el mundo
+    /// (12 números por cuadro); se pasan a Unity con MatrizDeBlender. Si hay reposo, la pista
+    /// se aplica como cambio desde esa posición (el objeto de Unity puede tener otro origen).
+    /// </summary>
+    [Serializable]
+    public class Pista
+    {
+        public string clip;
+        public string objeto;
+        public float[] reposo;
+        public float[] matrices;
+        public int Cuadros => matrices.Length / 12;
     }
 
     [Serializable]
@@ -87,8 +125,35 @@ public class EscenaBlender
 
     public static EscenaBlender Leer(TextAsset json) => JsonUtility.FromJson<EscenaBlender>(json.text);
 
+    /// <summary>Lee el JSON que acompaña a un FBX (&lt;nombre&gt;_escena.json), o null si no hay.</summary>
+    public static EscenaBlender DelModelo(string rutaFbx)
+    {
+        var ruta = System.IO.Path.ChangeExtension(rutaFbx, null) + "_escena.json";
+        return System.IO.File.Exists(ruta) ? JsonUtility.FromJson<EscenaBlender>(System.IO.File.ReadAllText(ruta)) : null;
+    }
+
     /// <summary>Blender (x, y, z) con Z arriba → Unity (x, z, y) con Y arriba.</summary>
     public static Vector3 DeBlender(float[] v) => new Vector3(v[0], v[2], v[1]);
+
+    /// <summary>
+    /// Matriz de Blender (12 números por filas, desde <paramref name="inicio"/>) → matriz de
+    /// Unity. Para una cabeza o una cámara, su +Z de Unity es hacia donde mira en Blender (+Y).
+    /// </summary>
+    public static Matrix4x4 MatrizDeBlender(float[] m, int inicio = 0)
+    {
+        var b = Matrix4x4.identity;
+        for (int fila = 0; fila < 3; fila++)
+            for (int col = 0; col < 4; col++)
+                b[fila, col] = m[inicio + fila * 4 + col];
+        // Cambiar Y por Z antes y después: la misma conversión que DeBlender.
+        var p = new Matrix4x4(new Vector4(1, 0, 0, 0), new Vector4(0, 0, 1, 0), new Vector4(0, 1, 0, 0), new Vector4(0, 0, 0, 1));
+        return p * b * p;
+    }
+
+    public Animacion BuscarAnimacion(string nombre) => animaciones == null ? null : Array.Find(animaciones, a => a.nombre == nombre);
+
+    public Pista BuscarPista(string clip, string objeto) =>
+        pistas == null ? null : Array.Find(pistas, p => p.clip == clip && p.objeto == objeto);
 
     public static Color Lineal(float[] c) => new Color(c[0], c[1], c[2]);
 
@@ -117,11 +182,13 @@ public class EscenaBlender
             // ese rebote lo da la luz precalculada, y además, sin tamaño, quemarían lo que tienen cerca.
             if (luz.truco == "rebote")
                 continue;
+            // Relativas al padre: en el 4B el padre está en el origen; la luz de los brazos
+            // cuelga de la cámara.
             var objeto = new GameObject(luz.nombre);
             objeto.transform.SetParent(padre, false);
-            objeto.transform.position = DeBlender(luz.posicion);
+            objeto.transform.localPosition = DeBlender(luz.posicion);
             var dir = DeBlender(luz.direccion);
-            objeto.transform.rotation = Quaternion.LookRotation(dir, Mathf.Abs(dir.y) > 0.99f ? Vector3.forward : Vector3.up);
+            objeto.transform.localRotation = Quaternion.LookRotation(dir, Mathf.Abs(dir.y) > 0.99f ? Vector3.forward : Vector3.up);
             Configurar(objeto.AddComponent<Light>(), luz, e);
         }
     }

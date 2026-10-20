@@ -11,6 +11,9 @@ using UnityEngine;
 ///   - Modelos: sin luces ni cámaras, con el giro de Blender corregido. Lo que en Blender no
 ///     proyecta sombra (propiedad sin_sombra) tampoco la proyecta en Unity.
 ///   - Materiales: shader OnTheNod/PS1, con el color, la textura y la emisión de Blender.
+///   - Clips: los que dice el JSON del modelo (&lt;nombre&gt;_escena.json), con su nombre, en
+///     bucle si corresponde y, los aditivos, con su cuadro de reposo como referencia. Sin
+///     compresión: el temblor es de pocos grados.
 /// Volver a correr un script de Blender reimporta su carpeta con estas reglas.
 /// </summary>
 public class ImportadorArte : AssetPostprocessor
@@ -19,7 +22,7 @@ public class ImportadorArte : AssetPostprocessor
     const string ShaderPS1 = "OnTheNod/PS1";
 
     // Subir este número hace que Unity reimporte Assets/Art con las reglas nuevas.
-    public override uint GetVersion() => 5;
+    public override uint GetVersion() => 8;
 
     static bool EsArte(string ruta) => ruta.StartsWith(CarpetaArte);
 
@@ -53,6 +56,52 @@ public class ImportadorArte : AssetPostprocessor
         importador.importLights = false;
         importador.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
         importador.materialLocation = ModelImporterMaterialLocation.InPrefab;
+        importador.animationCompression = ModelImporterAnimationCompression.Off;
+
+        // Con clips (el JSON lo dice): esqueleto genérico con su propio Avatar.
+        var json = Path.ChangeExtension(assetPath, null) + "_escena.json";
+        if (File.Exists(json))
+            context.DependsOnSourceAsset(json);
+        if (EscenaBlender.DelModelo(assetPath)?.animaciones?.Length > 0)
+        {
+            importador.animationType = ModelImporterAnimationType.Generic;
+            importador.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+        }
+    }
+
+    void OnPreprocessAnimation()
+    {
+        if (!EsArte(assetPath))
+            return;
+
+        var json = Path.ChangeExtension(assetPath, null) + "_escena.json";
+        if (File.Exists(json))
+            context.DependsOnSourceAsset(json);
+        var escena = EscenaBlender.DelModelo(assetPath);
+        if (escena?.animaciones == null || escena.animaciones.Length == 0)
+            return;
+
+        // Blender nombra cada clip "Esqueleto|accion"; quedan solo los de la lista, con el nombre de la acción.
+        var importador = (ModelImporter)assetImporter;
+        var clips = new System.Collections.Generic.List<ModelImporterClipAnimation>();
+        foreach (var clip in importador.defaultClipAnimations)
+        {
+            var nombre = clip.takeName.Substring(clip.takeName.LastIndexOf('|') + 1);
+            var datos = escena.BuscarAnimacion(nombre);
+            if (datos == null)
+                continue;
+            clip.name = nombre;
+            clip.loopTime = datos.loop;
+            if (datos.aditivo)
+            {
+                // El primer cuadro es el reposo que agregó exportar_unity.py: referencia, no parte del clip.
+                clip.hasAdditiveReferencePose = true;
+                clip.additiveReferencePoseFrame = clip.firstFrame;
+                clip.firstFrame += 1;
+            }
+            clips.Add(clip);
+        }
+        importador.clipAnimations = clips.ToArray();
     }
 
     readonly System.Collections.Generic.List<GameObject> sinSombra = new System.Collections.Generic.List<GameObject>();
@@ -65,9 +114,18 @@ public class ImportadorArte : AssetPostprocessor
 
     void OnPostprocessModel(GameObject modelo)
     {
+        if (!EsArte(assetPath))
+            return;
+
         foreach (var objeto in sinSombra)
             if (objeto != null && objeto.TryGetComponent<Renderer>(out var renderer))
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        // La caja que Unity usa para saber si una malla animada está a la vista se calcula en
+        // la pose de reposo; si una animación lleva las manos fuera de esa caja (los brazos en
+        // primera persona lo hacen siempre), Unity deja de dibujarlas. Se recalcula cada cuadro.
+        foreach (var piel in modelo.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            piel.updateWhenOffscreen = true;
     }
 
     void OnPreprocessMaterialDescription(MaterialDescription descripcion, Material material, AnimationClip[] animaciones)

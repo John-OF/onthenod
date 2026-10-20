@@ -1,6 +1,6 @@
 r"""
 Exporta la escena de Blender a Unity: un FBX, las texturas que usa y un JSON con
-lo que el FBX no guarda (luces, camaras y estados del mundo).
+lo que el FBX no guarda (luces, camaras, estados, animaciones).
 
 No se corre solo: lo importan los scripts de assets y lo llaman al final, despues
 de guardar el .blend y renderizar.
@@ -18,10 +18,17 @@ Si la escena tiene estados (abstinencia, efecto...), el script los fotografia an
     exportar_unity.exportar(ROOT, "Departamento4B", "departamento_4b",
                             excluir=("Plano",), estados=estados)
 
+Para un personaje animado se le dan los objetos y la lista de clips (ver
+brazos_animaciones.py):
+
+    exportar_unity.exportar(ROOT, "BrazosElias", "brazos_elias", objetos=[rig, malla],
+                            animaciones=[{"nombre": "reposo", "loop": True}, ...])
+
 Salidas (ROOT es la carpeta blender/; el proyecto de Unity esta al lado):
-  unity/Assets/Art/<carpeta>/<nombre>.fbx          mallas, empties y esqueletos
-  unity/Assets/Art/<carpeta>/<nombre>_escena.json  luces, camaras y estados
-  unity/Assets/Art/<carpeta>/Textures/*.png        las texturas de blender/textures que estan cargadas
+  unity/Assets/Art/<carpeta>/<nombre>.fbx          mallas, empties, esqueletos y clips
+  unity/Assets/Art/<carpeta>/<nombre>_escena.json  luces, camaras, estados, clips y extras
+  unity/Assets/Art/<carpeta>/Textures/*.png        las texturas de blender/textures que usa
+                                                   (tambien las de los otros estados)
 
 Que cambia en el FBX respecto del .blend:
   - Cada coleccion es un objeto vacio con su nombre, padre de sus objetos: en Unity se
@@ -29,6 +36,8 @@ Que cambia en el FBX respecto del .blend:
   - Los objetos que no proyectan sombra (Visibilidad > Sombra apagada) llevan la propiedad
     sin_sombra; Unity la lee al importar.
   - Los materiales de pura emision pasan a Principled (el FBX solo entiende ese).
+  - Con `animaciones`: solo esas acciones, cada una como un clip; a las aditivas se les
+    agrega un cuadro de reposo antes del primero, que Unity usa de referencia.
 Las luces y las camaras van en el JSON, no en el FBX. Las posiciones del JSON estan en
 coordenadas de Blender (Z arriba); en Unity, (x, y, z) de Blender es (x, z, y).
 Unity importa todo solo (Assets/Editor/ImportadorArte.cs y EscenaBlender.cs).
@@ -62,14 +71,12 @@ def _emision(mat):
     return None
 
 
-def _textura(mat):
-    """Nombre del archivo de la textura del color (sin extension), o ''."""
+def _imagenes(mat):
+    """Nombres de archivo (sin extension) de las texturas del material."""
     if not mat or not mat.node_tree:
-        return ""
-    for node in mat.node_tree.nodes:
-        if node.type == "TEX_IMAGE" and node.image and node.image.filepath:
-            return os.path.splitext(os.path.basename(bpy.path.abspath(node.image.filepath)))[0]
-    return ""
+        return []
+    return [os.path.splitext(os.path.basename(bpy.path.abspath(n.image.filepath)))[0]
+            for n in mat.node_tree.nodes if n.type == "TEX_IMAGE" and n.image and n.image.filepath]
 
 
 def _mundo():
@@ -86,28 +93,40 @@ def _mundo():
     return datos
 
 
-def foto_estado():
-    """Lo que puede cambiar de un estado del mundo a otro: que luces estan encendidas y con que
-    color y potencia, la emision y la textura de cada material, las colecciones ocultas y el
-    mundo (fondo y niebla). Se llama con la escena ya puesta en ese estado."""
+def foto_estado(objetos=None):
+    """Lo que puede cambiar de un estado a otro: que luces estan encendidas y con que color
+    y potencia, la emision y la textura de cada material, el valor de cada forma (shape key),
+    las colecciones ocultas y el mundo (fondo y niebla). Se llama con la escena ya puesta en
+    ese estado. objetos: solo esas luces, y los materiales y formas de esas mallas (por
+    defecto, todo)."""
+    todos = objetos if objetos is not None else list(bpy.context.scene.objects)
     luces = [{"nombre": ob.name, "encendida": not ob.hide_render,
               "color": _r(ob.data.color), "potencia": round(ob.data.energy, 5)}
-             for ob in bpy.context.scene.objects if ob.type == "LIGHT"]
+             for ob in todos if ob.type == "LIGHT"]
+    if objetos is None:
+        mats = list(bpy.data.materials)
+    else:
+        mats = list({s.material for ob in todos if ob.type == "MESH" for s in ob.material_slots if s.material})
     materiales = []
-    for mat in bpy.data.materials:
+    for mat in sorted(mats, key=lambda m: m.name):
         em = _emision(mat)
-        tex = _textura(mat)
+        tex = _imagenes(mat)
         if em is None and not tex:
             continue
         color, fuerza = em if em else ((0.0, 0.0, 0.0), 0.0)
-        materiales.append({"nombre": mat.name, "emision": _r(color), "fuerza": round(fuerza, 5), "textura": tex})
+        materiales.append({"nombre": mat.name, "emision": _r(color), "fuerza": round(fuerza, 5),
+                           "textura": tex[0] if tex else ""})
+    formas = [{"objeto": ob.name, "forma": kb.name, "valor": round(kb.value, 5)}
+              for ob in todos if ob.type == "MESH" and ob.data.shape_keys
+              for kb in ob.data.shape_keys.key_blocks[1:]]
     ocultas = [c.name for c in bpy.data.collections if c.hide_render]
-    return {"luces": luces, "materiales": materiales, "colecciones_ocultas": ocultas, "mundo": _mundo()}
+    return {"luces": luces, "materiales": materiales, "formas": formas,
+            "colecciones_ocultas": ocultas, "mundo": _mundo()}
 
 
-def _luces_y_camaras():
+def _luces_y_camaras(objetos):
     luces, camaras = [], []
-    for ob in bpy.context.scene.objects:
+    for ob in objetos:
         mw = ob.matrix_world
         pos = mw.translation
         direccion = (mw.to_3x3() @ Vector((0.0, 0.0, -1.0))).normalized()  # luces y camaras miran a su -Z
@@ -134,6 +153,12 @@ def _luces_y_camaras():
                             "orto": round(c.ortho_scale, 4) if c.type == "ORTHO" else 0.0,
                             "cerca": round(c.clip_start, 5), "lejos": round(c.clip_end, 5)})
     return luces, camaras
+
+
+def matriz(ob):
+    """Matriz del objeto en el mundo, en 12 numeros (3 filas x 4 columnas), para el JSON."""
+    m = ob.matrix_world
+    return [round(m[r][c], 5) for r in range(3) for c in range(4)]
 
 
 def _emision_pura(mat):
@@ -163,20 +188,16 @@ def _emision_a_principled(mat, em):
     nt.nodes.remove(em)
 
 
-def _copiar_texturas(tex_dir, destino):
-    """Copia las imagenes cargadas que vienen de blender/textures (tambien las de otros
-    estados, como las limpias del efecto). Las que no cambiaron no se tocan, para que
-    Unity no las vuelva a importar."""
+def _copiar_texturas(tex_dir, destino, nombres):
+    """Copia de blender/textures las texturas con esos nombres. Las que no cambiaron no se
+    tocan, para que Unity no las vuelva a importar."""
     os.makedirs(destino, exist_ok=True)
-    tex_dir = os.path.normcase(os.path.abspath(tex_dir))
     copiadas = 0
-    for img in bpy.data.images:
-        if img.source != "FILE" or not img.filepath:
+    for nombre in sorted(nombres):
+        src = os.path.join(tex_dir, nombre + ".png")
+        if not os.path.isfile(src):
             continue
-        src = os.path.abspath(bpy.path.abspath(img.filepath))
-        if os.path.normcase(os.path.dirname(src)) != tex_dir or not os.path.isfile(src):
-            continue
-        dst = os.path.join(destino, os.path.basename(src))
+        dst = os.path.join(destino, nombre + ".png")
         if os.path.isfile(dst) and filecmp.cmp(src, dst, shallow=False):
             continue
         shutil.copy2(src, dst)
@@ -184,53 +205,131 @@ def _copiar_texturas(tex_dir, destino):
     return copiadas
 
 
-def _preparar_objetos(excluir):
-    """Agrupa cada coleccion bajo un vacio con su nombre y devuelve los objetos a exportar."""
-    def excluido(ob):
-        return bool(ob.users_collection) and all(c.name in excluir for c in ob.users_collection)
+def _excluido(ob, excluir):
+    return bool(ob.users_collection) and all(c.name in excluir for c in ob.users_collection)
 
+
+def _agrupar(objetos, excluir):
+    """Agrupa los objetos de cada coleccion bajo un vacio con su nombre. Devuelve los vacios."""
+    grupos = []
     for col in list(bpy.data.collections):
         if col.name in excluir:
             continue
-        sueltos = [ob for ob in col.objects if ob.type in TIPOS and ob.parent is None]
+        sueltos = [ob for ob in col.objects if ob in objetos and ob.parent is None]
         if not sueltos:
             continue
         grupo = bpy.data.objects.new(col.name, None)
         col.objects.link(grupo)
         for ob in sueltos:
             ob.parent = grupo  # el grupo esta en el origen: nada se mueve
+        grupos.append(grupo)
+    return grupos
 
-    objetos = [ob for ob in bpy.context.scene.objects if ob.type in TIPOS and not excluido(ob)]
+
+def _preparar_animaciones(objetos, animaciones):
+    """Deja solo las acciones de la lista, sin NLA ni accion activa, y agrega el cuadro de
+    reposo a las aditivas. Devuelve los datos de cada clip para el JSON."""
+    por_nombre = {a["nombre"]: a for a in animaciones}
+    for act in list(bpy.data.actions):
+        if act.name not in por_nombre:
+            bpy.data.actions.remove(act)
     for ob in objetos:
-        if not ob.visible_shadow:
-            ob["sin_sombra"] = 1
-    return objetos
+        if ob.animation_data:
+            ob.animation_data.action = None
+            for pista in list(ob.animation_data.nla_tracks):
+                ob.animation_data.nla_tracks.remove(pista)
+        if ob.type == "ARMATURE":
+            for pb in ob.pose.bones:
+                pb.location = (0.0, 0.0, 0.0)
+                pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
+                pb.rotation_euler = (0.0, 0.0, 0.0)
+                pb.scale = (1.0, 1.0, 1.0)
+
+    datos = []
+    fps = bpy.context.scene.render.fps
+    for nombre, a in por_nombre.items():
+        act = bpy.data.actions.get(nombre)
+        if act is None:
+            print(f"[aviso] no existe la accion {nombre}")
+            continue
+        act.use_fake_user = True
+        inicio, fin = (int(round(x)) for x in act.frame_range)
+        if fin == inicio:
+            # Una pose de un solo cuadro: Unity la dejaria vacia. Se repite en el cuadro siguiente.
+            for fc in _curvas(act):
+                fc.keyframe_points.insert(fin + 1, fc.evaluate(inicio), options={"FAST"})
+        if a.get("aditivo"):
+            # Reposo un cuadro antes del primero: la referencia de la capa aditiva en Unity.
+            reposo = {"rotation_quaternion": (1.0, 0.0, 0.0, 0.0), "scale": (1.0, 1.0, 1.0)}
+            for fc in _curvas(act):
+                prop = fc.data_path.rsplit(".", 1)[-1]
+                valor = reposo.get(prop, (0.0, 0.0, 0.0, 0.0))[fc.array_index]
+                fc.keyframe_points.insert(inicio - 1, valor, options={"FAST"})
+        datos.append({"nombre": nombre, "cuadros": fin - inicio + 1, "fps": fps,
+                      "loop": bool(a.get("loop")), "aditivo": bool(a.get("aditivo"))})
+    return datos
 
 
-def exportar(root, carpeta, nombre, animaciones=False, excluir=(), estados=None):
+def _curvas(act):
+    """Las curvas de una accion (Blender 5 las guarda por capas y canales)."""
+    if hasattr(act, "fcurves") and len(act.fcurves):
+        return list(act.fcurves)
+    curvas = []
+    for capa in getattr(act, "layers", []):
+        for tira in capa.strips:
+            for canal in tira.channelbags:
+                curvas += list(canal.fcurves)
+    return curvas
+
+
+def exportar(root, carpeta, nombre, animaciones=None, excluir=(), estados=None, objetos=None, extra=None):
     """root: carpeta blender/. carpeta: subcarpeta en Assets/Art. nombre: nombre del FBX.
+    animaciones: [{"nombre", "loop", "aditivo"}], las acciones que van como clips.
     excluir: colecciones que no van a Unity. estados: {nombre: foto_estado()}; si no se da,
-    se toma el estado actual como 'base'."""
+    se toma el estado actual como 'base'. objetos: solo esos (y las luces y camaras de sus
+    colecciones); por defecto, todo. extra: datos que se agregan tal cual al JSON."""
+    escena = bpy.context.scene
     proyecto = os.path.dirname(os.path.abspath(root))
     destino = os.path.join(proyecto, "unity", "Assets", "Art", carpeta)
     os.makedirs(destino, exist_ok=True)
+    excluir = set(excluir)
+    todo = objetos is None
+
+    if todo:
+        objetos = [ob for ob in escena.objects if ob.type in TIPOS and not _excluido(ob, excluir)]
+        otros = [ob for ob in escena.objects if ob.type in ("LIGHT", "CAMERA")]
+    else:
+        objetos = list(objetos)
+        cols = {c for ob in objetos for c in ob.users_collection}
+        otros = [ob for ob in escena.objects if ob.type in ("LIGHT", "CAMERA") and cols & set(ob.users_collection)]
 
     if not estados:
-        estados = {"base": foto_estado()}
-    luces, camaras = _luces_y_camaras()
+        estados = {"base": foto_estado(None if todo else otros + objetos)}
+    luces, camaras = _luces_y_camaras(otros)
+
+    clips = _preparar_animaciones(objetos, animaciones) if animaciones else []
+
     datos = {"version": 1, "luces": luces, "camaras": camaras,
-             "estados": [dict(nombre=k, **v) for k, v in estados.items()]}
+             "estados": [dict(nombre=k, **v) for k, v in estados.items()], "animaciones": clips}
+    datos.update(extra or {})
     with open(os.path.join(destino, nombre + "_escena.json"), "w", encoding="utf-8") as f:
         json.dump(datos, f, indent=1, ensure_ascii=False)
 
-    for mat in bpy.data.materials:
+    mats = {s.material for ob in objetos if ob.type == "MESH" for s in ob.material_slots if s.material}
+    texturas = {t for m in mats for t in _imagenes(m)}
+    texturas |= {m["textura"] for e in estados.values() for m in e["materiales"] if m["textura"]}
+
+    for mat in mats:
         em = _emision_pura(mat)
         if em is not None:
             _emision_a_principled(mat, em)
 
-    copiadas = _copiar_texturas(os.path.join(root, "textures"), os.path.join(destino, "Textures"))
+    copiadas = _copiar_texturas(os.path.join(root, "textures"), os.path.join(destino, "Textures"), texturas)
 
-    objetos = _preparar_objetos(set(excluir))
+    objetos += _agrupar(objetos, excluir)
+    for ob in objetos:
+        if not ob.visible_shadow:
+            ob["sin_sombra"] = 1
     for ob in bpy.context.view_layer.objects:
         ob.select_set(ob in objetos)
 
@@ -246,10 +345,15 @@ def exportar(root, carpeta, nombre, animaciones=False, excluir=(), estados=None)
         mesh_smooth_type="OFF",
         use_custom_props=True,  # sin_sombra
         add_leaf_bones=False,
-        bake_anim=animaciones,
+        bake_anim=bool(clips),
+        bake_anim_use_all_bones=True,
+        bake_anim_use_nla_strips=False,
+        bake_anim_use_all_actions=True,  # cada accion, un clip
+        bake_anim_force_startend_keying=True,
+        bake_anim_simplify_factor=0.0,  # sin simplificar: el temblor es de pocos grados
         path_mode="STRIP",  # solo el nombre del archivo: Unity la busca en Textures/
         embed_textures=False,
     )
     print(f"[unity] {fbx}: {len(objetos)} objetos, {len(luces)} luces, {len(camaras)} camaras, "
-          f"estados {list(estados)}, {copiadas} texturas copiadas")
+          f"estados {list(estados)}, {len(clips)} clips, {len(texturas)} texturas ({copiadas} copiadas)")
     return fbx
