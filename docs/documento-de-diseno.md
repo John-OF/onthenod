@@ -1,7 +1,7 @@
 # On the Nod — Documento de diseño
 
 > Título: ***On the Nod*** (ver sección 14).
-> Versión 0.3 · 18 de octubre de 2026
+> Versión 0.4 · 19 de octubre de 2026
 
 ---
 
@@ -65,7 +65,7 @@ Debajo de la historia hay una segunda capa para quien la quiera encontrar. El ju
 1. **Funcionan sin conocerlas.** Cada referencia se lee como una frase u objeto normal. Quien la reconoce encuentra un segundo sentido; quien no, no pierde nada.
 2. **Viven en el mundo y nunca se explican.** Una Biblia subrayada en casa de la madre, un poema copiado en un cuaderno escolar, algo escrito a mano en el elevador, una frase en un diálogo. Nadie las recita ni las comenta.
 3. **Con moderación.** Como mucho una cita explícita por noche; el resto, escondido.
-4. **Solo textos de dominio público**, en español y en inglés: la Biblia Reina-Valera 1909 y la King James, y poemas publicados antes de 1929 (Vallejo, Bécquer, Dickinson, Poe). Antes de usarlos en el juego, verificar cada cita contra una edición confiable.
+4. **Solo textos de dominio público**, en español y en inglés: la Biblia Reina-Valera 1909 y la King James, y poemas publicados antes de 1929 (Vallejo, Bécquer, Dickinson, Poe). Antes de usarlos en el juego, verificar cada cita contra una edición confiable. Las citas bíblicas de esta sección se verificaron el 19 de octubre de 2026 contra la Reina-Valera Antigua (1909) y la King James de BibleGateway. Falta verificar los poemas.
 
 #### La Biblia
 
@@ -94,7 +94,7 @@ Caín queda marcado y condenado a vagar; Elías tiene los brazos marcados y no p
 Tomás necesitaba ver para creer: por eso su cámara muestra la verdad. En la correa de la Polaroid escribió *«Si no hay foto, no pasó»*. Y pedía ver las marcas en las manos, como las que Elías tiene en los brazos.
 
 **Elías bajo el enebro** — 1 Reyes 19:4-7
-> «Y deseando morirse, dijo: Baste ya, oh Jehová, quita mi alma…» … «Levántate y come, porque gran camino te resta.»
+> «Y deseando morirse, dijo: Baste ya, oh Jehová, quita mi alma…» … «Levántate, come: porque gran camino te resta.»
 > *"He requested for himself that he might die…" … "Arise and eat; because the journey is too great for thee."*
 
 Es el pasaje bíblico más directo sobre querer morir, y la respuesta no es un reproche: es pan, agua y descanso. Así funciona la comida que Doña Carmen le deja en la puerta (ver 6.10). Y el protagonista lleva el nombre del profeta: es su misma historia.
@@ -106,7 +106,7 @@ Es el pasaje bíblico más directo sobre querer morir, y la respuesta no es un r
 Doña Carmen es la que se detiene cuando nadie más lo hace. En inglés el juego de palabras es directo: *neighbor* significa vecino y prójimo a la vez.
 
 **El hijo pródigo** — Lucas 15:20-24
-> «Y como aún estuviese lejos, lo vio su padre, y fue movido a misericordia, y corrió…» … «Este mi hijo muerto era, y ha revivido; se había perdido, y es hallado.»
+> «Y como aún estuviese lejos, viólo su padre, y fue movido a misericordia, y corrió…» … «Este mi hijo muerto era, y ha revivido; habíase perdido, y es hallado.»
 > *"When he was yet a great way off, his father saw him, and had compassion, and ran…" … "This my son was dead, and is alive again; he was lost, and is found."*
 
 El hijo que despilfarró lo de su familia y vuelve. Es el arco del padre: en todo el juego nunca mira a Elías, y en el final bueno sí (ver 4.1).
@@ -577,8 +577,8 @@ C:\Dev\Personal\OnTheNod\
 ## 13. Decisiones pendientes
 
 1. ~~Cámara~~ **Decidido: primera persona.** Es más inmersiva, ahorra mucha animación y el jugador ve cómo se deterioran sus propios brazos.
-2. **¿A quién llama Elías en el final bueno?** Recomendado: a su madre. Alternativa: a una línea de ayuda, o las dos cosas (primero la línea y, en el epílogo, la madre).
-3. **Ambientación.** Recomendado: una ciudad latinoamericana sin nombre. Es poco común en el género y le da identidad propia.
+2. ~~A quién llama Elías en el final bueno~~ **Decidido:** a su madre (ver sección 7).
+3. ~~Ambientación~~ **Decidido:** una ciudad latinoamericana sin nombre (ver sección 5). Es poco común en el género y le da identidad propia.
 4. **Idioma.** Recomendado: textos y voces en español, con subtítulos en inglés.
 5. ~~Nombres~~ **Decidido:** Elías, Tomás, Eva, José y Doña Carmen (ver 4.2).
 6. ~~Título~~ **Decidido:** *On the Nod* (ver sección 14).
