@@ -24,6 +24,10 @@ brazos_animaciones.py):
     exportar_unity.exportar(ROOT, "BrazosElias", "brazos_elias", objetos=[rig, malla],
                             animaciones=[{"nombre": "reposo", "loop": True}, ...])
 
+Un personaje de cuerpo entero con esqueleto de nombres de Mixamo va con humanoide=True
+(ver tomas.py): Unity lo importa como Humanoid y le sirven las animaciones de Mixamo. Lo
+que lleve en alguna pose va en accesorios (el plato de Carmen, ver dona_carmen.py).
+
 Salidas (ROOT es la carpeta blender/; el proyecto de Unity esta al lado):
   unity/Assets/Art/<carpeta>/<nombre>.fbx          mallas, empties, esqueletos y clips
   unity/Assets/Art/<carpeta>/<nombre>_escena.json  luces, camaras, estados, clips y extras
@@ -38,17 +42,24 @@ Que cambia en el FBX respecto del .blend:
   - Los materiales de pura emision pasan a Principled (el FBX solo entiende ese).
   - Con `animaciones`: solo esas acciones, cada una como un clip; a las aditivas se les
     agrega un cuadro de reposo antes del primero, que Unity usa de referencia.
+  - Con `humanoide`: el personaje se gira 180 grados. En Blender los personajes miran hacia
+    -Y, que en Unity es -Z; un Humanoid tiene que mirar hacia +Z, como las animaciones de
+    Mixamo. El giro va en el objeto del esqueleto (en Unity, Tomas_Rig queda girado 180
+    grados en Y), no en las poses: lo que se mida relativo al esqueleto no cambia. Ademas
+    se agrega la accion _pose_t (el esqueleto en reposo), para que Unity tome la pose en T
+    como pose inicial del modelo y como referencia del Avatar.
 Las luces y las camaras van en el JSON, no en el FBX. Las posiciones del JSON estan en
 coordenadas de Blender (Z arriba); en Unity, (x, y, z) de Blender es (x, z, y).
 Unity importa todo solo (Assets/Editor/ImportadorArte.cs y EscenaBlender.cs).
 """
 import filecmp
 import json
+import math
 import os
 import shutil
 
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 # Tipos de objeto que van al FBX (FONT, CURVE...: como malla).
 TIPOS = {"MESH", "EMPTY", "ARMATURE", "FONT", "CURVE", "SURFACE", "META"}
@@ -96,9 +107,9 @@ def _mundo():
 def foto_estado(objetos=None):
     """Lo que puede cambiar de un estado a otro: que luces estan encendidas y con que color
     y potencia, la emision y la textura de cada material, el valor de cada forma (shape key),
-    las colecciones ocultas y el mundo (fondo y niebla). Se llama con la escena ya puesta en
-    ese estado. objetos: solo esas luces, y los materiales y formas de esas mallas (por
-    defecto, todo)."""
+    las colecciones y los objetos ocultos (como la Polaroid de Tomas) y el mundo (fondo y
+    niebla). Se llama con la escena ya puesta en ese estado. objetos: solo esas luces, y los
+    materiales, formas y objetos ocultos de esas mallas (por defecto, todo)."""
     todos = objetos if objetos is not None else list(bpy.context.scene.objects)
     luces = [{"nombre": ob.name, "encendida": not ob.hide_render,
               "color": _r(ob.data.color), "potencia": round(ob.data.energy, 5)}
@@ -120,8 +131,9 @@ def foto_estado(objetos=None):
               for ob in todos if ob.type == "MESH" and ob.data.shape_keys
               for kb in ob.data.shape_keys.key_blocks[1:]]
     ocultas = [c.name for c in bpy.data.collections if c.hide_render]
+    objetos_ocultos = [ob.name for ob in todos if ob.type in TIPOS and ob.hide_render]
     return {"luces": luces, "materiales": materiales, "formas": formas,
-            "colecciones_ocultas": ocultas, "mundo": _mundo()}
+            "colecciones_ocultas": ocultas, "objetos_ocultos": objetos_ocultos, "mundo": _mundo()}
 
 
 def _luces_y_camaras(objetos):
@@ -156,8 +168,9 @@ def _luces_y_camaras(objetos):
 
 
 def matriz(ob):
-    """Matriz del objeto en el mundo, en 12 numeros (3 filas x 4 columnas), para el JSON."""
-    m = ob.matrix_world
+    """Matriz del objeto en el mundo (o la matriz que se le de), en 12 numeros (3 filas x 4
+    columnas), para el JSON."""
+    m = ob if isinstance(ob, Matrix) else ob.matrix_world
     return [round(m[r][c], 5) for r in range(3) for c in range(4)]
 
 
@@ -270,6 +283,26 @@ def _preparar_animaciones(objetos, animaciones):
     return datos
 
 
+def _accion_pose_t(objetos):
+    """Agrega una accion con el esqueleto en reposo (la pose en T), llamada _pose_t para que
+    quede primera en la lista de acciones. El FBX no dice cual es su toma principal: Unity
+    pone el modelo en el primer cuadro de la primera, y de ahi saca la cadera de la
+    referencia del Avatar. Sin esto, la cadera de Carmen quedaba como en su primera pose
+    (con_plato): mas baja e inclinada. Unity no la importa como clip."""
+    for rig in (ob for ob in objetos if ob.type == "ARMATURE"):
+        rig.animation_data_create()
+        act = bpy.data.actions.new("_pose_t")
+        act.use_fake_user = True
+        rig.animation_data.action = act
+        for pb in rig.pose.bones:  # _preparar_animaciones ya los dejo en reposo
+            rot = {"QUATERNION": "rotation_quaternion", "AXIS_ANGLE": "rotation_axis_angle"}.get(
+                pb.rotation_mode, "rotation_euler")
+            for f in (1, 2):
+                pb.keyframe_insert("location", frame=f, group=pb.name)
+                pb.keyframe_insert(rot, frame=f, group=pb.name)
+        rig.animation_data.action = None
+
+
 def _curvas(act):
     """Las curvas de una accion (Blender 5 las guarda por capas y canales)."""
     if hasattr(act, "fcurves") and len(act.fcurves):
@@ -282,12 +315,37 @@ def _curvas(act):
     return curvas
 
 
-def exportar(root, carpeta, nombre, animaciones=None, excluir=(), estados=None, objetos=None, extra=None):
+def _girar_humanoide(objetos):
+    """Gira 180 grados alrededor del eje vertical los objetos de arriba de la jerarquia (el
+    esqueleto, y los sueltos como el plato de Carmen): en Unity, el personaje mira hacia +Z."""
+    giro = Matrix.Rotation(math.pi, 4, "Z")
+    for ob in objetos:
+        if ob.parent is None or ob.parent not in objetos:
+            ob.matrix_world = giro @ ob.matrix_world
+    bpy.context.view_layer.update()
+
+
+def _accesorios(objetos, accesorios):
+    """Para el JSON: donde va cada accesorio en su pose y donde esta en el FBX (su reposo),
+    los dos en el mundo de Blender tal como se exporta (ya girado si es humanoide). En
+    Unity se aplica como cambio desde el reposo, porque el objeto llega con otro giro
+    interno (ver EscenaBlender.EnPose)."""
+    rig = next(ob for ob in objetos if ob.type == "ARMATURE")
+    return [{"objeto": a["objeto"].name, "pose": a["pose"], "reposo": matriz(a["objeto"]),
+             "matriz": matriz(rig.matrix_world @ a["matriz"])} for a in accesorios]
+
+
+def exportar(root, carpeta, nombre, animaciones=None, excluir=(), estados=None, objetos=None, extra=None,
+             humanoide=False, accesorios=None):
     """root: carpeta blender/. carpeta: subcarpeta en Assets/Art. nombre: nombre del FBX.
     animaciones: [{"nombre", "loop", "aditivo"}], las acciones que van como clips.
     excluir: colecciones que no van a Unity. estados: {nombre: foto_estado()}; si no se da,
     se toma el estado actual como 'base'. objetos: solo esos (y las luces y camaras de sus
-    colecciones); por defecto, todo. extra: datos que se agregan tal cual al JSON."""
+    colecciones); por defecto, todo. extra: datos que se agregan tal cual al JSON.
+    humanoide: un personaje con esqueleto de nombres de Mixamo; se gira para que mire
+    hacia +Z en Unity, que lo importa como Humanoid (y sus clips, como poses fijas).
+    accesorios: [{"objeto", "pose", "matriz"}], un objeto suelto que el personaje lleva en
+    una pose (el plato de Carmen); la matriz es relativa al esqueleto."""
     escena = bpy.context.scene
     proyecto = os.path.dirname(os.path.abspath(root))
     destino = os.path.join(proyecto, "unity", "Assets", "Art", carpeta)
@@ -305,12 +363,18 @@ def exportar(root, carpeta, nombre, animaciones=None, excluir=(), estados=None, 
 
     if not estados:
         estados = {"base": foto_estado(None if todo else otros + objetos)}
+    if humanoide:
+        _girar_humanoide(objetos + otros)
     luces, camaras = _luces_y_camaras(otros)
+    lleva = _accesorios(objetos, accesorios) if accesorios else []
 
     clips = _preparar_animaciones(objetos, animaciones) if animaciones else []
+    if humanoide:
+        _accion_pose_t(objetos)
 
     datos = {"version": 1, "luces": luces, "camaras": camaras,
-             "estados": [dict(nombre=k, **v) for k, v in estados.items()], "animaciones": clips}
+             "estados": [dict(nombre=k, **v) for k, v in estados.items()], "animaciones": clips,
+             "humanoide": bool(humanoide), "accesorios": lleva}
     datos.update(extra or {})
     with open(os.path.join(destino, nombre + "_escena.json"), "w", encoding="utf-8") as f:
         json.dump(datos, f, indent=1, ensure_ascii=False)

@@ -415,7 +415,7 @@ Hecho el 19 de octubre de 2026. La prueba de estilo está recreada en Unity, en 
 | Shader PS1 | El de todos los objetos: luz difusa sin brillos, temblor de vértices (cada vértice salta de píxel en píxel de la imagen chica) y niebla. | `Rendering/PS1.shader` (`OnTheNod/PS1`) |
 | Niebla iluminada | Las luces iluminan la niebla que tienen cerca: el halo de los focos y la bruma fría del fondo. Imita la niebla volumétrica de Blender. | componente `NieblaPS1` |
 | Máscara de foco | Corta la luz que sale hacia arriba de los focos colgantes: en Blender la tapa la bombilla y el techo encima del foco queda negro. | `Rendering/Foco_Mascara.cubemap` (menú *On the Nod > Crear máscara de foco*) |
-| Importación | Lo que llega a `Art/` se configura solo: texturas con filtro Point, sin compresión, sin mipmaps y sin reescalar; materiales con el shader PS1 y los colores y la emisión de Blender. | `Editor/ImportadorArte.cs` |
+| Importación | Lo que llega a `Art/` se configura solo: texturas con filtro Point, sin compresión, sin mipmaps y sin reescalar; materiales con el shader PS1 y los colores y la emisión de Blender; los personajes (Tomás, Doña Carmen), como *Humanoid*. | `Editor/ImportadorArte.cs` |
 
 **Para darle el estilo a una escena nueva:**
 1. Poner el prefab `PS1_Pantalla`.
@@ -492,6 +492,12 @@ Tercer asset (18 de octubre de 2026). Se genera con `blender/scripts/tomas.py`; 
 - **Poses incluidas:** `de_pie`, `muerto_de_pie` (encorvado, hombros caídos, la cabeza ladeada), `sentado` y `sentado_muerto`.
 - **Pruebas en escena:** `tomas_sofa.png` y `tomas_sofa_muerto.png` son la misma toma del 4B, vivo y muerto en el mismo lugar ("al voltear, ya no está"). `tomas_pasillo.png` es la prueba de estilo del pasillo con Tomás muerto en lugar de la silueta.
 
+**En Unity** (20 de octubre de 2026). `tomas.py` lo exporta al final (o solo eso, sin rehacer texturas ni renders, con `-- blender --solo-unity`): `Assets/Art/Tomas/` tiene `tomas.fbx`, las cinco texturas y `tomas_escena.json`.
+- **Humanoid:** Unity reconoce los 22 huesos por sus nombres de Mixamo y arma el *Avatar* con la pose en T del esqueleto de Blender, así que las animaciones de Mixamo le sirven tal cual. En Blender, Tomás mira hacia −Y, que en Unity es −Z; el exportador lo gira 180° para que mire hacia +Z, como pide Unity.
+- **Las cuatro poses** son clips de un cuadro (`de_pie`, `muerto_de_pie`, `sentado` y `sentado_muerto`) y quedan fijas: el cuerpo queda a la altura y en el lugar de Blender (sentado, la cadera baja hasta el sofá).
+- **Los cinco estados** (`estado0` a `estado4`) están en el JSON: la textura, el valor de `descompuesto` y de `calavera` (en Unity, de 0 a 100) y, en `objetos_ocultos`, la Polaroid, que solo se ve en el estado 0. El FBX queda en el estado 1, con la Polaroid incluida.
+- **Comparación con Blender:** las tres pruebas en escena, recreadas en las escenas de prueba del 4B y del pasillo, con Tomás en el mismo lugar, pose y estado. La cadera, las manos y los pies quedan en los mismos puntos que en Blender. En el sofá, vivo y muerto, la zona de Tomás difiere en promedio 2 niveles de 255. En el pasillo difiere 11, pero esa zona ya difería 10,5 sin él: es la bruma del fluorescente del fondo (ver *Estilo PS1 en Unity*).
+
 ### Doña Carmen
 Cuarto asset (18 de octubre de 2026). Se genera con `blender/scripts/dona_carmen.py`; la hoja está en `blender/renders/carmen_hoja.png` y las vistas por la mirilla en `blender/renders/carmen_mirilla_*.png`.
 
@@ -518,6 +524,12 @@ Cuarto asset (18 de octubre de 2026). Se genera con `blender/scripts/dona_carmen
 
 - **Dos lecturas de la misma mujer:** por la mirilla, deformada y a contraluz, da miedo; en la hoja, con buena luz, es una abuela con un plato de comida. Es el giro del personaje (ver sección 4).
 - **En Unity:** la mirilla es una cámara muy abierta cuya imagen pasa por un shader de ojo de pez, con los bordes oscuros y borrosos.
+
+**En Unity** (20 de octubre de 2026). `dona_carmen.py` la exporta al final (o solo eso, con `-- blender --solo-unity`): `Assets/Art/DonaCarmen/` tiene `dona_carmen.fbx` (esqueleto, cuerpo y plato), las tres texturas y `dona_carmen_escena.json`.
+- **Humanoid**, como Tomás y girada igual que él. Sus cinco poses son clips fijos.
+- **Los vestuarios** son dos estados del JSON, `dia` y `noche`: solo cambia la textura. El FBX queda con `dia`.
+- **El plato:** en el JSON, `accesorios` dice dónde va en las poses que lo llevan: `con_plato` (en las dos manos) y `tocando` (en la palma izquierda). En las demás poses no lo lleva. Se aplica como un cambio desde donde está el plato en el FBX (`EscenaBlender.EnPose`), porque en Unity el plato llega con otro giro interno que en Blender.
+- **Comparación con Blender:** sus renders son por la mirilla, con el ojo de pez que Unity todavía no tiene. Se comparó con tres tomas de prueba en el pasillo, desde la cámara de la prueba de estilo: de frente con el plato, tocando la puerta del 4B y en bata mirando por la mirilla. La zona de Carmen difiere en promedio entre 3,5 y 4,7 niveles de 255, y el plato queda en sus manos. Lo único distinto es la luz ambiente: en Unity llega pareja a todas partes, también bajo el plato, así que el delantal y el plato se ven algo más claros en la sombra. Es lo mismo que pasa en el 4B y se resuelve con la luz precalculada, que a los personajes les llega por sondas de luz (*light probes*).
 
 ### Departamento 4B
 Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamento_4b.py`; las vistas están juntas en `blender/renders/4b_hoja.png` y el plano en `blender/renders/4b_plano.png`.
@@ -587,8 +599,8 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 
 **Personajes**
 - Elías: brazos en primera persona (**hecho**: cuatro estados, ya exportados a Unity con sus clips; ver sección 10) y cuerpo completo para espejos y cinemáticas.
-- Tomás vivo y muerto (**hecho**: un modelo con cinco estados, del vivo sonriente a la calavera; ver sección 10).
-- Doña Carmen y su plato tapado (**hecho**: dos vestuarios y las vistas por la mirilla; ver sección 10). En la demo solo se ve por la mirilla.
+- Tomás vivo y muerto (**hecho**: un modelo con cinco estados, del vivo sonriente a la calavera, ya exportado a Unity como *Humanoid*; ver sección 10).
+- Doña Carmen y su plato tapado (**hecho**: dos vestuarios y las vistas por la mirilla, ya exportada a Unity como *Humanoid*; ver sección 10). En la demo solo se ve por la mirilla.
 
 **Animaciones**
 - Brazos de Elías: abrir puertas, contestar y colgar el teléfono, temblor y mirarse las manos (**hecho**, ver sección 10). Faltan: tomar objetos y usar la cámara.

@@ -1,0 +1,262 @@
+{
+ "version": 1,
+ "luces": [],
+ "camaras": [],
+ "estados": [
+  {
+   "nombre": "estado0",
+   "luces": [],
+   "materiales": [
+    {
+     "nombre": "Tomas",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "tomas_estado0"
+    }
+   ],
+   "formas": [
+    {
+     "objeto": "Tomas",
+     "forma": "descompuesto",
+     "valor": 0.0
+    },
+    {
+     "objeto": "Tomas",
+     "forma": "calavera",
+     "valor": 0.0
+    }
+   ],
+   "colecciones_ocultas": [],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.05088,
+     0.05088,
+     0.05088
+    ],
+    "niebla_densidad": 0.0,
+    "niebla_color": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "nombre": "estado1",
+   "luces": [],
+   "materiales": [
+    {
+     "nombre": "Tomas",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "tomas_estado1"
+    }
+   ],
+   "formas": [
+    {
+     "objeto": "Tomas",
+     "forma": "descompuesto",
+     "valor": 0.25
+    },
+    {
+     "objeto": "Tomas",
+     "forma": "calavera",
+     "valor": 0.0
+    }
+   ],
+   "colecciones_ocultas": [],
+   "objetos_ocultos": [
+    "Tomas_Polaroid"
+   ],
+   "mundo": {
+    "fondo": [
+     0.05088,
+     0.05088,
+     0.05088
+    ],
+    "niebla_densidad": 0.0,
+    "niebla_color": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "nombre": "estado2",
+   "luces": [],
+   "materiales": [
+    {
+     "nombre": "Tomas",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "tomas_estado2"
+    }
+   ],
+   "formas": [
+    {
+     "objeto": "Tomas",
+     "forma": "descompuesto",
+     "valor": 0.25
+    },
+    {
+     "objeto": "Tomas",
+     "forma": "calavera",
+     "valor": 0.0
+    }
+   ],
+   "colecciones_ocultas": [],
+   "objetos_ocultos": [
+    "Tomas_Polaroid"
+   ],
+   "mundo": {
+    "fondo": [
+     0.05088,
+     0.05088,
+     0.05088
+    ],
+    "niebla_densidad": 0.0,
+    "niebla_color": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "nombre": "estado3",
+   "luces": [],
+   "materiales": [
+    {
+     "nombre": "Tomas",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "tomas_estado3"
+    }
+   ],
+   "formas": [
+    {
+     "objeto": "Tomas",
+     "forma": "descompuesto",
+     "valor": 0.8
+    },
+    {
+     "objeto": "Tomas",
+     "forma": "calavera",
+     "valor": 0.0
+    }
+   ],
+   "colecciones_ocultas": [],
+   "objetos_ocultos": [
+    "Tomas_Polaroid"
+   ],
+   "mundo": {
+    "fondo": [
+     0.05088,
+     0.05088,
+     0.05088
+    ],
+    "niebla_densidad": 0.0,
+    "niebla_color": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "nombre": "estado4",
+   "luces": [],
+   "materiales": [
+    {
+     "nombre": "Tomas",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "tomas_estado4"
+    }
+   ],
+   "formas": [
+    {
+     "objeto": "Tomas",
+     "forma": "descompuesto",
+     "valor": 1.0
+    },
+    {
+     "objeto": "Tomas",
+     "forma": "calavera",
+     "valor": 1.0
+    }
+   ],
+   "colecciones_ocultas": [],
+   "objetos_ocultos": [
+    "Tomas_Polaroid"
+   ],
+   "mundo": {
+    "fondo": [
+     0.05088,
+     0.05088,
+     0.05088
+    ],
+    "niebla_densidad": 0.0,
+    "niebla_color": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  }
+ ],
+ "animaciones": [
+  {
+   "nombre": "de_pie",
+   "cuadros": 1,
+   "fps": 24,
+   "loop": false,
+   "aditivo": false
+  },
+  {
+   "nombre": "muerto_de_pie",
+   "cuadros": 1,
+   "fps": 24,
+   "loop": false,
+   "aditivo": false
+  },
+  {
+   "nombre": "sentado",
+   "cuadros": 1,
+   "fps": 24,
+   "loop": false,
+   "aditivo": false
+  },
+  {
+   "nombre": "sentado_muerto",
+   "cuadros": 1,
+   "fps": 24,
+   "loop": false,
+   "aditivo": false
+  }
+ ],
+ "humanoide": true,
+ "accesorios": []
+}

@@ -1,0 +1,195 @@
+{
+ "version": 1,
+ "luces": [],
+ "camaras": [],
+ "estados": [
+  {
+   "nombre": "dia",
+   "luces": [],
+   "materiales": [
+    {
+     "nombre": "Carmen",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "carmen_dia"
+    },
+    {
+     "nombre": "PlatoCarmen",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "plato_carmen"
+    }
+   ],
+   "formas": [],
+   "colecciones_ocultas": [],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.05088,
+     0.05088,
+     0.05088
+    ],
+    "niebla_densidad": 0.0,
+    "niebla_color": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "nombre": "noche",
+   "luces": [],
+   "materiales": [
+    {
+     "nombre": "Carmen",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "carmen_noche"
+    },
+    {
+     "nombre": "PlatoCarmen",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "plato_carmen"
+    }
+   ],
+   "formas": [],
+   "colecciones_ocultas": [],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.05088,
+     0.05088,
+     0.05088
+    ],
+    "niebla_densidad": 0.0,
+    "niebla_color": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  }
+ ],
+ "animaciones": [
+  {
+   "nombre": "de_pie",
+   "cuadros": 1,
+   "fps": 24,
+   "loop": false,
+   "aditivo": false
+  },
+  {
+   "nombre": "con_plato",
+   "cuadros": 1,
+   "fps": 24,
+   "loop": false,
+   "aditivo": false
+  },
+  {
+   "nombre": "tocando",
+   "cuadros": 1,
+   "fps": 24,
+   "loop": false,
+   "aditivo": false
+  },
+  {
+   "nombre": "mirilla",
+   "cuadros": 1,
+   "fps": 24,
+   "loop": false,
+   "aditivo": false
+  },
+  {
+   "nombre": "preocupada",
+   "cuadros": 1,
+   "fps": 24,
+   "loop": false,
+   "aditivo": false
+  }
+ ],
+ "humanoide": true,
+ "accesorios": [
+  {
+   "objeto": "Carmen_Plato",
+   "pose": "con_plato",
+   "reposo": [
+    -1.0,
+    -0.0,
+    0.0,
+    -0.5,
+    0.0,
+    -1.0,
+    0.0,
+    0.3,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "matriz": [
+    -1.0,
+    -0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.285,
+    0.0,
+    0.0,
+    1.0,
+    0.958
+   ]
+  },
+  {
+   "objeto": "Carmen_Plato",
+   "pose": "tocando",
+   "reposo": [
+    -1.0,
+    -0.0,
+    0.0,
+    -0.5,
+    0.0,
+    -1.0,
+    0.0,
+    0.3,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "matriz": [
+    -1.0,
+    -0.0,
+    0.0,
+    -0.075,
+    0.0,
+    -1.0,
+    0.0,
+    0.31,
+    0.0,
+    0.0,
+    1.0,
+    0.972
+   ]
+  }
+ ]
+}

@@ -19,6 +19,7 @@ Uso (PowerShell, desde la carpeta del proyecto):
   & "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" -b --factory-startup `
       -P blender\scripts\tomas.py -- blender
   Solo el modelo y la hoja de estados (sin el 4B ni el pasillo): ... -- blender --solo-hoja
+  Solo exportar a Unity el tomas.blend que ya existe (sin rehacer nada): ... -- blender --solo-unity
 
 Salidas (dentro de la carpeta blender/):
   textures/tomas_estado0..4.png
@@ -27,6 +28,13 @@ Salidas (dentro de la carpeta blender/):
   renders/tomas_sofa.png             vivo en el sofa del 4B (Noche 1)
   renders/tomas_sofa_muerto.png      la misma toma: muerto, donde estaba el vivo
   renders/tomas_pasillo.png          muerto al fondo del pasillo (Noche 2)
+
+Y en el proyecto de Unity (ver exportar_unity.py), como Humanoid y en el estado 1:
+  unity/Assets/Art/Tomas/tomas.fbx          esqueleto, cuerpo con las dos formas, la Polaroid
+                                            y las cuatro poses como clips
+  unity/Assets/Art/Tomas/tomas_escena.json  los cinco estados (textura, formas y si se ve la
+                                            Polaroid) y los clips
+  unity/Assets/Art/Tomas/Textures/tomas_estado0..4.png
 """
 import math
 import os
@@ -38,12 +46,16 @@ import bpy
 import numpy as np
 from mathutils import Matrix, Vector
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import exportar_unity  # noqa: E402
+
 # ---------------------------------------------------------------------------
 # Configuracion
 # ---------------------------------------------------------------------------
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 ROOT = os.path.abspath(ARGS[0]) if ARGS else os.getcwd()
 SHEET_ONLY = "--solo-hoja" in ARGS
+UNITY_ONLY = "--solo-unity" in ARGS
 
 TEX_DIR = os.path.join(ROOT, "textures")
 SCENE_DIR = os.path.join(ROOT, "scenes")
@@ -1253,8 +1265,31 @@ def render_in_hallway(asset):
 
 
 # ---------------------------------------------------------------------------
+# Unity
+# ---------------------------------------------------------------------------
+def exportar_a_unity(asset):
+    """Un FBX con el esqueleto, el cuerpo, la Polaroid y las cuatro poses (Humanoid). En el
+    JSON, los cinco estados: la textura, las dos formas y si se ve la Polaroid."""
+    bpy.ops.wm.open_mainfile(filepath=asset)
+    rig, body, pol = (bpy.data.objects[n] for n in ("Tomas_Rig", "Tomas", "Tomas_Polaroid"))
+    estados = {}
+    for s in STATES:
+        set_state(body, pol, s)
+        estados[f"estado{s}"] = exportar_unity.foto_estado([rig, body, pol])
+    set_state(body, pol, 1)  # el FBX queda en el estado 1 (Noche 1)
+    # La Polaroid va en el FBX aunque el estado 1 la oculte: Unity la muestra segun el estado.
+    pol.hide_render = pol.hide_viewport = False
+    exportar_unity.exportar(ROOT, "Tomas", "tomas", objetos=[rig, body, pol],
+                            animaciones=[{"nombre": n} for n in POSES], estados=estados, humanoide=True)
+
+
+# ---------------------------------------------------------------------------
 def main():
     t0 = time.time()
+    asset = os.path.join(SCENE_DIR, "tomas.blend")
+    if UNITY_ONLY:
+        exportar_a_unity(asset)
+        return
     for d in (TEX_DIR, SCENE_DIR, RENDER_DIR):
         os.makedirs(d, exist_ok=True)
     for ob in list(bpy.data.objects):
@@ -1287,7 +1322,6 @@ def main():
 
     key_poses(rig)
     set_state(body, pol, 1)
-    asset = os.path.join(SCENE_DIR, "tomas.blend")
     bpy.ops.wm.save_as_mainfile(filepath=asset)
     try:
         bpy.ops.file.make_paths_relative()
@@ -1302,6 +1336,7 @@ def main():
     if not SHEET_ONLY:
         render_in_4b(asset)
         render_in_hallway(asset)
+    exportar_a_unity(asset)
     print(f"[info] listo en {time.time() - t0:.0f} s")
 
 

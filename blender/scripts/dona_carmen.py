@@ -17,6 +17,7 @@ Uso (PowerShell, desde la carpeta del proyecto):
   & "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" -b --factory-startup `
       -P blender\scripts\dona_carmen.py -- blender
   Solo el modelo y la hoja (sin el pasillo): ... -- blender --solo-hoja
+  Solo exportar a Unity el dona_carmen.blend que ya existe (sin rehacer nada): ... -- blender --solo-unity
 
 Salidas (dentro de la carpeta blender/):
   textures/carmen_dia.png, carmen_noche.png, plato_carmen.png
@@ -26,6 +27,13 @@ Salidas (dentro de la carpeta blender/):
   renders/carmen_mirilla_cerca.png    por la mirilla: se acerca a mirar
   renders/carmen_mirilla_noche.png    por la mirilla: aquella noche, en bata, tocando
   renders/carmen_mirilla_vacio.png    por la mirilla: nadie, solo los platos que se acumulan
+
+Y en el proyecto de Unity (ver exportar_unity.py), como Humanoid y con el vestuario dia:
+  unity/Assets/Art/DonaCarmen/dona_carmen.fbx          esqueleto, cuerpo, plato y las cinco
+                                                       poses como clips
+  unity/Assets/Art/DonaCarmen/dona_carmen_escena.json  los dos vestuarios, los clips y donde
+                                                       va el plato en las poses que lo llevan
+  unity/Assets/Art/DonaCarmen/Textures/carmen_dia.png, carmen_noche.png, plato_carmen.png
 """
 import math
 import os
@@ -37,12 +45,16 @@ import bpy
 import numpy as np
 from mathutils import Matrix, Vector
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import exportar_unity  # noqa: E402
+
 # ---------------------------------------------------------------------------
 # Configuracion
 # ---------------------------------------------------------------------------
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 ROOT = os.path.abspath(ARGS[0]) if ARGS else os.getcwd()
 SHEET_ONLY = "--solo-hoja" in ARGS
+UNITY_ONLY = "--solo-unity" in ARGS
 
 TEX_DIR = os.path.join(ROOT, "textures")
 SCENE_DIR = os.path.join(ROOT, "scenes")
@@ -1482,8 +1494,32 @@ def render_hallway(asset):
 
 
 # ---------------------------------------------------------------------------
+# Unity
+# ---------------------------------------------------------------------------
+def exportar_a_unity(asset):
+    """Un FBX con el esqueleto, el cuerpo, el plato y las cinco poses (Humanoid). En el JSON,
+    los dos vestuarios y, en las poses que lo llevan, donde va el plato respecto del esqueleto."""
+    bpy.ops.wm.open_mainfile(filepath=asset)
+    rig, body, plate = (bpy.data.objects[n] for n in ("Carmen_Rig", "Carmen", "Carmen_Plato"))
+    estados = {}
+    for outfit in OUTFITS:
+        set_outfit(body, outfit)
+        estados[outfit] = exportar_unity.foto_estado([rig, body, plate])
+    set_outfit(body, "dia")
+    accesorios = [{"objeto": plate, "pose": name, "matriz": Matrix.Translation(pose["_plato"])}
+                  for name, pose in ((n, fn()) for n, fn in POSES.items()) if "_plato" in pose]
+    exportar_unity.exportar(ROOT, "DonaCarmen", "dona_carmen", objetos=[rig, body, plate],
+                            animaciones=[{"nombre": n} for n in POSES], estados=estados,
+                            accesorios=accesorios, humanoide=True)
+
+
+# ---------------------------------------------------------------------------
 def main():
     t0 = time.time()
+    asset = os.path.join(SCENE_DIR, "dona_carmen.blend")
+    if UNITY_ONLY:
+        exportar_a_unity(asset)
+        return
     for d in (TEX_DIR, SCENE_DIR, RENDER_DIR):
         os.makedirs(d, exist_ok=True)
     for ob in list(bpy.data.objects):
@@ -1511,7 +1547,6 @@ def main():
 
     key_poses(rig)
     set_outfit(body, "dia")
-    asset = os.path.join(SCENE_DIR, "dona_carmen.blend")
     bpy.ops.wm.save_as_mainfile(filepath=asset)
     try:
         bpy.ops.file.make_paths_relative()
@@ -1524,6 +1559,7 @@ def main():
     studio_sheet(rig, body, plate)
     if not SHEET_ONLY:
         render_hallway(asset)
+    exportar_a_unity(asset)
     print(f"[info] listo en {time.time() - t0:.0f} s")
 
 

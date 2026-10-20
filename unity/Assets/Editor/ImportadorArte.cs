@@ -14,6 +14,9 @@ using UnityEngine;
 ///   - Clips: los que dice el JSON del modelo (&lt;nombre&gt;_escena.json), con su nombre, en
 ///     bucle si corresponde y, los aditivos, con su cuadro de reposo como referencia. Sin
 ///     compresión: el temblor es de pocos grados.
+///   - Personajes (el JSON dice "humanoide"): esqueleto Humanoid con su propio Avatar, para
+///     usar animaciones de Mixamo. Sus clips son poses: quedan donde las dejó Blender, sin
+///     mover ni girar el personaje.
 /// Volver a correr un script de Blender reimporta su carpeta con estas reglas.
 /// </summary>
 public class ImportadorArte : AssetPostprocessor
@@ -22,7 +25,7 @@ public class ImportadorArte : AssetPostprocessor
     const string ShaderPS1 = "OnTheNod/PS1";
 
     // Subir este número hace que Unity reimporte Assets/Art con las reglas nuevas.
-    public override uint GetVersion() => 8;
+    public override uint GetVersion() => 9;
 
     static bool EsArte(string ruta) => ruta.StartsWith(CarpetaArte);
 
@@ -58,11 +61,25 @@ public class ImportadorArte : AssetPostprocessor
         importador.materialLocation = ModelImporterMaterialLocation.InPrefab;
         importador.animationCompression = ModelImporterAnimationCompression.Off;
 
-        // Con clips (el JSON lo dice): esqueleto genérico con su propio Avatar.
+        // Personajes: Humanoid (Unity reconoce los huesos por sus nombres de Mixamo). Otros
+        // modelos con clips (el JSON lo dice): esqueleto genérico. Los dos, con su propio Avatar.
         var json = Path.ChangeExtension(assetPath, null) + "_escena.json";
         if (File.Exists(json))
             context.DependsOnSourceAsset(json);
-        if (EscenaBlender.DelModelo(assetPath)?.animaciones?.Length > 0)
+        var escena = EscenaBlender.DelModelo(assetPath);
+        if (escena != null && escena.humanoide)
+        {
+            importador.animationType = ModelImporterAnimationType.Human;
+            importador.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            // Unity guarda en el .meta qué hueso es cuál y la pose de referencia (la T) de la
+            // primera importación, y no los vuelve a calcular. Se borran para que los saque
+            // otra vez del modelo: si el esqueleto cambia en Blender, el Avatar también.
+            var descripcion = importador.humanDescription;
+            descripcion.human = new HumanBone[0];
+            descripcion.skeleton = new SkeletonBone[0];
+            importador.humanDescription = descripcion;
+        }
+        else if (escena?.animaciones?.Length > 0)
         {
             importador.animationType = ModelImporterAnimationType.Generic;
             importador.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
@@ -92,6 +109,15 @@ public class ImportadorArte : AssetPostprocessor
                 continue;
             clip.name = nombre;
             clip.loopTime = datos.loop;
+            if (escena.humanoide)
+            {
+                // Pose fija: el cuerpo queda a la altura, en el lugar y hacia el lado de Blender
+                // (sentado, la cadera baja). Si no, Unity saca de la pose un movimiento de la
+                // raíz y puede correr, girar o subir al personaje.
+                clip.lockRootRotation = clip.keepOriginalOrientation = true;
+                clip.lockRootHeightY = clip.keepOriginalPositionY = true;
+                clip.lockRootPositionXZ = clip.keepOriginalPositionXZ = true;
+            }
             if (datos.aditivo)
             {
                 // El primer cuadro es el reposo que agregó exportar_unity.py: referencia, no parte del clip.

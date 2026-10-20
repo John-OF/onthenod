@@ -21,6 +21,8 @@ public class EscenaBlender
     public Estado[] estados;
     public Animacion[] animaciones;
     public Pista[] pistas;
+    public Accesorio[] accesorios;
+    public bool humanoide; // personaje con esqueleto de Mixamo: se importa como Humanoid
 
     [Serializable]
     public class Luz
@@ -59,6 +61,7 @@ public class EscenaBlender
         public MaterialEstado[] materiales;
         public Forma[] formas;
         public string[] colecciones_ocultas;
+        public string[] objetos_ocultos; // por ejemplo, la Polaroid de Tomás fuera del estado 0
         public Mundo mundo;
     }
 
@@ -95,6 +98,21 @@ public class EscenaBlender
         public float[] reposo;
         public float[] matrices;
         public int Cuadros => matrices.Length / 12;
+    }
+
+    /// <summary>
+    /// Un objeto suelto que el personaje lleva en una pose (el plato de Carmen): dónde va en
+    /// esa pose y dónde está en el FBX (su reposo), las dos en el espacio del modelo con
+    /// coordenadas de Blender (12 números). Se aplica como cambio desde el reposo, con
+    /// <see cref="EnPose"/>. Si una pose no lo nombra, en esa pose no lo lleva.
+    /// </summary>
+    [Serializable]
+    public class Accesorio
+    {
+        public string objeto;
+        public string pose;
+        public float[] reposo;
+        public float[] matriz;
     }
 
     [Serializable]
@@ -154,6 +172,18 @@ public class EscenaBlender
 
     public Pista BuscarPista(string clip, string objeto) =>
         pistas == null ? null : Array.Find(pistas, p => p.clip == clip && p.objeto == objeto);
+
+    public Accesorio BuscarAccesorio(string pose, string objeto) =>
+        accesorios == null ? null : Array.Find(accesorios, a => a.pose == pose && a.objeto == objeto);
+
+    /// <summary>
+    /// Dónde va el accesorio en su pose, respecto de la raíz del modelo. <paramref name="reposo"/>:
+    /// dónde está en el modelo recién importado, respecto de la misma raíz (el plato cuelga de
+    /// ella: es su matriz local). Se usa el cambio y no la matriz tal cual porque en Unity el
+    /// objeto tiene otro giro interno que en Blender.
+    /// </summary>
+    public static Matrix4x4 EnPose(Accesorio a, Matrix4x4 reposo) =>
+        MatrizDeBlender(a.matriz) * MatrizDeBlender(a.reposo).inverse * reposo;
 
     public static Color Lineal(float[] c) => new Color(c[0], c[1], c[2]);
 
