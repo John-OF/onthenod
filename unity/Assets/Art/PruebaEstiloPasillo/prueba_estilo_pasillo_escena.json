@@ -1,0 +1,265 @@
+{
+ "version": 1,
+ "luces": [
+  {
+   "nombre": "luz_foco",
+   "tipo": "POINT",
+   "posicion": [
+    0.0,
+    2.0,
+    2.2
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.04,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": ""
+  },
+  {
+   "nombre": "luz_foco.001",
+   "tipo": "POINT",
+   "posicion": [
+    0.0,
+    10.0,
+    2.2
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.04,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": ""
+  },
+  {
+   "nombre": "luz_fluorescente",
+   "tipo": "AREA",
+   "posicion": [
+    0.0,
+    15.3,
+    2.51
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.0,
+   "tamano": [
+    1.0,
+    0.06
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": ""
+  },
+  {
+   "nombre": "luz_indicador",
+   "tipo": "POINT",
+   "posicion": [
+    0.0,
+    15.8,
+    2.42
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.05,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": ""
+  }
+ ],
+ "camaras": [
+  {
+   "nombre": "Camara",
+   "posicion": [
+    0.2,
+    -0.4,
+    1.6
+   ],
+   "direccion": [
+    -0.05278,
+    0.99845,
+    -0.01745
+   ],
+   "arriba": [
+    0.02522,
+    0.0188,
+    0.99951
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.05,
+   "lejos": 60.0
+  }
+ ],
+ "estados": [
+  {
+   "nombre": "base",
+   "luces": [
+    {
+     "nombre": "luz_foco",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco.001",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_fluorescente",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_indicador",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.45,
+      0.1
+     ],
+     "potencia": 0.6
+    }
+   ],
+   "materiales": [
+    {
+     "nombre": "Foco",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 10.0,
+     "textura": ""
+    },
+    {
+     "nombre": "LedAmbar",
+     "emision": [
+      1.0,
+      0.42,
+      0.08
+     ],
+     "fuerza": 6.0,
+     "textura": ""
+    },
+    {
+     "nombre": "Metal",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "metal_oxidado"
+    },
+    {
+     "nombre": "Pared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_pasillo"
+    },
+    {
+     "nombre": "Piso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_baldosa"
+    },
+    {
+     "nombre": "Puerta",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "puerta_madera"
+    },
+    {
+     "nombre": "Techo",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "techo"
+    },
+    {
+     "nombre": "TuboFluorescente",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    }
+   ],
+   "colecciones_ocultas": [],
+   "mundo": {
+    "fondo": [
+     0.004,
+     0.005,
+     0.007
+    ],
+    "niebla_densidad": 0.022,
+    "niebla_color": [
+     0.75,
+     0.8,
+     0.72
+    ]
+   }
+  }
+ ]
+}

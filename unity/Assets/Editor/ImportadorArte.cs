@@ -8,7 +8,8 @@ using UnityEngine;
 /// (ver blender/scripts/exportar_unity.py), sin configurar nada a mano:
 ///   - Texturas: filtro Point, sin compresión, sin mipmaps y sin reescalar
 ///     (Non-Power of 2 en None; algunas no miden potencias de 2).
-///   - Modelos: sin luces ni cámaras, con el giro de Blender corregido.
+///   - Modelos: sin luces ni cámaras, con el giro de Blender corregido. Lo que en Blender no
+///     proyecta sombra (propiedad sin_sombra) tampoco la proyecta en Unity.
 ///   - Materiales: shader OnTheNod/PS1, con el color, la textura y la emisión de Blender.
 /// Volver a correr un script de Blender reimporta su carpeta con estas reglas.
 /// </summary>
@@ -18,7 +19,7 @@ public class ImportadorArte : AssetPostprocessor
     const string ShaderPS1 = "OnTheNod/PS1";
 
     // Subir este número hace que Unity reimporte Assets/Art con las reglas nuevas.
-    public override uint GetVersion() => 3;
+    public override uint GetVersion() => 5;
 
     static bool EsArte(string ruta) => ruta.StartsWith(CarpetaArte);
 
@@ -45,10 +46,28 @@ public class ImportadorArte : AssetPostprocessor
 
         var importador = (ModelImporter)assetImporter;
         importador.bakeAxisConversion = true; // sin esto, Blender llega girado -90° en X
+        // Siempre una raíz propia, aunque el FBX tenga un solo objeto arriba (una sola
+        // colección): así todos los modelos son archivo > colecciones > objetos.
+        importador.preserveHierarchy = true;
         importador.importCameras = false;
         importador.importLights = false;
         importador.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
         importador.materialLocation = ModelImporterMaterialLocation.InPrefab;
+    }
+
+    readonly System.Collections.Generic.List<GameObject> sinSombra = new System.Collections.Generic.List<GameObject>();
+
+    void OnPostprocessGameObjectWithUserProperties(GameObject objeto, string[] nombres, object[] valores)
+    {
+        if (EsArte(assetPath) && System.Array.IndexOf(nombres, "sin_sombra") >= 0)
+            sinSombra.Add(objeto);
+    }
+
+    void OnPostprocessModel(GameObject modelo)
+    {
+        foreach (var objeto in sinSombra)
+            if (objeto != null && objeto.TryGetComponent<Renderer>(out var renderer))
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
     }
 
     void OnPreprocessMaterialDescription(MaterialDescription descripcion, Material material, AnimationClip[] animaciones)

@@ -35,6 +35,11 @@ Salidas (dentro de la carpeta blender/):
   scenes/departamento_4b.blend     la escena, para abrirla y retocarla
   renders/4b_<vista>.png           cada vista a 1920x1080 (el plano a 1080x1080)
   renders/4b_hoja.png              las seis vistas en perspectiva juntas
+
+Y en el proyecto de Unity (ver exportar_unity.py), en el estado abstinencia:
+  unity/Assets/Art/Departamento4B/departamento_4b.fbx          sin la coleccion Plano
+  unity/Assets/Art/Departamento4B/departamento_4b_escena.json  luces, camaras y los dos estados
+  unity/Assets/Art/Departamento4B/Textures/*.png               sucias y limpias
 """
 import math
 import os
@@ -45,6 +50,9 @@ import bmesh
 import bpy
 import numpy as np
 from mathutils import Matrix, Vector
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import exportar_unity  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Configuracion
@@ -1282,16 +1290,20 @@ def lights():
     light("patio_cocina", "SPOT", (9.2, 1.3, 3.8), {"abstinencia": (MOON, 250), "efecto": (GOLD, 400)},
           target=(6.4, 1.3, 0.6), radius=0.2, spot=(35, 0.3))
     light("luna_bano", "AREA", (4.8, 7.3, 2.1), {"abstinencia": (MOON, 25)}, target=(4.6, 6.2, 0.0), size=(0.5, 0.3))
-    # Trucos: luces bajas para que la luz se cuele por debajo de las puertas
-    light("fuga_bano", "POINT", (4.1, 6.2, 0.12), {"abstinencia": ((0.62, 0.78, 0.95), 25)}, radius=0.02)
-    light("pasillo_edificio", "POINT", (3.45, -1.4, 0.25), {"abstinencia": (WARM, 100)}, radius=0.02)
+    # Trucos: luces bajas para que la luz se cuele por debajo de las puertas.
+    # La propiedad "truco" va al JSON de Unity (ver exportar_unity.py).
+    light("fuga_bano", "POINT", (4.1, 6.2, 0.12), {"abstinencia": ((0.62, 0.78, 0.95), 25)}, radius=0.02)["truco"] = "fuga"
+    light("pasillo_edificio", "POINT", (3.45, -1.4, 0.25), {"abstinencia": (WARM, 100)}, radius=0.02)["truco"] = "fuga"
     # Rebote: Eevee no hace rebotar la luz; una luz tenue sin sombra junto a la
-    # ventana del dormitorio hace de luz rebotada del piso.
+    # ventana del dormitorio hace de luz rebotada del piso. En Unity no se usan: el
+    # rebote lo da la luz precalculada.
     rb = light("rebote_dormitorio", "POINT", (1.0, 6.0, 0.5), {"abstinencia": (SODIUM, 6)}, radius=0.5)
     rb.data.use_shadow = False
+    rb["truco"] = "rebote"
     # y la luz que sale bajo la puerta del bano rebota en el piso del pasillo
     rb = light("rebote_bano", "POINT", (4.1, 5.35, 0.06), {"abstinencia": ((0.62, 0.78, 0.95), 3.0)}, radius=0.3)
     rb.data.use_shadow = False
+    rb["truco"] = "rebote"
     light("led_contestadora", "POINT", (3.058, 3.79, 0.69), {"abstinencia": ((1.0, 0.1, 0.04), 0.04)}, radius=0.005)
     light("lampara_pie", "POINT", (0.28, 3.95, 1.42), {"efecto": ((1.0, 0.72, 0.45), 30)}, radius=0.08)
     light("sol_plano", "SUN", (3.6, 3.7, 10.0), {"plano": ((1.0, 1.0, 1.0), 2.5)}, target=(3.4, 3.9, 0.0))
@@ -1533,6 +1545,14 @@ def main():
         bpy.ops.wm.save_mainfile()
     except Exception as e:
         print(f"[aviso] rutas relativas: {e}")
+
+    # Unity: se fotografian los dos estados del mundo y el FBX queda en abstinencia
+    estados = {}
+    for estado in ("abstinencia", "efecto"):
+        set_state(estado, techo, M)
+        estados[estado] = exportar_unity.foto_estado()
+    set_state("abstinencia", techo, M)
+    exportar_unity.exportar(ROOT, "Departamento4B", "departamento_4b", excluir=("Plano",), estados=estados)
     print(f"[info] listo en {time.time() - t0:.1f} s")
 
 

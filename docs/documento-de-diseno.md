@@ -428,6 +428,8 @@ Hecho el 19 de octubre de 2026. La prueba de estilo está recreada en Unity, en 
 - Luz de área: se pone un spot que apunta hacia el mismo lado, con intensidad vatios / π².
 - Alcance (*Range*): √(vatios × el canal más brillante del color). Es donde EEVEE corta la luz (su umbral es 0,01) y es lo que deja zonas negras entre foco y foco; sin esto, la luz llega mucho más lejos que en Blender.
 - Color: el mismo de Blender. Por código, hay que pasarlo con `.gamma`, porque Unity guarda los colores en sRGB.
+- Todo esto lo hace `Assets/Editor/EscenaBlender.cs` a partir del JSON que cada script deja junto a su FBX (`<nombre>_escena.json`): menú *On the Nod > Crear luces desde Blender*, con el JSON seleccionado. También pone la cámara de Blender y el ambiente y la niebla de cada estado.
+- La niebla iluminada no sabe de paredes: una luz de afuera o de un cuarto cerrado haría brillar la niebla a través del muro. En `NieblaPS1` se ponen solo las luces de los espacios que se ven.
 
 **Diferencias que quedan:** las puertas se ven algo más rojas en Unity, porque los materiales de Blender tienen un brillo especular suave que el shader PS1 no tiene (la PS1 tampoco lo tenía). La bruma del fluorescente sobre las puertas del ascensor es un poco más fuerte.
 
@@ -538,6 +540,11 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 
 **Técnica:** unos 6.800 triángulos en 258 objetos. Las puertas tienen el origen en la bisagra, listas para animar. Algunas luces son trucos para Blender (las que se cuelan bajo las puertas y las de "rebote"); en Unity se resuelven con luz precalculada (*baked*).
 
+**En Unity** (19 de octubre de 2026). El script exporta `Assets/Art/Departamento4B/`: el FBX en el estado abstinencia, las 22 texturas (sucias y limpias) y `departamento_4b_escena.json` con las luces, las cámaras y los dos estados. La escena de prueba `Assets/Scenes/PruebaDepartamento4B.unity` es la vista `4b_sala`, armada desde ese JSON.
+- **Colecciones:** llegan como grupos (`Estructura`, `Muebles`, `Deterioro`, `Efecto`, `Eventos`); `Plano` no se exporta. Cambiar de mundo es activar o desactivar `Deterioro` y `Efecto`, poner las texturas limpias, cambiar la emisión de los focos y los resplandores, y las luces y la niebla del otro estado. El JSON dice qué cambia en cada uno.
+- **Luces-truco:** en el JSON, las de rebote llevan `truco: rebote` y no se crean en Unity, porque ahí el rebote lo da la luz precalculada; las que se cuelan bajo las puertas llevan `truco: fuga`.
+- **Comparación con Blender:** en abstinencia, cada píxel difiere en promedio 3 niveles de 255. Falta la luz que sale bajo la puerta del baño: la rendija es demasiado fina para las sombras en tiempo real y sin el rebote la puerta queda oscura. En el efecto la diferencia es de 13: Unity sale algo más claro porque su luz ambiente no se oscurece en los rincones, y faltan los rayos del atardecer en la niebla. Las dos cosas se resuelven con la luz precalculada.
+
 ---
 
 ## 11. Sonido
@@ -562,7 +569,7 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 ### Assets de la demo
 
 **Escenarios**
-- Departamento 4B: sala, cocina, dormitorio y baño (**hecho**: primera versión, ver sección 10). El interior del baño ya está modelado; falta su versión para la Noche 5.
+- Departamento 4B: sala, cocina, dormitorio y baño (**hecho**: primera versión, ya exportada a Unity; ver sección 10). El interior del baño ya está modelado; falta su versión para la Noche 5.
 - Pasillo modular: tramos de pared, piso y techo, puertas con marco, focos, fluorescentes, tuberías.
 - Elevador: exterior e interior.
 
@@ -586,7 +593,7 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 ### Herramientas y flujo
 - **Blender 5.2:** modelado y texturas. Los escenarios y objetos se generan con scripts de Python que después se pueden retocar a mano.
 - **Mixamo:** rig y animaciones base de los personajes.
-- **Unity 6:** el juego. Se exporta desde Blender en FBX: cada script llama al final a `blender/scripts/exportar_unity.py`, que deja el FBX y sus texturas en `unity/Assets/Art/<asset>/`.
+- **Unity 6:** el juego. Se exporta desde Blender en FBX: cada script llama al final a `blender/scripts/exportar_unity.py`, que deja en `unity/Assets/Art/<asset>/` el FBX, sus texturas y un JSON con las luces, las cámaras y los estados del mundo.
 
 ### Estructura de carpetas
 ```
