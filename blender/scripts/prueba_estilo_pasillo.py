@@ -15,6 +15,10 @@ Salidas (dentro de la carpeta blender/):
   scenes/prueba_estilo_pasillo.blend   la escena, para abrirla y retocarla
   renders/pasillo_raw.png              render a 480x270
   renders/pasillo_ps1.png              render final a 1920x1080
+
+Y en el proyecto de Unity (ver exportar_unity.py):
+  unity/Assets/Art/PruebaEstiloPasillo/prueba_estilo_pasillo.fbx
+  unity/Assets/Art/PruebaEstiloPasillo/Textures/*.png
 """
 import math
 import os
@@ -24,6 +28,9 @@ import bmesh
 import bpy
 import numpy as np
 from mathutils import Matrix, Vector
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import exportar_unity  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Configuracion
@@ -636,6 +643,7 @@ def main():
     scene.render.filepath = raw
     bpy.ops.render.render(write_still=True)
     ps1_post(raw, os.path.join(RENDER_DIR, "pasillo_ps1.png"))
+    exportar_unity.exportar(ROOT, "PruebaEstiloPasillo", "prueba_estilo_pasillo")
     print("[info] listo")
 
 

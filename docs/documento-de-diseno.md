@@ -388,7 +388,7 @@ Low poly con estética de PlayStation 1: pocos polígonos, texturas pixeladas, c
 | Personajes | 500–1.500 triángulos |
 | Objetos | 20–300 triángulos |
 | Escenarios | Modulares: paredes, puertas, marcos y luces reutilizables |
-| En Unity | URP, shader con vertex snapping (el "temblor" de los vértices de PS1), niebla, post-proceso de dithering |
+| En Unity | URP, shader con vertex snapping (el "temblor" de los vértices de PS1), niebla, post-proceso de dithering (ver *Estilo PS1 en Unity*) |
 
 ### Las dos versiones del mundo
 | | Abstinencia (normal) | Efecto (tras consumir) |
@@ -404,6 +404,34 @@ La luz es el recurso de miedo más importante: focos incandescentes aislados con
 
 ### Prueba de estilo
 Aprobada el 18 de octubre de 2026: `blender/renders/pasillo_ps1.png`, generada con `blender/scripts/prueba_estilo_pasillo.py`. Es la referencia visual para el resto del juego.
+
+### Estilo PS1 en Unity
+Hecho el 19 de octubre de 2026. La prueba de estilo está recreada en Unity, en `Assets/Scenes/PruebaEstiloPasillo.unity`, con el FBX que exporta el mismo script. Comparada con `pasillo_ps1.png`, cada píxel difiere en promedio 3 niveles de 255.
+
+| Pieza | Qué hace | Dónde (en `unity/Assets/`) |
+|---|---|---|
+| Imagen de 480×270 | La cámara del juego no dibuja en la pantalla sino en esta imagen chica (sin suavizado ni antialiasing). | `Rendering/PS1_Imagen.renderTexture` |
+| Pantalla | Amplía la imagen a la pantalla con píxeles duros (con barras negras si la ventana no es 16:9) y le aplica el color de 15 bits con dithering Bayer 4×4. Usa la misma fórmula que el post-proceso de Blender. | prefab `Rendering/PS1_Pantalla`, shader `OnTheNod/PS1 Pantalla` |
+| Shader PS1 | El de todos los objetos: luz difusa sin brillos, temblor de vértices (cada vértice salta de píxel en píxel de la imagen chica) y niebla. | `Rendering/PS1.shader` (`OnTheNod/PS1`) |
+| Niebla iluminada | Las luces iluminan la niebla que tienen cerca: el halo de los focos y la bruma fría del fondo. Imita la niebla volumétrica de Blender. | componente `NieblaPS1` |
+| Máscara de foco | Corta la luz que sale hacia arriba de los focos colgantes: en Blender la tapa la bombilla y el techo encima del foco queda negro. | `Rendering/Foco_Mascara.cubemap` (menú *On the Nod > Crear máscara de foco*) |
+| Importación | Lo que llega a `Art/` se configura solo: texturas con filtro Point, sin compresión, sin mipmaps y sin reescalar; materiales con el shader PS1 y los colores y la emisión de Blender. | `Editor/ImportadorArte.cs` |
+
+**Para darle el estilo a una escena nueva:**
+1. Poner el prefab `PS1_Pantalla`.
+2. En la cámara del juego: *Output Texture* = `PS1_Imagen`, sin HDR, sin MSAA y sin post-proceso.
+3. Niebla de la escena (*Lighting > Environment*): exponencial, con la densidad de la niebla de Blender (0,022 en el pasillo) y casi negra (el color del mundo por el de la niebla).
+4. Un objeto con el componente `NieblaPS1`, con el color de la niebla de Blender.
+
+**Luces de Blender a Unity** (URP, sin unidades físicas):
+- Intensidad de una luz puntual: vatios / (4π²). Un foco de 22 W queda en 0,56.
+- Luz de área: se pone un spot que apunta hacia el mismo lado, con intensidad vatios / π².
+- Alcance (*Range*): √(vatios × el canal más brillante del color). Es donde EEVEE corta la luz (su umbral es 0,01) y es lo que deja zonas negras entre foco y foco; sin esto, la luz llega mucho más lejos que en Blender.
+- Color: el mismo de Blender. Por código, hay que pasarlo con `.gamma`, porque Unity guarda los colores en sRGB.
+
+**Diferencias que quedan:** las puertas se ven algo más rojas en Unity, porque los materiales de Blender tienen un brillo especular suave que el shader PS1 no tiene (la PS1 tampoco lo tenía). La bruma del fluorescente sobre las puertas del ascensor es un poco más fuerte.
+
+**Capturas:** *On the Nod > Capturar pantalla PS1* guarda lo que ve la cámara del juego a 1920×1080, igual que los renders de Blender, sin tener que darle a Play.
 
 ### Brazos de Elías
 Primer asset del juego (18 de octubre de 2026). Se generan con `blender/scripts/brazos_primera_persona.py`; la hoja de estados está en `blender/renders/brazos_estados.png`.
@@ -558,7 +586,7 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 ### Herramientas y flujo
 - **Blender 5.2:** modelado y texturas. Los escenarios y objetos se generan con scripts de Python que después se pueden retocar a mano.
 - **Mixamo:** rig y animaciones base de los personajes.
-- **Unity 6:** el juego. Se exporta desde Blender en FBX.
+- **Unity 6:** el juego. Se exporta desde Blender en FBX: cada script llama al final a `blender/scripts/exportar_unity.py`, que deja el FBX y sus texturas en `unity/Assets/Art/<asset>/`.
 
 ### Estructura de carpetas
 ```
@@ -569,7 +597,13 @@ C:\Dev\Personal\OnTheNod\
 │   ├── textures/          texturas pixeladas (PNG)
 │   ├── scenes/            archivos .blend
 │   └── renders/           pruebas y renders
-└── unity/                 proyecto de Unity (los FBX exportados van en Assets/)
+└── unity/                 proyecto de Unity
+    └── Assets/
+        ├── Art/           lo que exportan los scripts de Blender: una carpeta por asset (FBX y Textures/)
+        ├── Rendering/     estilo PS1: shaders, imagen de 480×270, pantalla, niebla iluminada
+        ├── Editor/        herramientas del editor: importación automática, capturas, máscara de foco
+        ├── Scenes/        escenas
+        └── Settings/      configuración de URP
 ```
 
 ---
