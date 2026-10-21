@@ -57,6 +57,9 @@ public class Elias : MonoBehaviour
     /// <summary>Responde a los controles (no está usando nada).</summary>
     public bool Libre { get; private set; } = true;
 
+    /// <summary>Cuánto tiembla la cámara, en grados. Lo pone la abstinencia.</summary>
+    [System.NonSerialized] public float temblorCamara;
+
     CharacterController cuerpo;
     InputActionMap mapa;
     InputAction mover, mirar, interactuar;
@@ -111,6 +114,25 @@ public class Elias : MonoBehaviour
         if (interactuar.WasPressedThisFrame())
             TratarDeUsar();
     }
+
+    void LateUpdate()
+    {
+        // El temblor de la abstinencia: un vaivén chico e irregular, encima de donde esté la
+        // cámara (caminando o usando algo). Si nada movió la cámara desde el cuadro anterior
+        // (por ejemplo, con el auricular en la oreja), se parte de donde estaba sin temblor,
+        // para que no se acumule.
+        var base_ = camara.localRotation == conTemblor ? sinTemblor : camara.localRotation;
+        sinTemblor = base_;
+        if (temblorCamara > 0f)
+        {
+            float t = Time.time * 6f;
+            base_ *= Quaternion.Euler((Mathf.PerlinNoise(t, 0.3f) - 0.5f) * 2f * temblorCamara,
+                                      (Mathf.PerlinNoise(0.7f, t) - 0.5f) * 2f * temblorCamara, 0f);
+        }
+        camara.localRotation = conTemblor = base_;
+    }
+
+    Quaternion sinTemblor = Quaternion.identity, conTemblor = Quaternion.identity;
 
     void Mirar()
     {
@@ -185,17 +207,33 @@ public class Elias : MonoBehaviour
 
         yield return LlevarCamara(espacio.localToWorldMatrix * cabeza.EnTiempo(0f, fps));
 
+        // Lo que la mano agarra (la pista dice con qué mano y desde cuándo) la sigue desde ese
+        // momento: así tiembla con ella. Antes, sigue su pista como la puerta.
+        var enLaMano = new Matrix4x4?[objetos.Length];
+        bool hayManos = System.Array.Exists(pistas, p => p != null && !string.IsNullOrEmpty(p.mano));
         for (float t = 0f; ; t += Time.deltaTime)
         {
             float tc = Mathf.Min(t, duracion);
             brazos.Mostrar(animacion, tc);
             Poner(camara, espacio.localToWorldMatrix * cabeza.EnTiempo(tc, fps));
+            if (hayManos)
+                brazos.Evaluar(); // la pose de este cuadro, para saber dónde está la mano ahora
             for (int i = 0; i < objetos.Length; i++)
             {
-                if (pistas[i] == null)
+                var p = pistas[i];
+                if (p == null)
                     continue;
-                var cambio = espacio.localToWorldMatrix * pistas[i].CambioEnTiempo(tc, fps) * espacio.worldToLocalMatrix;
-                Poner(objetos[i].objeto, cambio * reposos[objetos[i].objeto]);
+                var objeto = objetos[i].objeto;
+                var cambio = espacio.localToWorldMatrix * p.CambioEnTiempo(tc, fps) * espacio.worldToLocalMatrix;
+                var segunPista = cambio * reposos[objeto];
+                if (string.IsNullOrEmpty(p.mano) || tc < p.agarre)
+                {
+                    Poner(objeto, segunPista);
+                    continue;
+                }
+                var mano = brazos.Hueso(p.mano);
+                enLaMano[i] ??= mano.worldToLocalMatrix * segunPista;
+                Poner(objeto, mano.localToWorldMatrix * enLaMano[i].Value);
             }
             if (t >= duracion)
                 break;
@@ -239,6 +277,29 @@ public class Elias : MonoBehaviour
     /// </summary>
     void Soltar()
     {
+        Ubicar();
+        Libre = true;
+    }
+
+    /// <summary>
+    /// Elías se para donde está la cabeza, con los ojos a su altura, sin volver a responder
+    /// todavía. Para cuando la pantalla está a oscuras (la dosis), así no se lo ve levantarse.
+    /// </summary>
+    public void Pararse()
+    {
+        Ubicar();
+        camara.localPosition = new Vector3(0f, alturaOjos, 0f);
+    }
+
+    /// <summary>Devuelve a su lugar algo que se movió con un clip (la jeringa, después de la dosis).</summary>
+    public void DevolverAlReposo(Transform objeto)
+    {
+        if (reposos.TryGetValue(objeto, out var m))
+            Poner(objeto, m);
+    }
+
+    void Ubicar()
+    {
         Vector3 ojos = camara.position, frente = camara.forward;
         var plano = Vector3.ProjectOnPlane(frente, Vector3.up);
         cuerpo.enabled = false;
@@ -247,7 +308,6 @@ public class Elias : MonoBehaviour
         cuerpo.enabled = true;
         inclinacion = Mathf.Clamp(-Mathf.Asin(Mathf.Clamp(frente.y, -1f, 1f)) * Mathf.Rad2Deg, -limiteVertical, limiteVertical);
         camara.SetPositionAndRotation(ojos, transform.rotation * Quaternion.Euler(inclinacion, 0f, 0f));
-        Libre = true;
     }
 
     static void Poner(Transform t, Matrix4x4 m) => t.SetPositionAndRotation(m.GetPosition(), m.rotation);

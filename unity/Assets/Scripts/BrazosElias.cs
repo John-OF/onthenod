@@ -34,6 +34,22 @@ public class BrazosElias : MonoBehaviour
 
     public AnimationClip Clip(string nombre) => Array.Find(clips, c => c != null && c.name == nombre);
 
+    readonly System.Collections.Generic.Dictionary<string, Transform> huesos = new System.Collections.Generic.Dictionary<string, Transform>();
+
+    /// <summary>Un hueso de los brazos por su nombre (por ejemplo, hand.R).</summary>
+    public Transform Hueso(string nombre)
+    {
+        if (!huesos.TryGetValue(nombre, out var hueso))
+            huesos[nombre] = hueso = Array.Find(GetComponentsInChildren<Transform>(true), t => t.name == nombre);
+        return hueso;
+    }
+
+    /// <summary>
+    /// Aplica ya la pose de este cuadro a los huesos (Unity la aplica después de los Update):
+    /// para saber dónde está la mano en el mismo cuadro en que se pidió el clip.
+    /// </summary>
+    public void Evaluar() => grafo.Evaluate(0f);
+
     /// <summary>
     /// Pone un estado de los brazos (del JSON de los brazos): su textura y cuánto se adelgazan
     /// (la forma "consumido"). Ver Brazos de Elías en la sección 10.
@@ -62,6 +78,10 @@ public class BrazosElias : MonoBehaviour
     {
         var animator = GetComponent<Animator>();
         animator.applyRootMotion = false;
+        // En reposo los brazos cuelgan fuera de cuadro. Si Unity dejara de animarlos por no
+        // verse (lo que hace por defecto con un modelo importado), al empezar un clip quedarían
+        // congelados abajo y nunca entrarían en cuadro.
+        animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
         grafo = PlayableGraph.Create("Brazos de Elías");
         grafo.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
 

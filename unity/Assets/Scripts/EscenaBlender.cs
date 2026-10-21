@@ -102,6 +102,8 @@ public class EscenaBlender
         public string objeto;
         public float[] reposo;
         public float[] matrices;
+        public string mano;   // si la mano lo agarra en el clip: el hueso (hand.R); si no, vacío
+        public float agarre;  // desde qué segundo del clip lo tiene en la mano
         public int Cuadros => matrices.Length / 12;
 
         /// <summary>

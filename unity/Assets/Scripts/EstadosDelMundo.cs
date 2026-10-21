@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// Los mundos de un escenario de Blender (sección 10, Las dos versiones del mundo): en el 4B, la
@@ -14,7 +13,7 @@ using UnityEngine.InputSystem;
 /// El primer estado del JSON es el del FBX (en el 4B, la abstinencia): en ese, los materiales son
 /// los del modelo tal cual. En los otros se usan copias, para no tocar el modelo.
 ///
-/// Mientras no exista la dosis (sección 6.3), se cambia con una tecla de prueba (F2).
+/// Lo cambia la dosis (Abstinencia.Consumir) y, al terminar el efecto, el bajón.
 /// </summary>
 public class EstadosDelMundo : MonoBehaviour
 {
@@ -27,8 +26,6 @@ public class EstadosDelMundo : MonoBehaviour
     public NieblaPS1 niebla;
     [Tooltip("Las texturas que nombran los estados (las sucias y las limpias).")]
     public Texture2D[] texturas;
-    [Tooltip("Tecla de prueba para pasar de un mundo al otro, mientras no exista la dosis. None: ninguna.")]
-    public Key teclaDePrueba = Key.F2;
 
     [Tooltip("La luz precalculada de cada mundo. La llena On the Nod > Precalcular la luz de los mundos.")]
     public List<LuzPrecalculada> precalculadas = new List<LuzPrecalculada>();
@@ -86,13 +83,6 @@ public class EstadosDelMundo : MonoBehaviour
     public string[] Nombres() => Array.ConvertAll(Escena.estados, e => e.nombre);
 
     void Start() => Poner(Nombres()[0]);
-
-    void Update()
-    {
-        var teclado = Keyboard.current;
-        if (teclaDePrueba != Key.None && teclado != null && teclado[teclaDePrueba].wasPressedThisFrame)
-            Alternar();
-    }
 
     /// <summary>Pasa al mundo siguiente (en el 4B, de la abstinencia al efecto y de vuelta).</summary>
     public void Alternar()

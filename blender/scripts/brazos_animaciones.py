@@ -13,6 +13,8 @@ Clips (30 cuadros por segundo):
   abrir_puerta        2.8 s: agarra la perilla, la gira y empuja la puerta
   telefono_contestar  2.4 s: levanta el auricular y se lo lleva al oido
   telefono_colgar     1.8 s: devuelve el auricular y baja la mano
+  tomar_jeringa       3.4 s: se agacha frente a la mesa de centro, toma la jeringa y la
+                      levanta frente a la cara (la dosis; en Unity sigue un corte a negro)
 
 Requiere scenes/departamento_4b.blend y scenes/brazos_primera_persona.blend
 (se generan con departamento_4b.py y brazos_primera_persona.py).
@@ -31,11 +33,11 @@ Salidas (dentro de la carpeta blender/):
 
 Y en el proyecto de Unity (ver exportar_unity.py):
   unity/Assets/Art/BrazosElias/brazos_elias.fbx          esqueleto, malla, forma "consumido"
-                                                         y los siete clips (con mirar_brazos)
+                                                         y los ocho clips (con mirar_brazos)
   unity/Assets/Art/BrazosElias/brazos_elias_escena.json  luz de los brazos, camara, los cuatro
                                                          estados, los clips y, por clip, el
-                                                         movimiento de la cabeza, la puerta y
-                                                         el auricular
+                                                         movimiento de la cabeza, la puerta,
+                                                         el auricular y la jeringa
   unity/Assets/Art/BrazosElias/Textures/brazos_estado0..3.png
   Para exportar sin renderizar las vistas previas: ... -- blender reposo
 """
@@ -90,6 +92,7 @@ OPEN = curls((4, 6, 4), (4, 6, 4), (6, 8, 6), (8, 10, 6), (-5, 5, 5))
 SPREAD = curls((3, 6, 4), (2, 5, 3), (5, 7, 5), (8, 10, 6), (-8, 2, 6))
 GRIP_KNOB = curls((55, 70, 40), (60, 75, 45), (62, 75, 45), (65, 70, 40), (20, 25, 20))
 GRIP_PHONE = curls((50, 60, 35), (55, 65, 40), (58, 65, 40), (60, 60, 35), (25, 20, 15))
+GRIP_SMALL = curls((38, 45, 30), (60, 70, 45), (68, 75, 45), (72, 72, 45), (20, 18, 15))  # pinza: algo chico
 
 scene = bpy.context.scene
 
@@ -324,6 +327,7 @@ HINGE = Vector((3.40, 5.29, 0.0))           # bisagra de la puerta del dormitori
 KNOB_REL = Vector((0.065, -0.69, 1.01))     # perilla (lado del pasillo) respecto de la bisagra
 DOOR_REST = -28.0                           # asi quedo entreabierta en el 4B
 HS = {}                                     # auricular: centro y matriz en reposo
+JERINGA = {}                                # jeringa de la mesa de centro: centro y matriz en reposo
 
 
 def knob_at(angle):
@@ -443,14 +447,47 @@ def clip_telefono_colgar():
                 handset=(None, 0.95))
 
 
+def clip_tomar_jeringa():
+    """La dosis (6.3): se agacha frente a la mesa de centro, toma la jeringa con la derecha y la
+    levanta frente a la cara. En Unity sigue un corte a negro y despues, el efecto."""
+    c = JERINGA["centro"]
+
+    def on_table(up=0.0, cur=OPEN):
+        rot = hand_rot((0.15, 0.75, -0.65), (0, 0, -1), 1)  # dedos hacia la mesa, palma abajo
+        return pose_world(lambda t: c + Vector((0, 0, up)), lambda t: rot.copy(), (0.6, -0.3, -1.0), cur)
+
+    def in_view(dx=0.0):
+        rot = hand_rot((-0.35, 0.85, 0.25), (-0.5, -0.2, 0.85), 1)  # palma arriba: se ve la jeringa
+        return pose_rig((0.03 + dx, 0.30, -0.07), rot, (0.6, -0.4, -1.0), GRIP_SMALL)
+
+    right = [
+        (0.0, pose_hang(1)),
+        (0.85, on_table(up=0.07)),
+        (1.05, on_table(up=0.012)),
+        (1.30, on_table(up=0.012, cur=GRIP_SMALL)),   # la agarra
+        (1.45, on_table(up=0.03, cur=GRIP_SMALL)),
+        (2.35, in_view()),
+        (3.40, in_view(dx=-0.01)),
+    ]
+    # Agachado e inclinado sobre el borde de la mesa: al mirar hacia abajo los hombros se van
+    # hacia atras, asi que la cabeza se acerca a la mesa para que la mano llegue.
+    head = [(0.0, (1.86, 1.98, 1.58), 0.0, -32.0), (0.80, (1.84, 2.18, 1.00), -2.0, -62.0),
+            (1.45, (1.84, 2.22, 0.98), -2.0, -60.0), (2.35, (1.84, 2.12, 1.06), 2.0, -24.0),
+            (3.40, (1.84, 2.12, 1.07), 3.0, -22.0)]
+    lean = [(0.0, (0, 0, 0)), (0.8, (0, 0.18, -0.04)), (1.45, (0, 0.18, -0.04)), (2.35, (0, 0.03, 0))]
+    return dict(dur=3.4, head=head, lean=lean, arms={1: right, -1: [(0.0, pose_hang(-1))]},
+                objeto=("jeringa_mesa", 1.30))
+
+
 CLIPS = {
     "reposo": clip_reposo,
     "mirar_manos": clip_mirar_manos,
     "abrir_puerta": clip_abrir_puerta,
     "telefono_contestar": clip_telefono_contestar,
     "telefono_colgar": clip_telefono_colgar,
+    "tomar_jeringa": clip_tomar_jeringa,
 }
-PREVIEW = ["mirar_manos", "abrir_puerta", "telefono_contestar", "telefono_colgar"]
+PREVIEW = ["mirar_manos", "abrir_puerta", "telefono_contestar", "telefono_colgar", "tomar_jeringa"]
 
 
 def nframes(dur):
@@ -606,30 +643,41 @@ def preview_setup(rig, head, door, handset, info, tremor, clip):
     if handset.animation_data:
         handset.animation_data.action = None
     handset.matrix_world = HS["rest"]
+    syr = bpy.data.objects["jeringa_mesa"]
+    if syr.animation_data:
+        syr.animation_data.action = None
+    syr.matrix_world = JERINGA["rest"]
     scene.frame_start, scene.frame_end = 1, info["frames"]
 
 
 def bake_handset(rig, handset, info, clip, store):
-    """El auricular sigue a la mano mientras esta agarrado (se hornea con el temblor incluido)."""
+    """El auricular sigue a la mano mientras esta agarrado."""
     grab, release = clip["handset"]
+    return bake_follow(rig, handset, HS["rest"], info, grab, release, store)
+
+
+def bake_follow(rig, ob, rest, info, grab, release, store):
+    """El objeto sigue a la mano derecha mientras esta agarrado (se hornea con el temblor
+    incluido). grab o release en None: lo agarro en otro clip o no lo suelta. store guarda
+    donde lo agarro la mano, para soltarlo en otro clip (el auricular)."""
     pb = rig.pose.bones["hand.R"]
-    handset.animation_data_create()
-    handset.animation_data.action = None
-    handset.rotation_mode = "QUATERNION"
+    ob.animation_data_create()
+    ob.animation_data.action = None
+    ob.rotation_mode = "QUATERNION"
     f_grab = 1 + int(round(grab * FPS)) if grab is not None else None
     f_rel = 1 + int(round(release * FPS)) if release is not None else None
     for f in range(1, info["frames"] + 1):
         scene.frame_set(f)
         hand_w = rig.matrix_world @ pb.matrix
         if f_grab is not None and f == f_grab:
-            store["offset"] = hand_w.inverted() @ HS["rest"]
+            store["offset"] = hand_w.inverted() @ rest
         held = (f_grab is not None and f >= f_grab) or (f_rel is not None and f <= f_rel)
-        m = hand_w @ store["offset"] if held else HS["rest"]
+        m = hand_w @ store["offset"] if held else rest
         loc, rot, _s = m.decompose()
-        handset.location, handset.rotation_quaternion = loc, rot
-        handset.keyframe_insert("location", frame=f)
-        handset.keyframe_insert("rotation_quaternion", frame=f)
-    act = handset.animation_data.action
+        ob.location, ob.rotation_quaternion = loc, rot
+        ob.keyframe_insert("location", frame=f)
+        ob.keyframe_insert("rotation_quaternion", frame=f)
+    act = ob.animation_data.action
     act.use_fake_user = True
     return act
 
@@ -690,6 +738,15 @@ def setup_scene():
     hs.rotation_mode = "QUATERNION"
     bpy.context.view_layer.update()
     HS["center"], HS["rest"] = c, hs.matrix_world.copy()
+
+    # La jeringa de la mesa de centro: la mano la agarra por el medio del cuerpo
+    syr = bpy.data.objects["jeringa_mesa"]
+    body = bpy.data.objects["jeringa_mesa_cuerpo"]
+    co = [body.matrix_world @ v.co for v in body.data.vertices]
+    JERINGA["centro"] = Vector([(min(p[i] for p in co) + max(p[i] for p in co)) / 2 for i in range(3)])
+    syr.rotation_mode = "QUATERNION"
+    bpy.context.view_layer.update()
+    JERINGA["rest"] = syr.matrix_world.copy()
 
     door = bpy.data.objects["puerta_dormitorio"]
     r = scene.render
@@ -805,6 +862,9 @@ def main():
         preview_setup(rig, head, door, handset, info, tremor, clip)
         if clip.get("handset"):
             bake_handset(rig, handset, info, clip, store).name = "auricular_" + name
+        if clip.get("objeto"):
+            nombre, grab = clip["objeto"]
+            bake_follow(rig, bpy.data.objects[nombre], JERINGA["rest"], info, grab, None, {}).name = nombre + "_" + name
         if ONLY and name not in ONLY:
             continue
         v = render_preview(name, info["frames"], ffmpeg)
@@ -861,34 +921,42 @@ def cargar_imagen(nombre):
 def exportar_a_unity(rig, head, door, handset, infos, clips):
     """Un solo FBX con el esqueleto, la malla y los clips. En Unity los brazos cuelgan de la
     camara, asi que se exportan con la cabeza en el origen. El movimiento de la cabeza (la
-    camara de Unity), de la puerta y del auricular en cada clip va en el JSON, cuadro a cuadro:
-    lo usa la camara de interaccion."""
+    camara de Unity), de la puerta, del auricular y de la jeringa en cada clip va en el JSON,
+    cuadro a cuadro: lo usa la camara de interaccion. La pista de lo que la mano agarra en el
+    clip (la jeringa) dice ademas con que mano y desde cuando: desde ahi, Unity lo pega a la
+    mano, para que tiemble con ella."""
     arms = bpy.data.objects["Brazos"]
     rig.animation_data.action = None
     for tr in list(rig.animation_data.nla_tracks):
         rig.animation_data.nla_tracks.remove(tr)
     reset_pose(rig)
 
-    # Puerta y auricular en reposo: las pistas se aplican como cambio desde aqui
-    for ob in (door, handset):
+    # Puerta, auricular y jeringa en reposo: las pistas se aplican como cambio desde aqui
+    syr = bpy.data.objects["jeringa_mesa"]
+    for ob in (door, handset, syr):
         if ob.animation_data:
             ob.animation_data.action = None
     door.rotation_euler.z = R(DOOR_REST)
     handset.matrix_world = HS["rest"]
+    syr.matrix_world = JERINGA["rest"]
     bpy.context.view_layer.update()
-    reposo = {door.name: exportar_unity.matriz(door), handset.name: exportar_unity.matriz(handset)}
+    reposo = {ob.name: exportar_unity.matriz(ob) for ob in (door, handset, syr)}
 
     pistas = []
     for name, info in infos.items():
         n = info["frames"]
         pistas.append({"clip": name, "objeto": head.name, "reposo": [], "matrices": muestrear(head, info["head"], n)})
-        moviles = [(door, info["door"]), (handset, bpy.data.actions.get("auricular_" + name))]
+        moviles = [(door, info["door"]), (handset, bpy.data.actions.get("auricular_" + name)),
+                   (syr, bpy.data.actions.get(syr.name + "_" + name))]
         for ob, accion in moviles:
             if accion is not None:
-                pistas.append({"clip": name, "objeto": ob.name, "reposo": reposo[ob.name],
-                               "matrices": muestrear(ob, accion, n)})
+                pista = {"clip": name, "objeto": ob.name, "reposo": reposo[ob.name], "matrices": muestrear(ob, accion, n)}
+                if clips[name].get("objeto", (None,))[0] == ob.name:
+                    pista["mano"], pista["agarre"] = "hand.R", clips[name]["objeto"][1]
+                pistas.append(pista)
     door.rotation_euler.z = R(DOOR_REST)
     handset.matrix_world = HS["rest"]
+    syr.matrix_world = JERINGA["rest"]
 
     # La cabeza en el origen: la luz y la camara quedan relativas a ella
     head.animation_data.action = None

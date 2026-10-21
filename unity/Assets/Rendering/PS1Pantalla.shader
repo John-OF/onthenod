@@ -7,6 +7,10 @@
 //
 // Lo usa el RawImage del prefab PS1_Pantalla, y también la captura del editor
 // (On the Nod > Capturar pantalla PS1).
+//
+// El corte a negro (Assets/Scripts/Fundido.cs) oscurece la imagen antes de cuantizarla, así que
+// el fundido sale con el mismo dithering, como en la PS1. Es un valor global (_PS1Oscuridad):
+// 0 se ve normal, 1 todo negro.
 Shader "OnTheNod/PS1 Pantalla"
 {
     Properties
@@ -75,6 +79,7 @@ Shader "OnTheNod/PS1 Pantalla"
             Texture2D _MainTex;
             float _Niveles;
             float _Dithering;
+            float _PS1Oscuridad; // global; sin poner vale 0
 
             static const float kBayer[16] =
             {
@@ -117,6 +122,7 @@ Shader "OnTheNod/PS1 Pantalla"
                 #ifndef UNITY_COLORSPACE_GAMMA
                     c = LinealASrgb(c);
                 #endif
+                c *= 1.0 - saturate(_PS1Oscuridad);
 
                 uint indice = ((uint)texel.y & 3u) * 4u + ((uint)texel.x & 3u);
                 float umbral = (kBayer[indice] / 16.0 - 0.5 + 1.0 / 32.0) * _Dithering;

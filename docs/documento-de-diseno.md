@@ -461,15 +461,17 @@ Primer asset del juego (18 de octubre de 2026). Se generan con `blender/scripts/
 | `abrir_puerta` | 2,8 s | Agarra la perilla, la gira y empuja la puerta. |
 | `telefono_contestar` | 2,4 s | Levanta el auricular y se lo lleva al oído. Al terminar, Elías mira hacia el pasillo y la puerta del baño. |
 | `telefono_colgar` | 1,8 s | Devuelve el auricular a la base y baja la mano. |
+| `tomar_jeringa` | 3,4 s | La dosis (20 de octubre de 2026): se agacha frente a la mesa de centro, toma la jeringa con la derecha y la levanta frente a la cara. En el juego sigue un corte a negro. |
 
+- **Tomar algo chico:** la mano lo agarra con una pinza y, desde ese momento, lo lleva. Como los brazos van pegados a la cabeza, al mirar hacia abajo los hombros se van hacia atrás: para llegar a la mesa de centro, la cabeza se inclina sobre el borde.
 - **Cámara de interacción:** abrir una puerta o contestar el teléfono mueve la cámara a un punto fijo frente al objeto (inclinado sobre la mesita, frente a la perilla), y desde ahí corre la animación. Así la mano siempre llega al objeto.
 - **Luz de los brazos:** una luz tenue pegada a la cámara, que solo ilumina los brazos, para que se lean en los cuartos oscuros.
 
 **En Unity** (19 de octubre de 2026). Los exporta `brazos_animaciones.py` (no `brazos_primera_persona.py`), porque es el que junta el modelo con los clips: `Assets/Art/BrazosElias/` tiene `brazos_elias.fbx`, las cuatro texturas y `brazos_elias_escena.json`. La escena de prueba es `Assets/Scenes/PruebaBrazosElias.unity`: el 4B con los brazos colgando de la cámara.
-- **El FBX:** esqueleto genérico con su *Avatar*, la malla con la forma `consumido` y los siete clips (`reposo`, `temblor`, `mirar_manos`, `abrir_puerta`, `telefono_contestar`, `telefono_colgar` y la pose `mirar_brazos`). `reposo` y `temblor` van en bucle.
+- **El FBX:** esqueleto genérico con su *Avatar*, la malla con la forma `consumido` y los ocho clips (`reposo`, `temblor`, `mirar_manos`, `abrir_puerta`, `telefono_contestar`, `telefono_colgar`, `tomar_jeringa` y la pose `mirar_brazos`). `reposo` y `temblor` van en bucle.
 - **El temblor:** va en una capa aditiva. El clip trae un cuadro de reposo antes del primero, y Unity lo usa como referencia de la capa; así el temblor se suma sin mover la pose de base.
 - **Los cuatro estados** están en el JSON: la textura de cada uno y el valor de `consumido` (0, 0, 0,45 y 1; en Unity el *blendshape* va de 0 a 100). Los define `brazos_primera_persona.py`, que los guarda en el `.blend`.
-- **La cámara de interacción:** el JSON trae, para cada clip y cuadro a cuadro, dónde está la cabeza (la cámara de Unity), y cómo se mueven la puerta del dormitorio y el auricular. La cabeza está en las coordenadas del 4B. La luz de los brazos y la cámara van relativas a la cabeza.
+- **La cámara de interacción:** el JSON trae, para cada clip y cuadro a cuadro, dónde está la cabeza (la cámara de Unity), y cómo se mueven la puerta del dormitorio, el auricular y la jeringa. La cabeza está en las coordenadas del 4B. La luz de los brazos y la cámara van relativas a la cabeza. La pista de la jeringa dice además con qué mano se agarra y desde qué segundo: desde ahí, Unity la pega a esa mano, para que tiemble con ella.
 - **Comparación con Blender:** cuatro cuadros de las vistas previas (`anim_*_claves.png`), con la cámara, la puerta y el auricular siguiendo esas pistas y el temblor sumado. Cada píxel difiere en promedio entre 4 y 6 niveles de 255; las manos y los dedos coinciden, y lo único distinto es la luz que falta en el fondo del pasillo (la precalculada del 4B).
 
 ### Tomás
@@ -574,11 +576,33 @@ Primer recorrido jugable (20 de octubre de 2026): `Assets/Scenes/Departamento4B.
 | Usar | E | botón de arriba |
 
 - **Caminar:** a 1,3 m/s, con los ojos a 1,6 m, la altura de la cabeza en las animaciones de Blender. Elías choca con paredes y muebles, y pisa la ropa, los cojines caídos y los papeles del piso sin subirse a ellos (ver *Importación* en *Estilo PS1 en Unity*). Todavía no corre ni se agacha (6.1).
-- **Usar:** se mira algo a menos de 1,4 m y se aprieta Usar. Por ahora, la puerta del dormitorio (desde el pasillo; queda abierta) y el teléfono (contesta, escucha hasta que se vuelve a apretar Usar, y cuelga). Los dos corren con la cámara de interacción de los brazos (ver *Brazos de Elías*): la cámara va al punto donde empieza el clip y desde ahí sigue a la cabeza de Blender, mientras la puerta o el auricular siguen sus pistas. Comparadas en cámara lenta con `anim_abrir_puerta_claves.png` y `anim_telefono_contestar_claves.png`, la mano agarra la perilla y el auricular igual que en Blender.
-- **Los brazos** cuelgan de la cámara, siempre con el temblor sumado y con peso fijo (el de las vistas previas de Blender); más adelante lo moverá la abstinencia (6.2). Su luz ilumina solo la capa de luz `Brazos`, y tampoco la niebla.
-- **El código** está en `Assets/Scripts/`: `Elias` (caminar, mirar, usar y la cámara de interacción), `BrazosElias` (el clip de turno, el temblor encima y el estado de los brazos), `PuertaInteractiva`, `TelefonoInteractivo` y `EstadosDelMundo` (los dos mundos). La puerta y el teléfono derivan de `Interactuable`, que es lo que hay que heredar para agregar algo que se pueda usar.
+- **Usar:** se mira algo a menos de 1,4 m y se aprieta Usar. Por ahora:
+  - la puerta del dormitorio, desde el pasillo; queda abierta;
+  - el teléfono: contesta, escucha hasta que se vuelve a apretar Usar, y cuelga;
+  - la jeringa de la mesa de centro: la dosis (ver abajo).
 
-**Los dos mundos.** Con F2 se pasa de la abstinencia al efecto y de vuelta. Es una tecla de prueba, hasta que exista la dosis (6.3). El cambio lo hace el componente `EstadosDelMundo` (el objeto `Mundos` de la escena), que lee el JSON del 4B:
+  Los tres corren con la cámara de interacción de los brazos (ver *Brazos de Elías*): la cámara va al punto donde empieza el clip y desde ahí sigue a la cabeza de Blender, mientras la puerta, el auricular o la jeringa siguen sus pistas. Comparadas en cámara lenta con las hojas de cuadros de Blender (`anim_*_claves.png`), la mano agarra la perilla, el auricular y la jeringa igual que en Blender.
+- **Los brazos** cuelgan de la cámara, con el temblor sumado según la abstinencia. Su luz ilumina solo la capa de luz `Brazos`, y tampoco la niebla. Unity los anima aunque no se vean: si no, en reposo (fuera de cuadro) quedaban congelados y al empezar un clip nunca entraban en cuadro.
+- **El código** está en `Assets/Scripts/`:
+  - `Elias`: caminar, mirar, usar y la cámara de interacción;
+  - `BrazosElias`: el clip de turno, el temblor encima y el estado de los brazos;
+  - `PuertaInteractiva`, `TelefonoInteractivo` y `DosisInteractiva`: derivan de `Interactuable`, que es lo que hay que heredar para agregar algo que se pueda usar;
+  - `Abstinencia`, `Partida` (lo que la partida va acumulando) y `Fundido` (el corte a negro);
+  - `EstadosDelMundo`: los dos mundos.
+
+**La abstinencia** (6.2) es un valor oculto que empieza en 35 (la Noche 1 es el primer día sin consumir) y sube 1,5 por minuto. Por ahora se nota en dos cosas:
+- **El temblor de las manos:** no hay por debajo de 10, y llega al de las vistas previas de Blender en 60.
+- **El temblor de la cámara:** desde 70 tiembla también la vista, hasta 0,6° en 100.
+
+**La dosis** (6.3) es la jeringa de la mesa de centro:
+1. Elías se agacha, la toma y la mira en la mano (el clip `tomar_jeringa`).
+2. Corte a negro, con el mismo dithering de 15 bits, como un fundido de la PS1. A oscuras, la jeringa vuelve a la mesa y Elías se para.
+3. Al volver, el efecto. La abstinencia baja a 0 y no hay temblor.
+4. A los 3 minutos llega el bajón, de golpe: la abstinencia vuelve 15 puntos más alta que antes de consumir.
+
+Lo que cuesta queda registrado en `Partida`: los días limpio vuelven a 0 y suman la dosis y la Dependencia (sección 7); se guardará con el cuaderno. La jeringa se usa una sola vez.
+
+**Los dos mundos.** La dosis pasa de la abstinencia al efecto y el bajón lo devuelve. El cambio lo hace el componente `EstadosDelMundo` (el objeto `Mundos` de la escena), que lee el JSON del 4B:
 - muestra `Deterioro` o `Efecto`;
 - pone las texturas limpias y la emisión de cada material;
 - enciende las luces de cada mundo (el sol del atardecer y la lámpara de pie, solo en el efecto);
@@ -649,7 +673,7 @@ Lo que queda distinto:
 - Doña Carmen y su plato tapado (**hecho**: dos vestuarios y las vistas por la mirilla, ya exportada a Unity como *Humanoid*; ver sección 10). En la demo solo se ve por la mirilla.
 
 **Animaciones**
-- Brazos de Elías: abrir puertas, contestar y colgar el teléfono, temblor y mirarse las manos (**hecho**, ver sección 10). Faltan: tomar objetos y usar la cámara.
+- Brazos de Elías: abrir puertas, contestar y colgar el teléfono, temblor, mirarse las manos y tomar la jeringa (**hecho**, ver sección 10). Faltan: tomar otros objetos (el agua, el cuaderno) y usar la cámara.
 - Tomás vivo: sentado, de pie, caminar, gestos. (Ya tiene las poses sentado y de pie; el resto, con Mixamo en Unity.)
 - Tomás muerto: quieto, aparecer de golpe, caminar, perseguir. (Ya tiene las poses de pie y sentado; el resto, con Mixamo en Unity.)
 - Doña Carmen: tocar la puerta, dejar el plato e irse. (Ya tiene las poses; el resto, con Mixamo en Unity.)
