@@ -47,6 +47,13 @@ public class Elias : MonoBehaviour
     [Tooltip("Hasta qué distancia, en metros, alcanza a usar algo que está mirando.")]
     public float alcance = 1.4f;
 
+    [Header("Los brazos según el mundo")]
+    [Tooltip("Los mundos del escenario (abstinencia y efecto).")]
+    public EstadosDelMundo mundo;
+    [Tooltip("Cómo están los brazos en la abstinencia (estado0 a estado3 del JSON de los brazos): en la Noche 1, estado1. " +
+             "Bajo el efecto se ven sanos (estado0): es la mentira de la droga (6.3).")]
+    public string estadoBrazos = "estado1";
+
     /// <summary>Responde a los controles (no está usando nada).</summary>
     public bool Libre { get; private set; } = true;
 
@@ -73,6 +80,8 @@ public class Elias : MonoBehaviour
         mapa.Enable();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        if (mundo != null)
+            mundo.Cambio += CambioDeMundo;
     }
 
     void OnDisable()
@@ -80,6 +89,15 @@ public class Elias : MonoBehaviour
         mapa.Disable();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+        if (mundo != null)
+            mundo.Cambio -= CambioDeMundo;
+    }
+
+    void CambioDeMundo(string nuevo)
+    {
+        var estado = datos.BuscarEstado(nuevo == "efecto" ? "estado0" : estadoBrazos);
+        if (estado != null)
+            brazos.PonerEstado(estado);
     }
 
     void Update()

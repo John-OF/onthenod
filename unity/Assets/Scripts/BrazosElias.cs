@@ -22,12 +22,41 @@ public class BrazosElias : MonoBehaviour
              "Más adelante lo moverá el nivel de abstinencia.")]
     [Range(0f, 1f)] public float pesoTemblor = 1f;
 
+    [Tooltip("Las texturas de los cuatro estados de los brazos (brazos_estado0 a brazos_estado3).")]
+    public Texture2D[] texturas;
+
     PlayableGraph grafo;
     AnimationMixerPlayable capaBase;
     AnimationLayerMixerPlayable capas;
     AnimationClipPlayable accion;
+    SkinnedMeshRenderer piel;
+    string nombreMaterial;
 
     public AnimationClip Clip(string nombre) => Array.Find(clips, c => c != null && c.name == nombre);
+
+    /// <summary>
+    /// Pone un estado de los brazos (del JSON de los brazos): su textura y cuánto se adelgazan
+    /// (la forma "consumido"). Ver Brazos de Elías en la sección 10.
+    /// </summary>
+    public void PonerEstado(EscenaBlender.Estado estado)
+    {
+        if (piel == null)
+        {
+            piel = GetComponentInChildren<SkinnedMeshRenderer>();
+            nombreMaterial = piel.sharedMaterial.name;
+        }
+        var m = Array.Find(estado.materiales, x => x.nombre == nombreMaterial);
+        var textura = m == null ? null : Array.Find(texturas, t => t != null && t.name == m.textura);
+        if (textura != null)
+            piel.material.SetTexture("_BaseMap", textura); // la primera vez, Unity hace una copia del material
+        if (estado.formas != null)
+            foreach (var f in estado.formas)
+            {
+                int i = piel.sharedMesh.GetBlendShapeIndex(f.forma);
+                if (i >= 0)
+                    piel.SetBlendShapeWeight(i, f.valor * 100f);
+            }
+    }
 
     void OnEnable()
     {

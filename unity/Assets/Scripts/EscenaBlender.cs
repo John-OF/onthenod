@@ -266,8 +266,6 @@ public class EscenaBlender
 
     public static void Configurar(Light l, Luz luz, LuzEstado estado)
     {
-        var color = Lineal(estado.color);
-        l.color = color.gamma; // Unity guarda el color de la luz en sRGB
         // Mixta: la luz directa se calcula en tiempo real; el rebote y las sombras de lo que no
         // se mueve, en la luz precalculada (Generate Lighting). Las luces-truco van enteras en la
         // luz precalculada: las de "fuga" (la que se cuela bajo una puerta), porque la rendija es
@@ -281,26 +279,41 @@ public class EscenaBlender
         {
             case "SUN":
                 l.type = LightType.Directional;
-                l.intensity = IntensidadSol(estado.potencia);
                 break;
             case "SPOT":
-                // En Blender, la potencia de un spot se mide como si alumbrara para todos lados.
                 l.type = LightType.Spot;
-                l.intensity = IntensidadPuntual(estado.potencia);
-                l.range = Alcance(estado.potencia, color);
                 l.spotAngle = Mathf.Min(luz.cono, 179f);
                 l.innerSpotAngle = l.spotAngle * (1f - luz.suavizado);
                 break;
             case "AREA":
                 // URP no tiene luces de área en tiempo real: un spot ancho que apunta igual.
                 l.type = LightType.Spot;
-                l.intensity = IntensidadArea(estado.potencia);
-                l.range = Alcance(estado.potencia, color);
                 l.spotAngle = 170f;
                 l.innerSpotAngle = 60f;
                 break;
             default:
                 l.type = LightType.Point;
+                break;
+        }
+        PonerPotencia(l, luz, estado);
+    }
+
+    /// <summary>Lo que cambia de una luz entre un estado y otro: el color, la potencia y el alcance.</summary>
+    public static void PonerPotencia(Light l, Luz luz, LuzEstado estado)
+    {
+        var color = Lineal(estado.color);
+        l.color = color.gamma; // Unity guarda el color de la luz en sRGB
+        switch (luz.tipo)
+        {
+            case "SUN":
+                l.intensity = IntensidadSol(estado.potencia);
+                break;
+            case "AREA":
+                l.intensity = IntensidadArea(estado.potencia);
+                l.range = Alcance(estado.potencia, color);
+                break;
+            default:
+                // En Blender, la potencia de un spot se mide como si alumbrara para todos lados.
                 l.intensity = IntensidadPuntual(estado.potencia);
                 l.range = Alcance(estado.potencia, color);
                 break;
