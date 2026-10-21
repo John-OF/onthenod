@@ -415,7 +415,7 @@ Hecho el 19 de octubre de 2026. La prueba de estilo está recreada en Unity, en 
 | Shader PS1 | El de todos los objetos: luz difusa sin brillos, temblor de vértices (cada vértice salta de píxel en píxel de la imagen chica) y niebla. | `Rendering/PS1.shader` (`OnTheNod/PS1`) |
 | Niebla iluminada | Las luces iluminan la niebla que tienen cerca: el halo de los focos y la bruma fría del fondo. Imita la niebla volumétrica de Blender. | componente `NieblaPS1` |
 | Máscara de foco | Corta la luz que sale hacia arriba de los focos colgantes: en Blender la tapa la bombilla y el techo encima del foco queda negro. | `Rendering/Foco_Mascara.cubemap` (menú *On the Nod > Crear máscara de foco*) |
-| Importación | Lo que llega a `Art/` se configura solo: texturas con filtro Point, sin compresión, sin mipmaps y sin reescalar; materiales con el shader PS1 y los colores y la emisión de Blender; los personajes (Tomás, Doña Carmen), como *Humanoid*. | `Editor/ImportadorArte.cs` |
+| Importación | Lo que llega a `Art/` se configura solo: texturas con filtro Point, sin compresión, sin mipmaps y sin reescalar; materiales con el shader PS1 y los colores y la emisión de Blender; los personajes (Tomás, Doña Carmen), como *Humanoid*. En los escenarios, colisión en lo que mide al menos 25 cm, salvo lo que está tirado en el piso y mide menos de 20 cm de alto y 1 m de largo (ropa, cojines caídos, papeles), y todo listo para la luz precalculada. | `Editor/ImportadorArte.cs` |
 
 **Para darle el estilo a una escena nueva:**
 1. Poner el prefab `PS1_Pantalla`.
@@ -561,8 +561,46 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 
 **En Unity** (19 de octubre de 2026). El script exporta `Assets/Art/Departamento4B/`: el FBX en el estado abstinencia, las 22 texturas (sucias y limpias) y `departamento_4b_escena.json` con las luces, las cámaras y los dos estados. La escena de prueba `Assets/Scenes/PruebaDepartamento4B.unity` es la vista `4b_sala`, armada desde ese JSON.
 - **Colecciones:** llegan como grupos (`Estructura`, `Muebles`, `Deterioro`, `Efecto`, `Eventos`); `Plano` no se exporta. Cambiar de mundo es activar o desactivar `Deterioro` y `Efecto`, poner las texturas limpias, cambiar la emisión de los focos y los resplandores, y las luces y la niebla del otro estado. El JSON dice qué cambia en cada uno.
-- **Luces-truco:** en el JSON, las de rebote llevan `truco: rebote` y no se crean en Unity, porque ahí el rebote lo da la luz precalculada; las que se cuelan bajo las puertas llevan `truco: fuga`.
-- **Comparación con Blender:** en abstinencia, cada píxel difiere en promedio 3 niveles de 255. Falta la luz que sale bajo la puerta del baño: la rendija es demasiado fina para las sombras en tiempo real y sin el rebote la puerta queda oscura. En el efecto la diferencia es de 13: Unity sale algo más claro porque su luz ambiente no se oscurece en los rincones, y faltan los rayos del atardecer en la niebla. Las dos cosas se resuelven con la luz precalculada.
+- **Luces-truco:** en el JSON, las de rebote llevan `truco: rebote` y las que se cuelan bajo las puertas, `truco: fuga`. En Unity van solo en la luz precalculada (ver *El 4B jugable*).
+- **Comparación con Blender** (la escena de prueba, sin luz precalculada): en abstinencia, cada píxel difiere en promedio 3 niveles de 255. Falta la luz que sale bajo la puerta del baño: la rendija es demasiado fina para las sombras en tiempo real y sin el rebote la puerta queda oscura. En el efecto la diferencia es de 13: Unity sale algo más claro porque su luz ambiente no se oscurece en los rincones, y faltan los rayos del atardecer en la niebla. La luz precalculada de la abstinencia ya está en la escena jugable (ver *El 4B jugable*); la del efecto, todavía no.
+
+### El 4B jugable
+Primer recorrido jugable (20 de octubre de 2026): `Assets/Scenes/Departamento4B.unity`. Elías empieza en la entrada, mirando hacia la sala (la vista `4b_sala`).
+
+| | Teclado y mouse | Control |
+|---|---|---|
+| Caminar | W, A, S, D o las flechas | palanca izquierda |
+| Mirar | mouse | palanca derecha |
+| Usar | E | botón de arriba |
+
+- **Caminar:** a 1,3 m/s, con los ojos a 1,6 m, la altura de la cabeza en las animaciones de Blender. Elías choca con paredes y muebles, y pisa la ropa, los cojines caídos y los papeles del piso sin subirse a ellos (ver *Importación* en *Estilo PS1 en Unity*). Todavía no corre ni se agacha (6.1).
+- **Usar:** se mira algo a menos de 1,4 m y se aprieta Usar. Por ahora, la puerta del dormitorio (desde el pasillo; queda abierta) y el teléfono (contesta, escucha hasta que se vuelve a apretar Usar, y cuelga). Los dos corren con la cámara de interacción de los brazos (ver *Brazos de Elías*): la cámara va al punto donde empieza el clip y desde ahí sigue a la cabeza de Blender, mientras la puerta o el auricular siguen sus pistas. Comparadas en cámara lenta con `anim_abrir_puerta_claves.png` y `anim_telefono_contestar_claves.png`, la mano agarra la perilla y el auricular igual que en Blender.
+- **Los brazos** cuelgan de la cámara, siempre con el temblor sumado y con peso fijo (el de las vistas previas de Blender); más adelante lo moverá la abstinencia (6.2). Su luz ilumina solo la capa de luz `Brazos`, y tampoco la niebla.
+- **El código** está en `Assets/Scripts/`: `Elias` (caminar, mirar, usar y la cámara de interacción), `BrazosElias` (el clip de turno y el temblor encima), `PuertaInteractiva` y `TelefonoInteractivo`. Los dos últimos derivan de `Interactuable`, que es lo que hay que heredar para agregar algo que se pueda usar.
+
+**Luz precalculada** (solo la abstinencia):
+- **Luces mixtas:** la luz directa se calcula en tiempo real, para que ilumine a Elías, a los personajes y a la puerta que se abre. El rebote, la luz del ambiente (que se oscurece en los rincones) y las sombras de lo que no se mueve quedan precalculados (*shadowmask*). Así salen exactas las sombras de los cartones de las ventanas y la rendija bajo la puerta del baño, que en tiempo real quedaban demasiado gruesas: Unity tenía que achicar los 29 mapas de sombra para que entraran.
+- **Luces-truco:** van solo en la luz precalculada, las de fuga y también las de rebote. Se esperaba que el rebote calculado reemplazara a las de rebote, pero en Blender hacen mucho más que el rebote real. La mancha cálida del colchón no viene de la farola, porque los cartones tapan casi toda la ventana: viene de `rebote_dormitorio`. Y la silla del baño iluminada desde abajo es `rebote_bano`. En Blender son esferas de 30 a 50 cm; en Unity son puntos y quemarían lo que tienen pegado, así que se separan medio radio de la superficie de abajo.
+- **Sondas de luz:** lo que se mueve (Elías, los personajes, la puerta, el auricular) y lo chico (menos de 25 cm) toma la luz de 598 sondas, en una grilla de 50 cm.
+- **Cálculo:** un mapa de luz de 1024×1024 (40 puntos por metro, 3 rebotes), en unos 20 segundos. Hay que recalcularlo cada vez que se vuelve a exportar el 4B.
+- **Límite:** la máscara de sombras admite 4 luces mixtas por punto. Donde se juntaban más, Unity dejó enteras en la luz precalculada a `luz_cocina` y `luna_bano`: a lo que se mueve en la cocina y en el baño, su luz le llega por las sondas.
+
+**Comparación con Blender** (diferencia promedio de cada píxel, en niveles de 255):
+
+| Vista | Sin luz precalculada | Con luz precalculada |
+|---|---|---|
+| `4b_sala` | 3,1 | 3,0 |
+| `4b_entrada` | 3,5 | 3,0 |
+| `4b_bano` | 7,3 | 5,9 |
+| `4b_dormitorio` | 7,5 | 4,3 |
+| `4b_cocina` | 8,0 | 7,5 |
+
+Lo que queda distinto:
+- En la cocina, el fluorescente es una luz de área en Blender y en Unity un foco muy abierto, que ilumina de más los frentes de los muebles; además, su bruma es más fuerte.
+- En el dormitorio falta el haz de la farola en la niebla.
+- A los costados de la puerta del baño se ven hilos de luz: el temblor de vértices abre rendijas de un píxel entre la puerta y el marco, y por ahí se ve el baño iluminado.
+
+**Falta la luz del efecto:** hay que calcularla aparte y cambiar entre las dos al consumir (6.3).
 
 ---
 
@@ -627,8 +665,9 @@ C:\Dev\Personal\OnTheNod\
     └── Assets/
         ├── Art/           lo que exportan los scripts de Blender: una carpeta por asset (FBX y Textures/)
         ├── Rendering/     estilo PS1: shaders, imagen de 480×270, pantalla, niebla iluminada
+        ├── Scripts/       el juego: Elías, sus brazos, lo que se usa y los datos de Blender
         ├── Editor/        herramientas del editor: importación automática, capturas, máscara de foco
-        ├── Scenes/        escenas
+        ├── Scenes/        escenas (y la luz precalculada de cada una, en una carpeta con su nombre)
         └── Settings/      configuración de URP
 ```
 

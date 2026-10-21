@@ -1,5 +1,7 @@
 using System;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -9,6 +11,9 @@ using UnityEngine.Rendering;
 /// Las posiciones están en coordenadas de Blender (Z arriba) y se pasan a Unity con DeBlender.
 /// Las luces se convierten como explica la sección 10 del documento de diseño
 /// (Estilo PS1 en Unity).
+///
+/// Lo usan el importador (Assets/Editor) y el juego: por ejemplo, Elías lee del JSON de sus
+/// brazos cómo se mueven la cabeza, la puerta y el auricular en cada clip.
 ///
 /// On the Nod > Crear luces desde Blender: con el JSON seleccionado, pone sus luces en la escena
 /// abierta, en el primer estado (por ejemplo, abstinencia).
@@ -98,6 +103,29 @@ public class EscenaBlender
         public float[] reposo;
         public float[] matrices;
         public int Cuadros => matrices.Length / 12;
+
+        /// <summary>
+        /// Dónde está el objeto a los <paramref name="tiempo"/> segundos del clip (entre dos
+        /// cuadros, interpola). En coordenadas de Unity, relativas al espacio de Blender (en el
+        /// 4B, a su raíz).
+        /// </summary>
+        public Matrix4x4 EnTiempo(float tiempo, float fps)
+        {
+            float f = Mathf.Clamp(tiempo * fps, 0f, Cuadros - 1);
+            int i0 = Mathf.FloorToInt(f);
+            int i1 = Mathf.Min(i0 + 1, Cuadros - 1);
+            var a = MatrizDeBlender(matrices, i0 * 12);
+            var b = MatrizDeBlender(matrices, i1 * 12);
+            return Matrix4x4.TRS(Vector3.Lerp(a.GetPosition(), b.GetPosition(), f - i0),
+                                 Quaternion.Slerp(a.rotation, b.rotation, f - i0), Vector3.one);
+        }
+
+        /// <summary>
+        /// Cuánto se movió el objeto desde su reposo a los <paramref name="tiempo"/> segundos (la
+        /// puerta, el auricular). Se aplica al objeto de Unity como cambio, porque llega con otro
+        /// giro interno que en Blender.
+        /// </summary>
+        public Matrix4x4 CambioEnTiempo(float tiempo, float fps) => EnTiempo(tiempo, fps) * MatrizDeBlender(reposo).inverse;
     }
 
     /// <summary>
@@ -208,10 +236,6 @@ public class EscenaBlender
             var e = Array.Find(datos.luces, x => x.nombre == luz.nombre);
             if (e == null || !e.encendida)
                 continue;
-            // Las de "rebote" imitan en Blender la luz que rebota (EEVEE no la calcula). En Unity
-            // ese rebote lo da la luz precalculada, y además, sin tamaño, quemarían lo que tienen cerca.
-            if (luz.truco == "rebote")
-                continue;
             // Relativas al padre: en el 4B el padre está en el origen; la luz de los brazos
             // cuelga de la cámara.
             var objeto = new GameObject(luz.nombre);
@@ -220,14 +244,38 @@ public class EscenaBlender
             var dir = DeBlender(luz.direccion);
             objeto.transform.localRotation = Quaternion.LookRotation(dir, Mathf.Abs(dir.y) > 0.99f ? Vector3.forward : Vector3.up);
             Configurar(objeto.AddComponent<Light>(), luz, e);
+            if (luz.truco == "rebote")
+                SepararDeAbajo(objeto.transform, luz.radio);
         }
+    }
+
+    /// <summary>
+    /// Las de "rebote" son esferas de 30 a 50 cm en Blender, que iluminan parejo lo que tienen
+    /// pegado (la de rebote_bano está a 6 cm del piso). En Unity son un punto y quemarían esa
+    /// superficie: se suben hasta que lo que tienen abajo quede a medio radio. Con el radio
+    /// entero, la puerta del baño se iluminaba demasiado alto (comparado con 4b_bano.png). Usa
+    /// las colisiones de la escena.
+    /// </summary>
+    public static void SepararDeAbajo(Transform luz, float radio)
+    {
+        float distancia = radio * 0.5f;
+        Physics.SyncTransforms();
+        if (Physics.Raycast(luz.position + Vector3.up * distancia, Vector3.down, out var abajo, 2f * distancia, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            luz.position = abajo.point + Vector3.up * distancia;
     }
 
     public static void Configurar(Light l, Luz luz, LuzEstado estado)
     {
         var color = Lineal(estado.color);
         l.color = color.gamma; // Unity guarda el color de la luz en sRGB
-        l.lightmapBakeType = LightmapBakeType.Realtime;
+        // Mixta: la luz directa se calcula en tiempo real; el rebote y las sombras de lo que no
+        // se mueve, en la luz precalculada (Generate Lighting). Las luces-truco van enteras en la
+        // luz precalculada: las de "fuga" (la que se cuela bajo una puerta), porque la rendija es
+        // demasiado fina para las sombras en tiempo real; las de "rebote" (imitan la luz que
+        // rebota, sin sombra), porque solo iluminan lo que no se mueve. Sin precalcular la
+        // escena, las luces-truco no iluminan. Una luz que se mueve (la de los brazos, que cuelga
+        // de la cámara) se pasa a Realtime en la escena.
+        l.lightmapBakeType = string.IsNullOrEmpty(luz.truco) ? LightmapBakeType.Mixed : LightmapBakeType.Baked;
         l.shadows = luz.sombras ? LightShadows.Soft : LightShadows.None;
         switch (luz.tipo)
         {
@@ -302,6 +350,7 @@ public class EscenaBlender
         return niebla;
     }
 
+#if UNITY_EDITOR
     [MenuItem("On the Nod/Crear luces desde Blender")]
     static void CrearLucesDelSeleccionado()
     {
@@ -322,4 +371,5 @@ public class EscenaBlender
     [MenuItem("On the Nod/Crear luces desde Blender", true)]
     static bool HayJsonSeleccionado() =>
         Selection.activeObject is TextAsset t && AssetDatabase.GetAssetPath(t).EndsWith("_escena.json");
+#endif
 }

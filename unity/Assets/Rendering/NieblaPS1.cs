@@ -22,7 +22,7 @@ public class NieblaPS1 : MonoBehaviour
     [Min(0f)] public float intensidad = 1f;
 
     [Tooltip("Luces que iluminan la niebla. Vacío: las luces puntuales y spots activas de la escena " +
-             "(como máximo 8, las más cercanas a la cámara).")]
+             "(como máximo 8, las más cercanas a la cámara). Nunca las que no iluminan la capa Default.")]
     public List<Light> luces = new List<Light>();
 
     static readonly int IdLuces = Shader.PropertyToID("_PS1NieblaLuces");
@@ -66,8 +66,11 @@ public class NieblaPS1 : MonoBehaviour
             else
                 candidatas.AddRange(FindObjectsByType<Light>(FindObjectsSortMode.None));
         }
+        // Las luces que no iluminan la capa Default (como la de los brazos de Elías, que solo
+        // ilumina la capa Brazos) tampoco iluminan la niebla.
         candidatas.RemoveAll(l => l == null || !l.isActiveAndEnabled || l.intensity <= 0f ||
-                                  (l.type != LightType.Point && l.type != LightType.Spot));
+                                  (l.type != LightType.Point && l.type != LightType.Spot) ||
+                                  (l.renderingLayerMask & 1) == 0);
 
         var camara = Camera.main;
         if (candidatas.Count > MaxLuces && camara != null)

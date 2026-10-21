@@ -17,15 +17,23 @@ using UnityEngine;
 ///   - Personajes (el JSON dice "humanoide"): esqueleto Humanoid con su propio Avatar, para
 ///     usar animaciones de Mixamo. Sus clips son poses: quedan donde las dejó Blender, sin
 ///     mover ni girar el personaje.
+///   - Escenarios (sin clips): colisión en todo lo que mide al menos 25 cm por algún lado
+///     (paredes, pisos, muebles, bolsas de basura), para no atravesarlo al caminar. Lo chico
+///     (jeringas, botellas) no la lleva, ni lo que está tirado en el piso, mide menos de 20 cm
+///     de alto y menos de 1 m de largo (ropa, cojines caídos, papeles): se pisa sin subirse.
+///   - Escenarios, para la luz precalculada: coordenadas para el mapa de luz y todo marcado
+///     como fijo (Contribute GI). Lo chico (menos de 25 cm) toma la luz de las sondas en vez
+///     del mapa de luz. Lo que se mueve en una escena (la puerta que se abre) se desmarca ahí.
 /// Volver a correr un script de Blender reimporta su carpeta con estas reglas.
 /// </summary>
 public class ImportadorArte : AssetPostprocessor
 {
     const string CarpetaArte = "Assets/Art/";
     const string ShaderPS1 = "OnTheNod/PS1";
+    const float TamanoConColision = 0.25f; // metros
 
     // Subir este número hace que Unity reimporte Assets/Art con las reglas nuevas.
-    public override uint GetVersion() => 9;
+    public override uint GetVersion() => 12;
 
     static bool EsArte(string ruta) => ruta.StartsWith(CarpetaArte);
 
@@ -84,7 +92,14 @@ public class ImportadorArte : AssetPostprocessor
             importador.animationType = ModelImporterAnimationType.Generic;
             importador.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
         }
+        else if (escena != null)
+        {
+            importador.generateSecondaryUV = true; // escenario: coordenadas para el mapa de luz
+        }
     }
+
+    static bool EsEscenario(EscenaBlender escena) =>
+        escena != null && !escena.humanoide && (escena.animaciones == null || escena.animaciones.Length == 0);
 
     void OnPreprocessAnimation()
     {
@@ -152,6 +167,45 @@ public class ImportadorArte : AssetPostprocessor
         // primera persona lo hacen siempre), Unity deja de dibujarlas. Se recalcula cada cuadro.
         foreach (var piel in modelo.GetComponentsInChildren<SkinnedMeshRenderer>(true))
             piel.updateWhenOffscreen = true;
+
+        // Escenarios: colisión en lo que se choca al caminar y luz precalculada (ver arriba).
+        if (!EsEscenario(EscenaBlender.DelModelo(assetPath)))
+            return;
+        foreach (var t in modelo.GetComponentsInChildren<Transform>(true))
+            GameObjectUtility.SetStaticEditorFlags(t.gameObject, StaticEditorFlags.ContributeGI);
+        foreach (var malla in modelo.GetComponentsInChildren<MeshFilter>(true))
+        {
+            if (malla.sharedMesh == null)
+                continue;
+            var caja = CajaEnElModelo(malla, modelo.transform);
+            if (EsChico(caja) && malla.TryGetComponent<MeshRenderer>(out var r))
+                r.receiveGI = ReceiveGI.LightProbes;
+            if (SeChoca(caja))
+                malla.gameObject.AddComponent<MeshCollider>().sharedMesh = malla.sharedMesh;
+        }
+    }
+
+    static bool EsChico(Bounds caja) => Mathf.Max(caja.size.x, caja.size.y, caja.size.z) < TamanoConColision;
+
+    static bool SeChoca(Bounds caja)
+    {
+        var tamano = caja.size;
+        if (EsChico(caja))
+            return false;
+        bool tiradoEnElPiso = caja.min.y < 0.05f && caja.max.y < 0.2f && Mathf.Max(tamano.x, tamano.z) < 1f;
+        return !tiradoEnElPiso;
+    }
+
+    /// <summary>La caja que ocupa la malla, en las coordenadas del modelo (el piso del escenario está en y = 0).</summary>
+    static Bounds CajaEnElModelo(MeshFilter malla, Transform raiz)
+    {
+        var local = malla.sharedMesh.bounds;
+        var aModelo = raiz.worldToLocalMatrix * malla.transform.localToWorldMatrix;
+        var caja = new Bounds(aModelo.MultiplyPoint3x4(local.center), Vector3.zero);
+        for (int i = 0; i < 8; i++)
+            caja.Encapsulate(aModelo.MultiplyPoint3x4(local.center + Vector3.Scale(local.extents,
+                new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1))));
+        return caja;
     }
 
     void OnPreprocessMaterialDescription(MaterialDescription descripcion, Material material, AnimationClip[] animaciones)
