@@ -42,6 +42,7 @@ public class EscenaBlender
         public float suavizado; // spots: borde suave, de 0 a 1
         public bool sombras;
         public string truco; // "rebote", "fuga" o vacío: ver el apartado del asset en la sección 10
+        public bool precalculada; // va entera en la luz precalculada, aunque no sea un truco (ver Configurar)
     }
 
     [Serializable]
@@ -274,8 +275,12 @@ public class EscenaBlender
         // demasiado fina para las sombras en tiempo real; las de "rebote" (imitan la luz que
         // rebota, sin sombra), porque solo iluminan lo que no se mueve. Sin precalcular la
         // escena, las luces-truco no iluminan. Una luz que se mueve (la de los brazos, que cuelga
-        // de la cámara) se pasa a Realtime en la escena.
-        l.lightmapBakeType = string.IsNullOrEmpty(luz.truco) ? LightmapBakeType.Mixed : LightmapBakeType.Baked;
+        // de la cámara) se pasa a Realtime en la escena, y también las de lo que no entra en la luz
+        // precalculada (las lámparas del pasillo de afuera del 4B). Las marcadas "precalculada" también van
+        // enteras: la máscara de sombras admite 4 luces mixtas que se tocan, y con una más Unity
+        // pasa a precalculada otra que hace falta mixta (en el 4B, con las del dormitorio bajo el
+        // efecto mixtas, la de la sala y la del patio de la cocina perdían el tiempo real).
+        l.lightmapBakeType = string.IsNullOrEmpty(luz.truco) && !luz.precalculada ? LightmapBakeType.Mixed : LightmapBakeType.Baked;
         l.shadows = luz.sombras ? LightShadows.Soft : LightShadows.None;
         switch (luz.tipo)
         {

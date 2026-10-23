@@ -14,7 +14,10 @@ Clips (30 cuadros por segundo):
   telefono_contestar  2.4 s: levanta el auricular y se lo lleva al oido
   telefono_colgar     1.8 s: devuelve el auricular y baja la mano
   tomar_jeringa       3.4 s: se agacha frente a la mesa de centro, toma la jeringa y la
-                      levanta frente a la cara (la dosis; en Unity sigue un corte a negro)
+                      levanta frente a la cara (para una dosis sobre una mesa)
+  sacar_dosis         4.0 s: se arrodilla junto al colchon, apoya la izquierda, saca de abajo
+                      la media con la jeringa y la levanta frente a la cara (la dosis de la
+                      Noche 1; en Unity sigue un corte a negro)
 
 Requiere scenes/departamento_4b.blend y scenes/brazos_primera_persona.blend
 (se generan con departamento_4b.py y brazos_primera_persona.py).
@@ -33,11 +36,11 @@ Salidas (dentro de la carpeta blender/):
 
 Y en el proyecto de Unity (ver exportar_unity.py):
   unity/Assets/Art/BrazosElias/brazos_elias.fbx          esqueleto, malla, forma "consumido"
-                                                         y los ocho clips (con mirar_brazos)
+                                                         y los nueve clips (con mirar_brazos)
   unity/Assets/Art/BrazosElias/brazos_elias_escena.json  luz de los brazos, camara, los cuatro
                                                          estados, los clips y, por clip, el
                                                          movimiento de la cabeza, la puerta,
-                                                         el auricular y la jeringa
+                                                         el auricular, la jeringa y la dosis
   unity/Assets/Art/BrazosElias/Textures/brazos_estado0..3.png
   Para exportar sin renderizar las vistas previas: ... -- blender reposo
 """
@@ -262,7 +265,8 @@ def solve_arm(rig, side, root, pose):
     W = pose["G"] - y_h * GRIP_FWD - palm_of(rot, side) * GRIP_PALM
 
     v = W - S
-    REACH["max"] = max(REACH["max"], v.length - (LU + LF))
+    if v.length - (LU + LF) > REACH["max"]:
+        REACH["max"], REACH["lado"] = v.length - (LU + LF), side
     n = v.normalized()
     d = min(max(v.length, abs(LU - LF) + 1e-3), LU + LF - 1e-3)
     W = S + n * d
@@ -327,12 +331,21 @@ HINGE = Vector((3.40, 5.29, 0.0))           # bisagra de la puerta del dormitori
 KNOB_REL = Vector((0.065, -0.69, 1.01))     # perilla (lado del pasillo) respecto de la bisagra
 DOOR_REST = -28.0                           # asi quedo entreabierta en el 4B
 HS = {}                                     # auricular: centro y matriz en reposo
-JERINGA = {}                                # jeringa de la mesa de centro: centro y matriz en reposo
+# Lo que la mano toma en un clip (la jeringa de la mesa de centro, la dosis bajo el colchon):
+# el punto por donde lo agarra y su matriz en reposo.
+AGARRABLES = {}
 
 
 def knob_at(angle):
     rz = Matrix.Rotation(R(angle), 3, "Z")
     return HINGE + rz @ KNOB_REL, rz @ Vector((1, 0, 0)), rz
+
+
+def superficie(x, y):
+    """Altura de lo que hay en (x, y) bajo un metro (el colchon, la manta...)."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    hit, loc, *_ = scene.ray_cast(dg, Vector((x, y, 1.0)), Vector((0, 0, -1)))
+    return loc.z if hit else 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -448,9 +461,11 @@ def clip_telefono_colgar():
 
 
 def clip_tomar_jeringa():
-    """La dosis (6.3): se agacha frente a la mesa de centro, toma la jeringa con la derecha y la
-    levanta frente a la cara. En Unity sigue un corte a negro y despues, el efecto."""
-    c = JERINGA["centro"]
+    """Una dosis sobre una mesa (6.3): se agacha frente a la mesa de centro, toma la jeringa con
+    la derecha y la levanta frente a la cara. En Unity seguiria un corte a negro y el efecto.
+    La jeringa de la mesa ya no es la dosis de la Noche 1 (ver sacar_dosis): el clip queda para
+    las dosis que esten sobre una mesa."""
+    c = AGARRABLES["jeringa_mesa"]["agarre"]
 
     def on_table(up=0.0, cur=OPEN):
         rot = hand_rot((0.15, 0.75, -0.65), (0, 0, -1), 1)  # dedos hacia la mesa, palma abajo
@@ -479,6 +494,58 @@ def clip_tomar_jeringa():
                 objeto=("jeringa_mesa", 1.30))
 
 
+def clip_sacar_dosis():
+    """La dosis de la Noche 1 (secciones 5 y 6.3): se arrodilla junto al colchon del dormitorio,
+    apoya la izquierda en el borde, saca de abajo la media con la jeringa (la punta de la media
+    asoma por el costado) y la levanta frente a la cara: por la boca de la media sale la jeringa.
+    En Unity sigue un corte a negro y despues, el efecto."""
+    g = AGARRABLES["dosis_colchon"]["agarre"]
+    apoyo = Vector((1.645, 6.40, 0.0))
+    apoyo.z = superficie(apoyo.x, apoyo.y) + 0.005
+
+    def at_sock(dx=0.0, up=0.0, cur=OPEN):
+        # Pellizca la punta de la media: los dedos hacia el colchon (a lo largo de la media) y
+        # hacia abajo, la palma abajo. Asi, en la mano, la jeringa queda del lado de los dedos.
+        rot = hand_rot((-0.80, 0.05, -0.60), (0, 0, -1), 1)
+        return pose_world(lambda t: g + Vector((dx, 0, up)), lambda t: rot.copy(), (0.6, -0.3, -1.0), cur)
+
+    def on_mattress(up=0.0):
+        rot = hand_rot((-0.95, -0.2, -0.12), (0, 0, -1), -1)  # la palma sobre el borde del colchon
+        return pose_world(lambda t: apoyo + Vector((0, 0, up)), lambda t: rot.copy(), (-0.6, -0.3, -1.0), OPEN)
+
+    def in_view(dx=0.0):
+        # Los dedos hacia arriba y la palma hacia la cara: la media queda parada en la mano,
+        # vista de costado, con la jeringa arriba
+        rot = hand_rot((-0.25, -0.15, 1.0), (-0.3, -1.0, 0.1), 1)
+        return pose_rig((0.05 + dx, 0.32, -0.11), rot, (0.6, -0.4, -1.0), GRIP_SMALL)
+
+    right = [
+        (0.0, pose_hang(1)),
+        (0.95, at_sock(dx=0.04, up=0.07)),
+        (1.20, at_sock(up=0.01)),
+        (1.40, at_sock(up=0.01, cur=GRIP_SMALL)),            # la agarra
+        (2.00, at_sock(dx=0.20, up=0.03, cur=GRIP_SMALL)),   # la saca de abajo del colchon
+        (2.90, in_view()),
+        (4.00, in_view(dx=-0.01)),
+    ]
+    left = [
+        (0.0, pose_hang(-1)),
+        (0.80, on_mattress(up=0.06)),
+        (1.00, on_mattress()),                               # se apoya
+        (1.50, on_mattress()),
+        (1.70, on_mattress(up=0.05)),                        # la suelta cuando la otra tira
+        (2.55, pose_hang(-1)),
+        (4.00, pose_hang(-1)),
+    ]
+    # De rodillas e inclinado sobre el borde del colchon, que esta en el piso: la cabeza baja
+    # hasta 62 cm para que la mano llegue abajo del colchon. Despues se endereza, de rodillas.
+    head = [(0.0, (2.32, 6.54, 1.58), 90.0, -36.0), (0.80, (2.07, 6.54, 0.64), 88.0, -58.0),
+            (1.40, (2.06, 6.54, 0.62), 88.0, -58.0), (2.00, (2.15, 6.54, 0.66), 89.0, -60.0),
+            (2.90, (2.15, 6.54, 0.92), 92.0, -24.0), (4.00, (2.15, 6.54, 0.93), 93.0, -22.0)]
+    lean = [(0.0, (0, 0, 0)), (0.8, (0, 0.18, -0.04)), (2.0, (0, 0.18, -0.04)), (2.9, (0, 0.03, 0))]
+    return dict(dur=4.0, head=head, lean=lean, arms={1: right, -1: left}, objeto=("dosis_colchon", 1.40))
+
+
 CLIPS = {
     "reposo": clip_reposo,
     "mirar_manos": clip_mirar_manos,
@@ -486,8 +553,9 @@ CLIPS = {
     "telefono_contestar": clip_telefono_contestar,
     "telefono_colgar": clip_telefono_colgar,
     "tomar_jeringa": clip_tomar_jeringa,
+    "sacar_dosis": clip_sacar_dosis,
 }
-PREVIEW = ["mirar_manos", "abrir_puerta", "telefono_contestar", "telefono_colgar", "tomar_jeringa"]
+PREVIEW = ["mirar_manos", "abrir_puerta", "telefono_contestar", "telefono_colgar", "tomar_jeringa", "sacar_dosis"]
 
 
 def nframes(dur):
@@ -573,7 +641,8 @@ def bake_clip(rig, head, door, name, clip):
         door_act.use_fake_user = True
         door.animation_data.action = None
         door.rotation_euler.z = R(DOOR_REST)
-    print(f"[clip] {name}: {n} cuadros; alcance sobrante {-REACH['max'] * 100:.1f} cm; "
+    lado = "derecho" if REACH.get("lado", 1) > 0 else "izquierdo"
+    print(f"[clip] {name}: {n} cuadros; alcance sobrante {-REACH['max'] * 100:.1f} cm (brazo {lado}); "
           f"desfase del hombro {up_loc * 1000:.2f} mm")
     return dict(action=act, head=head_act, door=door_act, frames=n)
 
@@ -643,10 +712,11 @@ def preview_setup(rig, head, door, handset, info, tremor, clip):
     if handset.animation_data:
         handset.animation_data.action = None
     handset.matrix_world = HS["rest"]
-    syr = bpy.data.objects["jeringa_mesa"]
-    if syr.animation_data:
-        syr.animation_data.action = None
-    syr.matrix_world = JERINGA["rest"]
+    for nombre, a in AGARRABLES.items():
+        ob = bpy.data.objects[nombre]
+        if ob.animation_data:
+            ob.animation_data.action = None
+        ob.matrix_world = a["reposo"]
     scene.frame_start, scene.frame_end = 1, info["frames"]
 
 
@@ -739,14 +809,17 @@ def setup_scene():
     bpy.context.view_layer.update()
     HS["center"], HS["rest"] = c, hs.matrix_world.copy()
 
-    # La jeringa de la mesa de centro: la mano la agarra por el medio del cuerpo
-    syr = bpy.data.objects["jeringa_mesa"]
+    # Lo que la mano agarra. La jeringa de la mesa de centro, por el medio del cuerpo; la dosis
+    # bajo el colchon, por la parte de la media que asoma (cerca de la punta).
     body = bpy.data.objects["jeringa_mesa_cuerpo"]
     co = [body.matrix_world @ v.co for v in body.data.vertices]
-    JERINGA["centro"] = Vector([(min(p[i] for p in co) + max(p[i] for p in co)) / 2 for i in range(3)])
-    syr.rotation_mode = "QUATERNION"
-    bpy.context.view_layer.update()
-    JERINGA["rest"] = syr.matrix_world.copy()
+    agarres = {"jeringa_mesa": Vector([(min(p[i] for p in co) + max(p[i] for p in co)) / 2 for i in range(3)]),
+               "dosis_colchon": bpy.data.objects["dosis_colchon"].matrix_world @ Vector((0.0, -0.075, 0.0216))}
+    for nombre, agarre in agarres.items():
+        ob = bpy.data.objects[nombre]
+        ob.rotation_mode = "QUATERNION"
+        bpy.context.view_layer.update()
+        AGARRABLES[nombre] = {"agarre": agarre, "reposo": ob.matrix_world.copy()}
 
     door = bpy.data.objects["puerta_dormitorio"]
     r = scene.render
@@ -864,7 +937,8 @@ def main():
             bake_handset(rig, handset, info, clip, store).name = "auricular_" + name
         if clip.get("objeto"):
             nombre, grab = clip["objeto"]
-            bake_follow(rig, bpy.data.objects[nombre], JERINGA["rest"], info, grab, None, {}).name = nombre + "_" + name
+            bake_follow(rig, bpy.data.objects[nombre], AGARRABLES[nombre]["reposo"], info, grab, None,
+                        {}).name = nombre + "_" + name
         if ONLY and name not in ONLY:
             continue
         v = render_preview(name, info["frames"], ffmpeg)
@@ -921,42 +995,45 @@ def cargar_imagen(nombre):
 def exportar_a_unity(rig, head, door, handset, infos, clips):
     """Un solo FBX con el esqueleto, la malla y los clips. En Unity los brazos cuelgan de la
     camara, asi que se exportan con la cabeza en el origen. El movimiento de la cabeza (la
-    camara de Unity), de la puerta, del auricular y de la jeringa en cada clip va en el JSON,
-    cuadro a cuadro: lo usa la camara de interaccion. La pista de lo que la mano agarra en el
-    clip (la jeringa) dice ademas con que mano y desde cuando: desde ahi, Unity lo pega a la
-    mano, para que tiemble con ella."""
+    camara de Unity), de la puerta, del auricular, de la jeringa y de la dosis en cada clip va
+    en el JSON, cuadro a cuadro: lo usa la camara de interaccion. La pista de lo que la mano
+    agarra en el clip (la jeringa, la dosis) dice ademas con que mano y desde cuando: desde ahi,
+    Unity lo pega a la mano, para que tiemble con ella."""
     arms = bpy.data.objects["Brazos"]
     rig.animation_data.action = None
     for tr in list(rig.animation_data.nla_tracks):
         rig.animation_data.nla_tracks.remove(tr)
     reset_pose(rig)
 
-    # Puerta, auricular y jeringa en reposo: las pistas se aplican como cambio desde aqui
-    syr = bpy.data.objects["jeringa_mesa"]
-    for ob in (door, handset, syr):
+    # Puerta, auricular y lo que se agarra en reposo: las pistas se aplican como cambio desde aqui
+    agarrables = [bpy.data.objects[nombre] for nombre in AGARRABLES]
+
+    def en_reposo():
+        door.rotation_euler.z = R(DOOR_REST)
+        handset.matrix_world = HS["rest"]
+        for ob in agarrables:
+            ob.matrix_world = AGARRABLES[ob.name]["reposo"]
+        bpy.context.view_layer.update()
+
+    for ob in [door, handset] + agarrables:
         if ob.animation_data:
             ob.animation_data.action = None
-    door.rotation_euler.z = R(DOOR_REST)
-    handset.matrix_world = HS["rest"]
-    syr.matrix_world = JERINGA["rest"]
-    bpy.context.view_layer.update()
-    reposo = {ob.name: exportar_unity.matriz(ob) for ob in (door, handset, syr)}
+    en_reposo()
+    reposo = {ob.name: exportar_unity.matriz(ob) for ob in [door, handset] + agarrables}
 
     pistas = []
     for name, info in infos.items():
         n = info["frames"]
         pistas.append({"clip": name, "objeto": head.name, "reposo": [], "matrices": muestrear(head, info["head"], n)})
-        moviles = [(door, info["door"]), (handset, bpy.data.actions.get("auricular_" + name)),
-                   (syr, bpy.data.actions.get(syr.name + "_" + name))]
+        moviles = [(door, info["door"]), (handset, bpy.data.actions.get("auricular_" + name))]
+        moviles += [(ob, bpy.data.actions.get(ob.name + "_" + name)) for ob in agarrables]
         for ob, accion in moviles:
             if accion is not None:
                 pista = {"clip": name, "objeto": ob.name, "reposo": reposo[ob.name], "matrices": muestrear(ob, accion, n)}
                 if clips[name].get("objeto", (None,))[0] == ob.name:
                     pista["mano"], pista["agarre"] = "hand.R", clips[name]["objeto"][1]
                 pistas.append(pista)
-    door.rotation_euler.z = R(DOOR_REST)
-    handset.matrix_world = HS["rest"]
-    syr.matrix_world = JERINGA["rest"]
+    en_reposo()
 
     # La cabeza en el origen: la luz y la camara quedan relativas a ella
     head.animation_data.action = None

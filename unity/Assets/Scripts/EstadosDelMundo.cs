@@ -36,7 +36,8 @@ public class EstadosDelMundo : MonoBehaviour
     /// <summary>Avisa con el nombre del mundo nuevo (por ejemplo, para los brazos de Elías).</summary>
     public event Action<string> Cambio;
 
-    EscenaBlender escena;
+    // Que Unity no lo guarde al recompilar: lo restauraría vacío y no se volvería a leer.
+    [NonSerialized] EscenaBlender escena;
     readonly Dictionary<Renderer, Material[]> originales = new Dictionary<Renderer, Material[]>();
     readonly Dictionary<Material, Material> copias = new Dictionary<Material, Material>();
 

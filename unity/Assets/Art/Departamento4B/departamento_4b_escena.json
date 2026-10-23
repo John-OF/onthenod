@@ -22,7 +22,8 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
   },
   {
    "nombre": "luz_cocina",
@@ -45,7 +46,8 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
   },
   {
    "nombre": "farola_sala",
@@ -68,7 +70,8 @@
    "cono": 40.0,
    "suavizado": 0.2,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
   },
   {
    "nombre": "sol_efecto",
@@ -91,7 +94,8 @@
    "cono": 30.0,
    "suavizado": 0.4,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
   },
   {
    "nombre": "farola_dormitorio",
@@ -114,7 +118,8 @@
    "cono": 40.0,
    "suavizado": 0.2,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
   },
   {
    "nombre": "patio_cocina",
@@ -137,7 +142,8 @@
    "cono": 35.0,
    "suavizado": 0.3,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
   },
   {
    "nombre": "luna_bano",
@@ -160,7 +166,8 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
   },
   {
    "nombre": "fuga_bano",
@@ -183,7 +190,8 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": true,
-   "truco": "fuga"
+   "truco": "fuga",
+   "precalculada": false
   },
   {
    "nombre": "pasillo_edificio",
@@ -206,7 +214,8 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": true,
-   "truco": "fuga"
+   "truco": "fuga",
+   "precalculada": false
   },
   {
    "nombre": "rebote_dormitorio",
@@ -229,7 +238,8 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": false,
-   "truco": "rebote"
+   "truco": "rebote",
+   "precalculada": false
   },
   {
    "nombre": "rebote_bano",
@@ -252,7 +262,8 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": false,
-   "truco": "rebote"
+   "truco": "rebote",
+   "precalculada": false
   },
   {
    "nombre": "led_contestadora",
@@ -275,7 +286,8 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
   },
   {
    "nombre": "lampara_pie",
@@ -298,7 +310,56 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_dormitorio",
+   "tipo": "POINT",
+   "posicion": [
+    1.7,
+    5.85,
+    2.12
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": true
+  },
+  {
+   "nombre": "sol_dormitorio",
+   "tipo": "SPOT",
+   "posicion": [
+    -3.0,
+    4.9,
+    3.8
+   ],
+   "direccion": [
+    0.77037,
+    0.26963,
+    -0.57778
+   ],
+   "radio": 0.05,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 30.0,
+   "suavizado": 0.4,
+   "sombras": true,
+   "truco": "",
+   "precalculada": true
   },
   {
    "nombre": "sol_plano",
@@ -321,7 +382,8 @@
    "cono": 0.0,
    "suavizado": 0.0,
    "sombras": true,
-   "truco": ""
+   "truco": "",
+   "precalculada": false
   }
  ],
  "camaras": [
@@ -441,6 +503,29 @@
    "lejos": 40.0
   },
   {
+   "nombre": "Cam_dosis",
+   "posicion": [
+    2.55,
+    5.8,
+    1.6
+   ],
+   "direccion": [
+    -0.47239,
+    0.3962,
+    -0.78732
+   ],
+   "arriba": [
+    -0.60324,
+    0.50594,
+    0.61655
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 40.0
+  },
+  {
    "nombre": "Cam_plano",
    "posicion": [
     3.6,
@@ -503,10 +588,10 @@
      "encendida": false,
      "color": [
       1.0,
-      1.0,
-      1.0
+      0.7,
+      0.4
      ],
-     "potencia": 10.0
+     "potencia": 2500.0
     },
     {
      "nombre": "farola_dormitorio",
@@ -593,10 +678,30 @@
      "encendida": false,
      "color": [
       1.0,
-      1.0,
-      1.0
+      0.72,
+      0.45
      ],
-     "potencia": 10.0
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_dormitorio",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "sol_dormitorio",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.7,
+      0.4
+     ],
+     "potencia": 2500.0
     },
     {
      "nombre": "sol_plano",
@@ -606,7 +711,7 @@
       1.0,
       1.0
      ],
-     "potencia": 10.0
+     "potencia": 2.5
     }
    ],
    "materiales": [
@@ -831,11 +936,13 @@
      "textura": ""
     }
    ],
+   "formas": [],
    "colecciones_ocultas": [
     "Efecto",
     "Eventos",
     "Plano"
    ],
+   "objetos_ocultos": [],
    "mundo": {
     "fondo": [
      0.004,
@@ -984,6 +1091,26 @@
      "potencia": 30.0
     },
     {
+     "nombre": "luz_dormitorio",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "sol_dormitorio",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.7,
+      0.4
+     ],
+     "potencia": 2500.0
+    },
+    {
      "nombre": "sol_plano",
      "encendida": false,
      "color": [
@@ -991,7 +1118,7 @@
       1.0,
       1.0
      ],
-     "potencia": 10.0
+     "potencia": 2.5
     }
    ],
    "materiales": [
@@ -1216,11 +1343,13 @@
      "textura": ""
     }
    ],
+   "formas": [],
    "colecciones_ocultas": [
     "Deterioro",
     "Eventos",
     "Plano"
    ],
+   "objetos_ocultos": [],
    "mundo": {
     "fondo": [
      0.07,
@@ -1235,5 +1364,8 @@
     ]
    }
   }
- ]
+ ],
+ "animaciones": [],
+ "humanoide": false,
+ "accesorios": []
 }

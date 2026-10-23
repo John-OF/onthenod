@@ -44,7 +44,7 @@ public class Elias : MonoBehaviour
     public float limiteVertical = 80f;
 
     [Header("Usar")]
-    [Tooltip("Hasta qué distancia, en metros, alcanza a usar algo que está mirando.")]
+    [Tooltip("Hasta qué distancia, en metros, alcanza a usar algo que está mirando (salvo que el objeto diga otra).")]
     public float alcance = 1.4f;
 
     [Header("Los brazos según el mundo")]
@@ -63,7 +63,7 @@ public class Elias : MonoBehaviour
     CharacterController cuerpo;
     InputActionMap mapa;
     InputAction mover, mirar, interactuar;
-    EscenaBlender datos;
+    [System.NonSerialized] EscenaBlender datos; // se lee del JSON al empezar
     float inclinacion, caida;
     readonly Dictionary<Transform, Matrix4x4> reposos = new Dictionary<Transform, Matrix4x4>();
 
@@ -154,10 +154,13 @@ public class Elias : MonoBehaviour
 
     void TratarDeUsar()
     {
-        if (!Physics.Raycast(camara.position, camara.forward, out var golpe, alcance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        // Se mira hasta lejos y después se compara con el alcance de lo que se miró: lo que está
+        // en el piso (la dosis bajo el colchón) se alcanza desde más lejos.
+        if (!Physics.Raycast(camara.position, camara.forward, out var golpe, 3f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             return;
         var objeto = golpe.collider.GetComponentInParent<Interactuable>();
-        if (objeto != null && objeto.isActiveAndEnabled && objeto.PuedeUsar(this))
+        if (objeto != null && objeto.isActiveAndEnabled && golpe.distance <= (objeto.alcance > 0f ? objeto.alcance : alcance)
+            && objeto.PuedeUsar(this))
             StartCoroutine(Usar(objeto));
     }
 
@@ -178,11 +181,41 @@ public class Elias : MonoBehaviour
     /// (las pistas están en sus coordenadas); <paramref name="propio"/>: el objeto que se usa,
     /// que puede estar en el camino.
     /// </summary>
-    public bool LlegaAlInicio(string clip, Transform espacio, Transform propio)
+    public bool LlegaAlInicio(string clip, Transform espacio, Transform propio, Matrix4x4? reubicar = null)
     {
-        var inicio = (espacio.localToWorldMatrix * PistaCabeza(clip).EnTiempo(0f, Fps(clip))).GetPosition();
+        var inicio = (espacio.localToWorldMatrix * (reubicar ?? Matrix4x4.identity) * PistaCabeza(clip).EnTiempo(0f, Fps(clip))).GetPosition();
         return !Physics.Linecast(camara.position, inicio, out var golpe, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)
                || golpe.collider.transform.IsChildOf(propio);
+    }
+
+    /// <summary>
+    /// Corre algo que no empezó el jugador (el despertar, un susto): mientras dura, Elías no
+    /// responde a los controles. Al terminar, queda donde quedó la cabeza.
+    /// </summary>
+    public IEnumerator Escena(IEnumerator contenido)
+    {
+        Libre = false;
+        yield return contenido;
+        Soltar();
+    }
+
+    /// <summary>
+    /// El despertar (Noche 1): Elías está en el suelo, corre el clip (por ejemplo, mirar_manos)
+    /// desde su primer cuadro, sin llevar la cámara, y se levanta despacio. Va dentro de Escena.
+    /// </summary>
+    public IEnumerator Despertar(string clip, Transform espacio, float levantarse = 1.6f)
+    {
+        Poner(camara, espacio.localToWorldMatrix * PistaCabeza(clip).EnTiempo(0f, Fps(clip)));
+        yield return Reproducir(clip, espacio, true);
+        Ubicar();
+        var desde = camara.localPosition;
+        var ojos = new Vector3(0f, alturaOjos, 0f);
+        for (float t = 0f; t < levantarse; t += Time.deltaTime)
+        {
+            camara.localPosition = Vector3.Lerp(desde, ojos, Mathf.SmoothStep(0f, 1f, t / levantarse));
+            yield return null;
+        }
+        camara.localPosition = ojos;
     }
 
     /// <summary>
@@ -191,12 +224,40 @@ public class Elias : MonoBehaviour
     /// Si <paramref name="volverAlReposo"/> es falso, los brazos se quedan en el último cuadro
     /// (por ejemplo, con el auricular en la oreja).
     /// </summary>
-    public IEnumerator Reproducir(string clip, Transform espacio, bool volverAlReposo, params (string pista, Transform objeto)[] objetos)
+    public IEnumerator Reproducir(string clip, Transform espacio, bool volverAlReposo, params (string pista, Transform objeto)[] objetos) =>
+        Reproducir(clip, espacio, volverAlReposo, new OpcionesClip(), objetos);
+
+    /// <summary>
+    /// Igual, y además avisa en cada cuadro en qué segundo del clip va (<paramref name="cadaCuadro"/>):
+    /// para que un sonido caiga justo cuando la mano toma el auricular.
+    /// </summary>
+    public IEnumerator Reproducir(string clip, Transform espacio, bool volverAlReposo, System.Action<float> cadaCuadro,
+                                  params (string pista, Transform objeto)[] objetos) =>
+        Reproducir(clip, espacio, volverAlReposo, new OpcionesClip { cadaCuadro = cadaCuadro }, objetos);
+
+    /// <summary>Lo que se puede cambiar al correr un clip.</summary>
+    public class OpcionesClip
+    {
+        /// <summary>Se llama en cada cuadro con el segundo del clip.</summary>
+        public System.Action<float> cadaCuadro;
+        /// <summary>Corta el clip en este segundo (por ejemplo, para un corte a negro).</summary>
+        public float hasta = float.PositiveInfinity;
+        /// <summary>
+        /// Mueve la cabeza del clip (en las coordenadas del escenario): para usar con otra puerta
+        /// el clip que se hizo para una (ver PuertaDeEntrada).
+        /// </summary>
+        public Matrix4x4 reubicar = Matrix4x4.identity;
+    }
+
+    public IEnumerator Reproducir(string clip, Transform espacio, bool volverAlReposo, OpcionesClip opciones,
+                                  params (string pista, Transform objeto)[] objetos)
     {
         var animacion = brazos.Clip(clip);
         float fps = Fps(clip);
-        float duracion = (datos.BuscarAnimacion(clip).cuadros - 1) / fps;
+        float duracion = Mathf.Min((datos.BuscarAnimacion(clip).cuadros - 1) / fps, opciones.hasta);
         var cabeza = PistaCabeza(clip);
+        var espacioCabeza = espacio.localToWorldMatrix * opciones.reubicar;
+        var cadaCuadro = opciones.cadaCuadro;
         var pistas = new EscenaBlender.Pista[objetos.Length];
         for (int i = 0; i < objetos.Length; i++)
         {
@@ -205,7 +266,7 @@ public class Elias : MonoBehaviour
                 reposos[objetos[i].objeto] = objetos[i].objeto.localToWorldMatrix;
         }
 
-        yield return LlevarCamara(espacio.localToWorldMatrix * cabeza.EnTiempo(0f, fps));
+        yield return LlevarCamara(espacioCabeza * cabeza.EnTiempo(0f, fps));
 
         // Lo que la mano agarra (la pista dice con qué mano y desde cuándo) la sigue desde ese
         // momento: así tiembla con ella. Antes, sigue su pista como la puerta.
@@ -215,7 +276,7 @@ public class Elias : MonoBehaviour
         {
             float tc = Mathf.Min(t, duracion);
             brazos.Mostrar(animacion, tc);
-            Poner(camara, espacio.localToWorldMatrix * cabeza.EnTiempo(tc, fps));
+            Poner(camara, espacioCabeza * cabeza.EnTiempo(tc, fps));
             if (hayManos)
                 brazos.Evaluar(); // la pose de este cuadro, para saber dónde está la mano ahora
             for (int i = 0; i < objetos.Length; i++)
@@ -235,6 +296,7 @@ public class Elias : MonoBehaviour
                 enLaMano[i] ??= mano.worldToLocalMatrix * segunPista;
                 Poner(objeto, mano.localToWorldMatrix * enLaMano[i].Value);
             }
+            cadaCuadro?.Invoke(tc);
             if (t >= duracion)
                 break;
             yield return null;
@@ -254,6 +316,12 @@ public class Elias : MonoBehaviour
     EscenaBlender.Pista PistaCabeza(string clip) => datos.BuscarPista(clip, Cabeza);
 
     float Fps(string clip) => datos.BuscarAnimacion(clip).fps;
+
+    /// <summary>
+    /// Lleva la cámara, con suavidad, a <paramref name="destino"/> (en el mundo) y la deja ahí:
+    /// para mirar por la mirilla. Va dentro de un Interactuable o de Escena.
+    /// </summary>
+    public IEnumerator Acercarse(Matrix4x4 destino) => LlevarCamara(destino);
 
     /// <summary>Lleva la cámara, con suavidad, de donde está a <paramref name="destino"/>.</summary>
     IEnumerator LlevarCamara(Matrix4x4 destino)
@@ -291,13 +359,6 @@ public class Elias : MonoBehaviour
         camara.localPosition = new Vector3(0f, alturaOjos, 0f);
     }
 
-    /// <summary>Devuelve a su lugar algo que se movió con un clip (la jeringa, después de la dosis).</summary>
-    public void DevolverAlReposo(Transform objeto)
-    {
-        if (reposos.TryGetValue(objeto, out var m))
-            Poner(objeto, m);
-    }
-
     void Ubicar()
     {
         Vector3 ojos = camara.position, frente = camara.forward;
@@ -308,6 +369,19 @@ public class Elias : MonoBehaviour
         cuerpo.enabled = true;
         inclinacion = Mathf.Clamp(-Mathf.Asin(Mathf.Clamp(frente.y, -1f, 1f)) * Mathf.Rad2Deg, -limiteVertical, limiteVertical);
         camara.SetPositionAndRotation(ojos, transform.rotation * Quaternion.Euler(inclinacion, 0f, 0f));
+    }
+
+    /// <summary>
+    /// Si Elías ve <paramref name="punto"/>: está dentro de la imagen, a más de
+    /// <paramref name="margen"/> del borde (en fracción de la imagen), y nada lo tapa.
+    /// </summary>
+    public bool Ve(Vector3 punto, float margen = 0.05f)
+    {
+        var cam = camara.GetComponent<Camera>();
+        var v = cam.WorldToViewportPoint(punto);
+        if (v.z <= 0f || v.x < margen || v.x > 1f - margen || v.y < margen || v.y > 1f - margen)
+            return false;
+        return !Physics.Linecast(camara.position, punto, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
     }
 
     static void Poner(Transform t, Matrix4x4 m) => t.SetPositionAndRotation(m.GetPosition(), m.rotation);

@@ -148,7 +148,9 @@ def _luces_y_camaras(objetos):
                    "radio": 0.0, "tamano": [0.0, 0.0], "cono": 0.0, "suavizado": 0.0,
                    "sombras": bool(d.use_shadow),
                    # luces que solo existen para imitar algo que EEVEE no calcula: "rebote", "fuga"
-                   "truco": str(ob.get("truco", ""))}
+                   "truco": str(ob.get("truco", "")),
+                   # luces que en Unity van enteras en la luz precalculada (no mixtas)
+                   "precalculada": bool(ob.get("precalculada", False))}
             if d.type in ("POINT", "SPOT"):
                 luz["radio"] = round(d.shadow_soft_size, 5)
             if d.type == "SPOT":

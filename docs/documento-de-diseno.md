@@ -227,7 +227,7 @@ Cada capítulo es una noche. Entre noches, Elías despierta en el 4B y escribe e
 - Elías despierta en el suelo, temblando. Tutorial integrado: buscar agua, ordenar el cuarto, escribir en el cuaderno.
 - El teléfono suena; al contestar solo hay estática. (Es su madre; el jugador aún no lo sabe.)
 - Tomás vivo aparece en el sofá: *«¿Otra vez sin dormir?»*. Al voltear, ya no está.
-- Hay droga escondida en el departamento. Primera oportunidad de consumir.
+- Hay droga escondida en el departamento: bajo el colchón, envuelta en una media. Elías la escondió de sí mismo. Primera oportunidad de consumir.
 - Golpes en la puerta. Por la mirilla no hay nadie. Una voz: *«Eli, ábreme»*. Al abrir, el pasillo.
 
 ### Noche 2 — El pasillo
@@ -461,17 +461,19 @@ Primer asset del juego (18 de octubre de 2026). Se generan con `blender/scripts/
 | `abrir_puerta` | 2,8 s | Agarra la perilla, la gira y empuja la puerta. |
 | `telefono_contestar` | 2,4 s | Levanta el auricular y se lo lleva al oído. Al terminar, Elías mira hacia el pasillo y la puerta del baño. |
 | `telefono_colgar` | 1,8 s | Devuelve el auricular a la base y baja la mano. |
-| `tomar_jeringa` | 3,4 s | La dosis (20 de octubre de 2026): se agacha frente a la mesa de centro, toma la jeringa con la derecha y la levanta frente a la cara. En el juego sigue un corte a negro. |
+| `tomar_jeringa` | 3,4 s | Una dosis sobre una mesa (20 de octubre de 2026): se agacha frente a la mesa de centro, toma la jeringa con la derecha y la levanta frente a la cara. Ya no es la dosis de la Noche 1; queda para las dosis que estén sobre una mesa. |
+| `sacar_dosis` | 4 s | La dosis de la Noche 1 (23 de octubre de 2026): se arrodilla junto al colchón del dormitorio, apoya la izquierda en el borde, saca de abajo la media con la jeringa y la levanta frente a la cara: por la boca de la media asoma la jeringa. En el juego sigue un corte a negro. |
 
-- **Tomar algo chico:** la mano lo agarra con una pinza y, desde ese momento, lo lleva. Como los brazos van pegados a la cabeza, al mirar hacia abajo los hombros se van hacia atrás: para llegar a la mesa de centro, la cabeza se inclina sobre el borde.
+- **Tomar algo chico:** la mano lo agarra con una pinza y, desde ese momento, lo lleva. Como los brazos van pegados a la cabeza, al mirar hacia abajo los hombros se van hacia atrás: para llegar a la mesa de centro, la cabeza se inclina sobre el borde, y para llegar abajo del colchón, que está en el piso, baja hasta 62 cm (de rodillas e inclinado).
+- **La media en la mano:** se agarra por la punta, con los dedos a lo largo de la media. Al levantarla, los dedos apuntan hacia arriba y la palma hacia la cara, así que la media queda parada y se ve de costado, con la jeringa arriba.
 - **Cámara de interacción:** abrir una puerta o contestar el teléfono mueve la cámara a un punto fijo frente al objeto (inclinado sobre la mesita, frente a la perilla), y desde ahí corre la animación. Así la mano siempre llega al objeto.
 - **Luz de los brazos:** una luz tenue pegada a la cámara, que solo ilumina los brazos, para que se lean en los cuartos oscuros.
 
 **En Unity** (19 de octubre de 2026). Los exporta `brazos_animaciones.py` (no `brazos_primera_persona.py`), porque es el que junta el modelo con los clips: `Assets/Art/BrazosElias/` tiene `brazos_elias.fbx`, las cuatro texturas y `brazos_elias_escena.json`. La escena de prueba es `Assets/Scenes/PruebaBrazosElias.unity`: el 4B con los brazos colgando de la cámara.
-- **El FBX:** esqueleto genérico con su *Avatar*, la malla con la forma `consumido` y los ocho clips (`reposo`, `temblor`, `mirar_manos`, `abrir_puerta`, `telefono_contestar`, `telefono_colgar`, `tomar_jeringa` y la pose `mirar_brazos`). `reposo` y `temblor` van en bucle.
+- **El FBX:** esqueleto genérico con su *Avatar*, la malla con la forma `consumido` y los nueve clips (`reposo`, `temblor`, `mirar_manos`, `abrir_puerta`, `telefono_contestar`, `telefono_colgar`, `tomar_jeringa`, `sacar_dosis` y la pose `mirar_brazos`). `reposo` y `temblor` van en bucle.
 - **El temblor:** va en una capa aditiva. El clip trae un cuadro de reposo antes del primero, y Unity lo usa como referencia de la capa; así el temblor se suma sin mover la pose de base.
 - **Los cuatro estados** están en el JSON: la textura de cada uno y el valor de `consumido` (0, 0, 0,45 y 1; en Unity el *blendshape* va de 0 a 100). Los define `brazos_primera_persona.py`, que los guarda en el `.blend`.
-- **La cámara de interacción:** el JSON trae, para cada clip y cuadro a cuadro, dónde está la cabeza (la cámara de Unity), y cómo se mueven la puerta del dormitorio, el auricular y la jeringa. La cabeza está en las coordenadas del 4B. La luz de los brazos y la cámara van relativas a la cabeza. La pista de la jeringa dice además con qué mano se agarra y desde qué segundo: desde ahí, Unity la pega a esa mano, para que tiemble con ella.
+- **La cámara de interacción:** el JSON trae, para cada clip y cuadro a cuadro, dónde está la cabeza (la cámara de Unity), y cómo se mueven la puerta del dormitorio, el auricular, la jeringa de la mesa y la dosis bajo el colchón. La cabeza está en las coordenadas del 4B. La luz de los brazos y la cámara van relativas a la cabeza. La pista de lo que la mano agarra (la jeringa, la dosis) dice además con qué mano se agarra y desde qué segundo: desde ahí, Unity lo pega a esa mano, para que tiemble con ella.
 - **Comparación con Blender:** cuatro cuadros de las vistas previas (`anim_*_claves.png`), con la cámara, la puerta y el auricular siguiendo esas pistas y el temblor sumado. Cada píxel difiere en promedio entre 4 y 6 niveles de 255; las manos y los dedos coinciden, y lo único distinto es la luz que falta en el fondo del pasillo (la precalculada del 4B).
 
 ### Tomás
@@ -531,7 +533,7 @@ Cuarto asset (18 de octubre de 2026). Se genera con `blender/scripts/dona_carmen
 - **Humanoid**, como Tomás y girada igual que él. Sus cinco poses son clips fijos.
 - **Los vestuarios** son dos estados del JSON, `dia` y `noche`: solo cambia la textura. El FBX queda con `dia`.
 - **El plato:** en el JSON, `accesorios` dice dónde va en las poses que lo llevan: `con_plato` (en las dos manos) y `tocando` (en la palma izquierda). En las demás poses no lo lleva. Se aplica como un cambio desde donde está el plato en el FBX (`EscenaBlender.EnPose`), porque en Unity el plato llega con otro giro interno que en Blender.
-- **Comparación con Blender:** sus renders son por la mirilla, con el ojo de pez que Unity todavía no tiene. Se comparó con tres tomas de prueba en el pasillo, desde la cámara de la prueba de estilo: de frente con el plato, tocando la puerta del 4B y en bata mirando por la mirilla. La zona de Carmen difiere en promedio entre 3,5 y 4,7 niveles de 255, y el plato queda en sus manos. Lo único distinto es la luz ambiente: en Unity llega pareja a todas partes, también bajo el plato, así que el delantal y el plato se ven algo más claros en la sombra. Es lo mismo que pasa en el 4B y se resuelve con la luz precalculada, que a los personajes les llega por sondas de luz (*light probes*).
+- **Comparación con Blender:** sus renders son por la mirilla, y cuando se importó Unity todavía no tenía el ojo de pez (ahora sí, ver *La Noche 1* en *El 4B jugable*). Se comparó con tres tomas de prueba en el pasillo, desde la cámara de la prueba de estilo: de frente con el plato, tocando la puerta del 4B y en bata mirando por la mirilla. La zona de Carmen difiere en promedio entre 3,5 y 4,7 niveles de 255, y el plato queda en sus manos. Lo único distinto es la luz ambiente: en Unity llega pareja a todas partes, también bajo el plato, así que el delantal y el plato se ven algo más claros en la sombra. Es lo mismo que pasa en el 4B y se resuelve con la luz precalculada, que a los personajes les llega por sondas de luz (*light probes*).
 
 ### Departamento 4B
 Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamento_4b.py`; las vistas están juntas en `blender/renders/4b_hoja.png` y el plano en `blender/renders/4b_plano.png`.
@@ -546,6 +548,8 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 | `4b_entrada` | La puerta de entrada, con cadena y cerrojos, en el momento en que tocan. |
 | `4b_cocina` | Fluorescente frío, ventana tapada con periódicos, el calendario. |
 | `4b_dormitorio` | El colchón en el piso, bajo la ventana tapada con cartón. |
+| `4b_dormitorio_efecto` | El dormitorio bajo el efecto: cortinas, el foco prendido y el atardecer que cae sobre el colchón. No va en la hoja. |
+| `4b_dosis` | Junto al colchón: por el costado asoma la punta de la media donde está la droga. No va en la hoja. |
 | `4b_plano` | Vista desde arriba, sin techo. |
 
 **Detalles que cuentan la historia** (nunca se explican):
@@ -555,15 +559,18 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 - **El calendario** de la cocina quedó en el mes en que murió Tomás, con un día marcado en rojo.
 - **La contestadora** tiene la luz roja encendida: hay mensajes sin escuchar.
 - **Los pies bajo la puerta.** Cuando tocan (Noche 1), la luz del pasillo que entra por debajo de la puerta se corta en dos sombras. Por la mirilla no hay nadie.
-- **El cuaderno** (donde se guarda la partida) está en la mesa de centro, junto a la cuchara quemada, la jeringa y el cinturón.
+- **El cuaderno** (donde se guarda la partida) está en la mesa de centro, junto a la cuchara quemada, la jeringa y el cinturón. Esa jeringa está vacía: es parte del desorden.
+- **La dosis bajo el colchón** (23 de octubre de 2026). Elías la escondió de sí mismo: una media blanca de franjas rojas con una jeringa adentro, metida bajo el borde del colchón que da al cuarto, cerca de la almohada. Solo asoma la punta de la media (6 cm, pálida contra el piso oscuro); la jeringa sale por la boca de la media, del lado de abajo del colchón, y no se ve hasta sacarla. Junto al colchón ya había una jeringa usada tirada.
 
 **Las dos versiones en una escena.** Los objetos están en colecciones: `Estructura` y `Muebles` (siempre), `Deterioro` (abstinencia) y `Efecto` (bajo el efecto). Paredes, pisos, techo y sofá tienen dos texturas, la sucia y la limpia (`*_limpio.png`). En Unity, cambiar de mundo es mostrar u ocultar un grupo de objetos y cambiar esas texturas.
 
-**Técnica:** unos 6.800 triángulos en 258 objetos. Las puertas tienen el origen en la bisagra, listas para animar. Algunas luces son trucos para Blender (las que se cuelan bajo las puertas y las de "rebote"); en Unity se resuelven con luz precalculada (*baked*).
+**El dormitorio bajo el efecto** (23 de octubre de 2026). Como la dosis de la Noche 1 se toma ahí, es lo primero que se ve del efecto. Antes no tenía ninguna luz en ese mundo (el sol y la lámpara de pie están en la sala) y quedaba negro, con la ventana sin cartones en blanco. Ahora, como la sala: cortinas a los costados de la ventana, el foco del techo prendido (`luz_dormitorio`; en la abstinencia la bombilla está quemada) y el sol del atardecer (`sol_dormitorio`), que entra por la ventana a 35° y cae sobre el colchón con la sombra de la cruz del marco. La ventana se sigue viendo blanca, como la de la sala: afuera es el atardecer.
+
+**Técnica:** unos 7.000 triángulos en 271 objetos. Las puertas tienen el origen en la bisagra, listas para animar. Algunas luces son trucos para Blender (las que se cuelan bajo las puertas y las de "rebote"); en Unity se resuelven con luz precalculada (*baked*).
 
 **En Unity** (19 de octubre de 2026). El script exporta `Assets/Art/Departamento4B/`: el FBX en el estado abstinencia, las 22 texturas (sucias y limpias) y `departamento_4b_escena.json` con las luces, las cámaras y los dos estados. La escena de prueba `Assets/Scenes/PruebaDepartamento4B.unity` es la vista `4b_sala`, armada desde ese JSON.
 - **Colecciones:** llegan como grupos (`Estructura`, `Muebles`, `Deterioro`, `Efecto`, `Eventos`); `Plano` no se exporta. Cambiar de mundo es activar o desactivar `Deterioro` y `Efecto`, poner las texturas limpias, cambiar la emisión de los focos y los resplandores, y las luces y la niebla del otro estado. El JSON dice qué cambia en cada uno.
-- **Luces-truco:** en el JSON, las de rebote llevan `truco: rebote` y las que se cuelan bajo las puertas, `truco: fuga`. En Unity van solo en la luz precalculada (ver *El 4B jugable*).
+- **Luces-truco:** en el JSON, las de rebote llevan `truco: rebote` y las que se cuelan bajo las puertas, `truco: fuga`. En Unity van solo en la luz precalculada (ver *El 4B jugable*). Las del dormitorio bajo el efecto no son trucos, pero también van enteras en la luz precalculada: llevan `precalculada` (ver *Luz precalculada*).
 - **Comparación con Blender** (la escena de prueba, sin luz precalculada): en abstinencia, cada píxel difiere en promedio 3 niveles de 255. Falta la luz que sale bajo la puerta del baño: la rendija es demasiado fina para las sombras en tiempo real y sin el rebote la puerta queda oscura. En el efecto la diferencia es de 13: Unity sale algo más claro porque su luz ambiente no se oscurece en los rincones, y faltan los rayos del atardecer en la niebla. La luz bajo la puerta del baño y los rincones del efecto se resolvieron con la luz precalculada de la escena jugable (ver *El 4B jugable*); los rayos en la niebla siguen faltando.
 
 ### El 4B jugable
@@ -576,47 +583,71 @@ Primer recorrido jugable (20 de octubre de 2026): `Assets/Scenes/Departamento4B.
 | Usar | E | botón de arriba |
 
 - **Caminar:** a 1,3 m/s, con los ojos a 1,6 m, la altura de la cabeza en las animaciones de Blender. Elías choca con paredes y muebles, y pisa la ropa, los cojines caídos y los papeles del piso sin subirse a ellos (ver *Importación* en *Estilo PS1 en Unity*). Todavía no corre ni se agacha (6.1).
-- **Usar:** se mira algo a menos de 1,4 m y se aprieta Usar. Por ahora:
+- **Usar:** se mira algo a menos de 1,4 m y se aprieta Usar. Lo que está en el piso se alcanza desde más lejos, porque los ojos están a 1,6 m: la dosis bajo el colchón, desde 2 m (el campo `alcance` de `Interactuable`). Por ahora:
   - la puerta del dormitorio, desde el pasillo; queda abierta;
   - el teléfono: contesta, escucha hasta que se vuelve a apretar Usar, y cuelga;
-  - la jeringa de la mesa de centro: la dosis (ver abajo).
+  - la dosis escondida bajo el colchón del dormitorio (ver abajo);
+  - la mirilla de la puerta de entrada: mira por ella hasta que se vuelve a apretar Usar;
+  - la puerta de entrada, solo al final de la Noche 1 (ver *La Noche 1*).
 
-  Los tres corren con la cámara de interacción de los brazos (ver *Brazos de Elías*): la cámara va al punto donde empieza el clip y desde ahí sigue a la cabeza de Blender, mientras la puerta, el auricular o la jeringa siguen sus pistas. Comparadas en cámara lenta con las hojas de cuadros de Blender (`anim_*_claves.png`), la mano agarra la perilla, el auricular y la jeringa igual que en Blender.
+  Todos menos la mirilla corren con la cámara de interacción de los brazos (ver *Brazos de Elías*): la cámara va al punto donde empieza el clip y desde ahí sigue a la cabeza de Blender, mientras la puerta, el auricular o la dosis siguen sus pistas. Comparadas en cámara lenta con las hojas de cuadros de Blender (`anim_*_claves.png`), la mano agarra la perilla, el auricular, la jeringa y la media igual que en Blender.
 - **Los brazos** cuelgan de la cámara, con el temblor sumado según la abstinencia. Su luz ilumina solo la capa de luz `Brazos`, y tampoco la niebla. Unity los anima aunque no se vean: si no, en reposo (fuera de cuadro) quedaban congelados y al empezar un clip nunca entraban en cuadro.
 - **El código** está en `Assets/Scripts/`:
   - `Elias`: caminar, mirar, usar y la cámara de interacción;
   - `BrazosElias`: el clip de turno, el temblor encima y el estado de los brazos;
   - `PuertaInteractiva`, `TelefonoInteractivo` y `DosisInteractiva`: derivan de `Interactuable`, que es lo que hay que heredar para agregar algo que se pueda usar;
   - `Abstinencia`, `Partida` (lo que la partida va acumulando) y `Fundido` (el corte a negro);
-  - `EstadosDelMundo`: los dos mundos.
+  - `EstadosDelMundo`: los dos mundos;
+  - `NocheUno`: el orden de la Noche 1, con sus eventos en `AparicionTomas`, `GolpesEnLaPuerta`, `MirillaInteractiva`, `VistaMirilla` (la cámara con ojo de pez) y `PuertaDeEntrada`.
 
 **La abstinencia** (6.2) es un valor oculto que empieza en 35 (la Noche 1 es el primer día sin consumir) y sube 1,5 por minuto. Por ahora se nota en dos cosas:
 - **El temblor de las manos:** no hay por debajo de 10, y llega al de las vistas previas de Blender en 60.
 - **El temblor de la cámara:** desde 70 tiembla también la vista, hasta 0,6° en 100.
 
-**La dosis** (6.3) es la jeringa de la mesa de centro:
-1. Elías se agacha, la toma y la mira en la mano (el clip `tomar_jeringa`).
-2. Corte a negro, con el mismo dithering de 15 bits, como un fundido de la PS1. A oscuras, la jeringa vuelve a la mesa y Elías se para.
+**La dosis** (6.3) está escondida bajo el colchón del dormitorio (23 de octubre de 2026; ver *Departamento 4B*). Se puede tomar en cualquier momento de la noche, mirando la punta de la media que asoma:
+1. Elías se arrodilla junto al colchón, apoya la izquierda en el borde, saca la media de abajo y la mira en la mano, con la jeringa asomando por la boca (el clip `sacar_dosis`).
+2. Corte a negro, con el mismo dithering de 15 bits, como un fundido de la PS1. A oscuras, la dosis desaparece y Elías se para.
 3. Al volver, el efecto. La abstinencia baja a 0 y no hay temblor.
 4. A los 3 minutos llega el bajón, de golpe: la abstinencia vuelve 15 puntos más alta que antes de consumir.
 
-Lo que cuesta queda registrado en `Partida`: los días limpio vuelven a 0 y suman la dosis y la Dependencia (sección 7); se guardará con el cuaderno. La jeringa se usa una sola vez.
+Lo que cuesta queda registrado en `Partida`: los días limpio vuelven a 0 y suman la dosis y la Dependencia (sección 7); se guardará con el cuaderno. La dosis se usa una sola vez. La jeringa de la mesa de centro ya no se usa: está vacía.
+
+- **Para encontrarla:** la colisión de la dosis (lo que la mirada de Elías tiene que tocar) cubre la punta de la media y un poco de piso alrededor, de 18 × 16 cm y 8 cm de alto. Elías no choca con ella: está tirada en el piso, como la ropa.
+- **Comparación con Blender:** probada en *Play* con la E, en cámara lenta, y capturada en los mismos seis segundos que `anim_sacar_dosis_claves.png`. La mano, la media y la jeringa quedan en el mismo lugar que en Blender. Cada píxel difiere en promedio entre 7 y 12 niveles de 255, y es la luz: en Unity el colchón y la pared del fondo salen más claros, y faltan los granos de la niebla de Blender.
+- **Al volver del negro:** Elías está parado junto al colchón, en el dormitorio bajo el efecto: cálido, con el foco prendido y el atardecer sobre la cama (ver *Departamento 4B*).
 
 **Los dos mundos.** La dosis pasa de la abstinencia al efecto y el bajón lo devuelve. El cambio lo hace el componente `EstadosDelMundo` (el objeto `Mundos` de la escena), que lee el JSON del 4B:
 - muestra `Deterioro` o `Efecto`;
 - pone las texturas limpias y la emisión de cada material;
-- enciende las luces de cada mundo (el sol del atardecer y la lámpara de pie, solo en el efecto);
+- enciende las luces de cada mundo (solo en el efecto: el sol del atardecer en la sala y en el dormitorio, la lámpara de pie y el foco del dormitorio);
 - cambia el ambiente, la niebla y la luz precalculada.
 
 Elías se entera del cambio: bajo el efecto sus brazos se ven sanos (estado 0, la mentira de la droga); en la abstinencia, como en la Noche 1 (estado 1).
+
+**La Noche 1** (sección 5). La lleva el componente `NocheUno` (el objeto `Noche 1` de la escena), en este orden:
+1. **El despertar.** La imagen aclara desde negro en 3 segundos mientras Elías, en el suelo de la sala, se mira las manos (`mirar_manos`) y se levanta.
+2. **El teléfono.** A los 40 segundos suena. Si Elías contesta, el timbre se corta al levantar el auricular y en la oreja solo hay estática hasta que cuelga. Si no, se corta solo después de 8 timbres (40 segundos). `Partida` cuenta las llamadas contestadas y las perdidas.
+3. **Tomás.** 15 segundos después de la llamada aparece sentado en el sofá, pero solo mientras Elías no mira hacia ahí; la ropa tirada en el sofá se esconde mientras él está. Cuando Elías lo ve, a los 0,8 segundos dice: «¿Otra vez sin dormir?». En cuanto Elías deja de mirarlo, ya no está. Se ve según el mundo: «vivo, mal» en la abstinencia y sonriente bajo el efecto.
+4. **Los golpes.** 40 segundos después tocan la puerta de entrada: tres golpes cada 7 segundos, hasta 5 veces o hasta que Elías mira por la mirilla. Por la mirilla, el pasillo vacío. Cuando deja de mirar (o después del último golpe), una voz detrás de la puerta: «Eli, ábreme».
+5. **La puerta.** Desde ahí se puede usar la puerta de entrada: Elías agarra la perilla (el clip `abrir_puerta`, llevado de la puerta del dormitorio a esta) y, al primer segundo, corte a negro. Ahí empezará la Noche 2.
+
+Los tiempos se cambian en el inspector de `Noche 1`. Se probó entera en *Play*, por los dos caminos del teléfono.
+
+- **La mirilla** es una cámara del lado de afuera de la puerta, a la altura de la mirilla y con 170° de campo. Su imagen pasa por el shader `OnTheNod/Mirilla` (`Assets/Rendering/`), que hace el mismo ojo de pez que `fisheye()` en `dona_carmen.py`: un círculo del 97 % del alto, con los bordes borrosos y oscuros. Mientras se mira, la cámara de Elías no dibuja. Comparada con `carmen_mirilla_vacio.png`, la imagen de Unity sale un 19 % más clara: la pared casi igual, el techo un 30 % y el piso un 57 % (en Blender el piso tiene un brillo que el shader PS1 no copia igual).
+- **El pasillo de afuera** es el de la prueba de estilo (`Assets/Art/PruebaEstiloPasillo/`), puesto contra la puerta de entrada como en las vistas de Doña Carmen. Se le esconden la pared y la puerta que ya pone el 4B, y la silueta de Tomás. Sus cuatro luces salen de su JSON.
+- **El pasillo no entra en la luz precalculada.** La luz-truco `pasillo_edificio` del 4B (la que entra bajo la puerta) queda dentro del pasillo, a 40 cm de la pared de enfrente, y le dejaba una mancha de luz en el zócalo y en el piso. Unity no deja que una luz precalculada ignore objetos (la máscara de capas de la luz no cuenta en el cálculo), así que el pasillo lo iluminan solo sus lámparas, en tiempo real. Tampoco usa sondas de luz: las del 4B quedan del otro lado de la pared y le tapaban la lámpara. Sus cuatro lámparas están en *Realtime* en la escena (23 de octubre de 2026): como mixtas ocupaban canales de la máscara de sombras y Unity dejaba entera en la luz precalculada a `luz_sala` (ver *Límite* en *Luz precalculada*). Comparadas antes y después, no se cuelan al 4B: la vista de la entrada no cambia y el pasillo se ve igual.
+- **Los sonidos** (sección 11): el timbre y el auricular suenan en el teléfono; la estática, en la oreja; los golpes y la voz, detrás de la puerta; la voz de Tomás, en su cabeza.
+- **Falta:** los pies bajo la puerta mientras tocan (ver *Departamento 4B*). Y un error conocido: la puerta del dormitorio salta a cerrada cuando empieza su clip, porque en reposo está entreabierta 28° y `abrir_puerta` empieza con la puerta cerrada.
 
 **Luz precalculada** (una por mundo):
 - **Luces mixtas:** la luz directa se calcula en tiempo real, para que ilumine a Elías, a los personajes y a la puerta que se abre. La luz del ambiente (que se oscurece en los rincones) y las sombras de lo que no se mueve quedan precalculadas (*shadowmask*). Así salen exactas las sombras de los cartones de las ventanas, del sol que entra en el efecto y de la rendija bajo la puerta del baño. En tiempo real quedaban demasiado gruesas: Unity tenía que achicar los 29 mapas de sombra para que entraran.
 - **Sin rebote:** Blender (EEVEE sin trazado de rayos) no calcula la luz que rebota. Su look se arma con la luz directa, la del ambiente y las luces-truco. Con 3 rebotes, Unity salía más claro que Blender, y en el efecto mucho más: los rincones y el frente del sofá quedaban iluminados (13 niveles de diferencia en la sala, contra 6 sin rebote). Por eso se precalcula sin rebote.
 - **Luces-truco:** van solo en la luz precalculada, las de fuga y también las de rebote, que hacen de rebote como en Blender. La mancha cálida del colchón no viene de la farola, porque los cartones tapan casi toda la ventana: viene de `rebote_dormitorio`. Y la silla del baño iluminada desde abajo es `rebote_bano`. En Blender son esferas de 30 a 50 cm; en Unity son puntos y quemarían lo que tienen pegado, así que se separan medio radio de la superficie de abajo.
 - **Sondas de luz:** lo que se mueve (Elías, los personajes, la puerta, el auricular) y lo chico (menos de 25 cm) toma la luz de 595 sondas, en una grilla de 50 cm, ubicadas lejos de los muebles de los dos mundos.
-- **Cálculo:** con *On the Nod > Precalcular la luz de los mundos* (`Assets/Editor/LuzDeLosMundos.cs`). Primero calcula el efecto y lo copia a `Assets/Scenes/Departamento4B/efecto/`; al final, la abstinencia, que queda como la luz normal de la escena. Un mapa de luz de 1024×1024 por mundo (40 puntos por metro), unos 10 segundos en total. Hay que recalcularla con ese menú cada vez que se vuelve a exportar el 4B; *Generate Lighting* calcula solo el mundo que está puesto y desarma el cambio.
+- **Cálculo:** con *On the Nod > Precalcular la luz de los mundos* (`Assets/Editor/LuzDeLosMundos.cs`). Primero calcula el efecto y lo copia a `Assets/Scenes/Departamento4B/efecto/`; al final, la abstinencia, que queda como la luz normal de la escena. Un mapa de luz de 1024×1024 por mundo (40 puntos por metro), unos 20 segundos en total. Guarda dónde cae en el mapa cada objeto de la escena, no solo los del 4B. Hay que recalcularla con ese menú cada vez que se vuelve a exportar el 4B; *Generate Lighting* calcula solo el mundo que está puesto y desarma el cambio.
 - **Límite:** la máscara de sombras admite 4 luces mixtas por punto. Donde se juntaban más, Unity dejó enteras en la luz precalculada a `luz_cocina` (en los dos mundos) y a `luna_bano`: a lo que se mueve en la cocina y en el baño, su luz le llega por las sondas.
+  - Cuando se agregó el pasillo de afuera, con sus lámparas mixtas, Unity dejó entera también a `luz_sala`, y el foco de la sala dejó de iluminar en tiempo real lo que se mueve (Elías, Tomás, la puerta del dormitorio). Por eso esas lámparas van en tiempo real (ver *El pasillo no entra en la luz precalculada*). Hay que tenerlo en cuenta al agregar una luz mixta: si Unity deja entera una que hace falta, se nota en Tomás y en los brazos.
+  - Las dos luces del dormitorio bajo el efecto (`luz_dormitorio` y `sol_dormitorio`) van enteras en la luz precalculada a propósito: en el JSON llevan `precalculada`, y `EscenaBlender.Configurar` las pone *Baked*. Probadas como mixtas (también con el pasillo en tiempo real), Unity dejaba enteras además la de la sala y la del patio de la cocina. En el dormitorio, bajo el efecto, lo único que se mueve son los brazos, que tienen su propia luz.
 
 **Comparación con Blender** (diferencia promedio de cada píxel, en niveles de 255):
 
@@ -628,11 +659,12 @@ Elías se entera del cambio: bajo el efecto sus brazos se ven sanos (estado 0, l
 | `4b_dormitorio` | 7,5 | 3,7 |
 | `4b_cocina` | 8,0 | 7,9 |
 | `4b_sala_efecto` | 13 | 6,2 |
+| `4b_dormitorio_efecto` | — | 4,6 |
 
 Lo que queda distinto:
 - En la cocina, el fluorescente es una luz de área en Blender y en Unity un foco muy abierto, que ilumina de más los frentes de los muebles; además, su bruma es más fuerte.
 - Faltan los haces de luz en la niebla: el del sol en el efecto y el de la farola en el dormitorio. La niebla iluminada de Unity no tiene sombras.
-- A los costados de la puerta del baño se ven hilos de luz: el temblor de vértices abre rendijas de un píxel entre la puerta y el marco, y por ahí se ve el baño iluminado.
+- A los costados de la puerta del baño se ven hilos de luz: el temblor de vértices abre rendijas de un píxel entre la puerta y el marco, y por ahí se ve el baño iluminado. Lo mismo pasa bajo el efecto en el dormitorio: debajo de la cortina izquierda se ve una línea punteada de luz, por la rendija entre el muro de abajo de la ventana y el de al lado, porque detrás está el resplandor de afuera.
 
 ---
 
@@ -644,6 +676,20 @@ Lo que queda distinto:
 - **Elías:** respiración, latidos y voz temblorosa según la abstinencia.
 - **Música:** mínima, industrial y ambiental (referencia: Akira Yamaoka en Silent Hill). Durante el efecto, una canción cálida que se distorsiona al pasar.
 - **Silencio:** usarlo. Los momentos sin nada son los que más tensan.
+
+**Lo que ya hay** (20 de octubre de 2026): los sonidos de la Noche 1. Se generan con `audio/scripts/sonidos.py` (Python con numpy), como los assets de Blender: para cambiar un sonido se cambia el script y se vuelve a correr. Todo a 22.050 Hz y en mono, como en la PS1. Quedan en `unity/Assets/Audio/`.
+
+| Sonido | Qué es |
+|---|---|
+| `telefono_timbre` | Un ciclo del timbre de un teléfono fijo viejo: dos campanas golpeadas 20 veces por segundo durante 1,2 segundos, y silencio hasta los 5. Va en bucle. |
+| `telefono_descolgar` | El auricular que se levanta: el golpe del plástico y el clic del gancho. |
+| `telefono_colgar` | El auricular que vuelve a la base: el golpe y un «tin» de las campanas. |
+| `telefono_estatica` | La línea sin nadie (6.5): ruido con el sonido apagado de un teléfono, chasquidos, el zumbido de la corriente y dos cortes. 8 segundos en bucle, sin saltos. |
+| `golpes_puerta` | Tres golpes de nudillos en la puerta de entrada, oídos desde adentro. |
+| `voz_tomas_otra_vez_sin_dormir` | Tomás en el sofá: «¿Otra vez sin dormir?». **Provisional.** |
+| `voz_eli_abreme` | La voz detrás de la puerta: «Eli, ábreme», apagada por la puerta. **Provisional.** |
+
+- **Las voces son provisionales:** son la voz sintética de Windows (la única en español es de mujer), con el tono bajado para que suene a hombre. Hay que grabarlas y reemplazar los archivos con el mismo nombre.
 
 ---
 
@@ -664,7 +710,7 @@ Lo que queda distinto:
 
 **Objetos**
 - Teléfono fijo, teléfono público del pasillo, cuaderno, Polaroid, fotos.
-- Jeringas, cucharas, cinturón, dosis.
+- Jeringas, cucharas, cinturón, dosis. La dosis de la Noche 1 (**hecho**: la media con la jeringa bajo el colchón, jugable en el 4B; ver *Departamento 4B* y *El 4B jugable* en la sección 10).
 - Sofá, cama, mesa, sillas, refrigerador, tele vieja, ventanas tapadas con cartón y periódicos, basura, botellas.
 
 **Personajes**
@@ -673,11 +719,15 @@ Lo que queda distinto:
 - Doña Carmen y su plato tapado (**hecho**: dos vestuarios y las vistas por la mirilla, ya exportada a Unity como *Humanoid*; ver sección 10). En la demo solo se ve por la mirilla.
 
 **Animaciones**
-- Brazos de Elías: abrir puertas, contestar y colgar el teléfono, temblor, mirarse las manos y tomar la jeringa (**hecho**, ver sección 10). Faltan: tomar otros objetos (el agua, el cuaderno) y usar la cámara.
+- Brazos de Elías: abrir puertas, contestar y colgar el teléfono, temblor, mirarse las manos, tomar la jeringa y sacar la dosis de abajo del colchón (**hecho**, ver sección 10). Faltan: tomar otros objetos (el agua, el cuaderno) y usar la cámara.
 - Tomás vivo: sentado, de pie, caminar, gestos. (Ya tiene las poses sentado y de pie; el resto, con Mixamo en Unity.)
 - Tomás muerto: quieto, aparecer de golpe, caminar, perseguir. (Ya tiene las poses de pie y sentado; el resto, con Mixamo en Unity.)
 - Doña Carmen: tocar la puerta, dejar el plato e irse. (Ya tiene las poses; el resto, con Mixamo en Unity.)
 - Escenario: puertas, elevador, luces que parpadean, objetos que se mueven.
+
+**Sonido**
+- La Noche 1: el teléfono (timbre, auricular y estática), los golpes en la puerta y las dos voces (**hecho**, con las voces provisionales; ver sección 11).
+- Falta: el ambiente, Elías (respiración, latidos), la música y el resto de las noches.
 
 ### Herramientas y flujo
 - **Blender 5.2:** modelado y texturas. Los escenarios y objetos se generan con scripts de Python que después se pueden retocar a mano.
@@ -693,10 +743,13 @@ C:\Dev\Personal\OnTheNod\
 │   ├── textures/          texturas pixeladas (PNG)
 │   ├── scenes/            archivos .blend
 │   └── renders/           pruebas y renders
+├── audio/
+│   └── scripts/           scripts que generan los sonidos (los dejan en unity/Assets/Audio/)
 └── unity/                 proyecto de Unity
     └── Assets/
         ├── Art/           lo que exportan los scripts de Blender: una carpeta por asset (FBX y Textures/)
-        ├── Rendering/     estilo PS1: shaders, imagen de 480×270, pantalla, niebla iluminada
+        ├── Audio/         los sonidos (WAV)
+        ├── Rendering/     estilo PS1: shaders, imagen de 480×270, pantalla, niebla iluminada, ojo de pez de la mirilla
         ├── Scripts/       el juego: Elías, sus brazos, lo que se usa y los datos de Blender
         ├── Editor/        herramientas del editor: importación automática, capturas, máscara de foco
         ├── Scenes/        escenas (y la luz precalculada de cada una, en una carpeta con su nombre)

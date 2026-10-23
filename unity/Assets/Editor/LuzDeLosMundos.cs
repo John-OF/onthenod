@@ -101,12 +101,16 @@ public static class LuzDeLosMundos
         }
         d.sondas = sondas;
 
-        var renderers = mundo.modelo.GetComponentsInChildren<Renderer>(true);
+        // Todo lo de la escena, no solo el escenario de los mundos: lo que está alrededor (el
+        // pasillo afuera del 4B) también cambia de mapa de luz entre un cálculo y otro.
+        var renderers = Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+            .Where(r => r.gameObject.scene == mundo.gameObject.scene).ToArray();
         d.renderers = renderers;
         d.indices = renderers.Select(r => r.lightmapIndex).ToArray();
         d.escalas = renderers.Select(r => r.lightmapScaleOffset).ToArray();
 
-        var luces = mundo.luces.GetComponentsInChildren<Light>(true);
+        var luces = Object.FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+            .Where(l => l.gameObject.scene == mundo.gameObject.scene).ToArray();
         d.luces = luces;
         d.salidas = luces.Select(l => EstadosDelMundo.SalidaLuz.De(l.bakingOutput)).ToArray();
         return d;

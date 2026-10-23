@@ -8,6 +8,10 @@ using UnityEngine;
 /// </summary>
 public abstract class Interactuable : MonoBehaviour
 {
+    [Tooltip("Hasta qué distancia de los ojos, en metros, se puede usar. 0: la de Elías (alcance). " +
+             "Lo que está en el piso necesita más, porque los ojos están a 1,6 m (la dosis bajo el colchón).")]
+    public float alcance;
+
     /// <summary>Si ahora se puede usar (por ejemplo, la puerta no está abierta ya).</summary>
     public abstract bool PuedeUsar(Elias elias);
 

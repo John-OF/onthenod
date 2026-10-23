@@ -28,7 +28,8 @@ Uso (PowerShell, desde la carpeta del proyecto):
       -P blender\scripts\departamento_4b.py -- blender
   Solo algunas vistas (mas rapido para probar): ... -- blender sala,bano
 
-Vistas: sala, sala_efecto, bano, entrada, cocina, dormitorio, plano
+Vistas: sala, sala_efecto, bano, entrada, cocina, dormitorio, dormitorio_efecto, dosis, plano
+  (no van en la hoja: dormitorio_efecto, y dosis, la media con la droga que asoma bajo el colchon)
 
 Salidas (dentro de la carpeta blender/):
   textures/*_4b*.png               texturas pixeladas (version sucia y limpia)
@@ -510,6 +511,8 @@ def build_materials():
         "vidrio_ambar": S("VidrioAmbar", (0.22, 0.09, 0.02), rough=0.1, spec=0.7),
         "botella_agua": S("BotellaAgua", (0.42, 0.52, 0.58), rough=0.15, spec=0.6),
         "jeringa": S("Jeringa", (0.78, 0.78, 0.74), rough=0.25, spec=0.5),
+        "media": S("Media", (0.66, 0.64, 0.55), rough=0.95, spec=0.1),
+        "media_franja": S("MediaFranja", (0.40, 0.08, 0.06), rough=0.95, spec=0.1),
         "cuero": S("Cuero", (0.10, 0.06, 0.04), rough=0.5),
         "bolsa": S("BolsaBasura", (0.02, 0.02, 0.025), rough=0.35, spec=0.5),
         "ropa_azul": S("RopaAzul", (0.12, 0.15, 0.22), rough=0.95, spec=0.1),
@@ -776,9 +779,15 @@ def hanging_bulb(name, x, y, M, mat=None, drop=0.36):
     box(name + "_socket", (x - 0.02, y - 0.02, H - drop), (x + 0.02, y + 0.02, H - drop + 0.06),
         M["plastico_negro"])
     if mat is not None:
-        b = mesh_obj(name, lambda bm: bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.05), mat,
-                     loc=(x, y, H - drop - 0.04))
-        b.visible_shadow = False  # que no tape su propia luz
+        bulb(name, x, y, mat, drop)
+
+
+def bulb(name, x, y, mat, drop=0.36):
+    """La bombilla de un foco colgante (va con el socket de hanging_bulb)."""
+    b = mesh_obj(name, lambda bm: bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.05), mat,
+                 loc=(x, y, H - drop - 0.04))
+    b.visible_shadow = False  # que no tape su propia luz
+    return b
 
 
 def architecture(M):
@@ -1160,10 +1169,18 @@ def dormitorio(M):
     boxes_obj("ropero_manijas", [((2.78, 6.47, 1.0), (2.795, 6.50, 1.15)), ((2.78, 6.66, 1.0), (2.795, 6.69, 1.15))],
               M["laton"])
 
+    # El foco del techo: quemado en la abstinencia, prendido bajo el efecto
     use("Estructura")
-    hanging_bulb("foco_dormitorio", 1.7, 5.85, M, M["foco_apagado"])
+    hanging_bulb("foco_dormitorio", 1.7, 5.85, M)
+    use("Efecto")
+    bulb("foco_dormitorio_efecto", 1.7, 5.85, M["foco"])
+    # Bajo el efecto, cortinas como en la sala: por el medio entra el atardecer
+    curtain("cortina_dormitorio_1", "y", 0.0, 1, 5.18, 5.60, 0.75, 2.35, M["cortina"])
+    curtain("cortina_dormitorio_2", "y", 0.0, 1, 6.30, 6.72, 0.75, 2.35, M["cortina"])
+    cyl("barra_cortina_dormitorio", (0.07, 5.12, 2.38), 0.012, 1.66, M["laton"], rot=(R(-90), 0, 0), seg=6)
 
     use("Deterioro")
+    bulb("foco_dormitorio", 1.7, 5.85, M["foco_apagado"])
     cover_window("ventana_dormitorio", "y", 0.0, 1, [
         ("carton", 5.22, 6.05, 0.82, 1.70, 1.0, 0.020),
         ("carton", 6.02, 6.68, 0.82, 1.55, -2.0, 0.022),
@@ -1178,6 +1195,41 @@ def dormitorio(M):
     blob("ropa_1", (2.30, 4.75, 0.0), (0.30, 0.25, 0.10), M["ropa_azul"])
     blob("ropa_2", (0.75, 4.70, 0.0), (0.25, 0.22, 0.08), M["ropa_roja"])
     blob("ropa_3", (2.45, 5.35, 0.0), (0.20, 0.18, 0.07), M["ropa_gris"])
+    hidden_dose(M)
+
+
+# La dosis escondida: bajo el borde del colchon que da al cuarto, cerca de la almohada. La
+# media va de canto al borde (la boca hacia adentro): la punta asoma 6 cm por el costado.
+DOSIS = (1.61, 6.60, 0.0)
+DOSIS_GIRO = 90.0
+
+
+def hidden_dose(M):
+    """La dosis de la Noche 1 (secciones 5 y 6.3): Elias la escondio de si mismo bajo el colchon,
+    envuelta en una media. Por el costado del colchon asoma la punta de la media; la jeringa sale
+    por la boca, que queda bajo el colchon, asi que no se ve hasta sacarla. La raiz esta en el
+    piso, bajo el eje de la media. No usa el generador de ruido, para no cambiar el resto del 4B."""
+    use("Deterioro")
+    r, flat = 0.027, 0.8      # la media va aplastada bajo el colchon
+    zc = r * flat
+
+    def tube(name, y0, y1, rad, mat, rad2=None):
+        """Tramo de la media a lo largo de Y; rad en el extremo y0, rad2 en el y1."""
+        m = (Matrix.Translation((0, (y0 + y1) / 2, zc)) @ Matrix.Diagonal((1, 1, flat, 1))
+             @ Matrix.Rotation(R(-90), 4, "X"))
+        return mesh_obj(name, lambda bm: bmesh.ops.create_cone(
+            bm, cap_ends=True, cap_tris=False, segments=8, radius1=rad, radius2=rad if rad2 is None else rad2,
+            depth=y1 - y0, matrix=m), mat)
+
+    root = empty("dosis_colchon", DOSIS, (0, 0, R(DOSIS_GIRO)))
+    return parent([
+        tube("dosis_media", -0.08, 0.06, r, M["media"]),
+        tube("dosis_media_punta", -0.10, -0.08, 0.014, M["media"], rad2=r),
+        tube("dosis_media_franja_1", 0.035, 0.042, r + 0.0015, M["media_franja"]),
+        tube("dosis_media_franja_2", 0.047, 0.054, r + 0.0015, M["media_franja"]),
+        # el embolo hacia la boca de la media: asoma 7 cm
+        syringe("dosis_jeringa", (0.0, 0.012, zc - 0.0065), R(90), M),
+    ], root)
 
 
 def bano(M):
@@ -1306,6 +1358,13 @@ def lights():
     rb["truco"] = "rebote"
     light("led_contestadora", "POINT", (3.058, 3.79, 0.69), {"abstinencia": ((1.0, 0.1, 0.04), 0.04)}, radius=0.005)
     light("lampara_pie", "POINT", (0.28, 3.95, 1.42), {"efecto": ((1.0, 0.72, 0.45), 30)}, radius=0.08)
+    # El dormitorio bajo el efecto (ahi se toma la dosis de la Noche 1): el foco del techo y el
+    # atardecer, que entra por la ventana a 35 grados y cae sobre el colchon y el piso. En Unity
+    # van enteras en la luz precalculada ("precalculada" en el JSON): como luces mixtas se
+    # juntaban con otras, y Unity pasaba a precalculadas la de la sala y la del patio de la cocina.
+    light("luz_dormitorio", "POINT", (1.7, 5.85, H - 0.48), {"efecto": (GOLD, 30)}, radius=0.03)["precalculada"] = True
+    light("sol_dormitorio", "SPOT", (-3.0, 4.90, 3.80), {"efecto": ((1.0, 0.70, 0.40), 2500)},
+          target=(2.0, 6.65, 0.05), radius=0.05, spot=(30, 0.4))["precalculada"] = True
     light("sol_plano", "SUN", (3.6, 3.7, 10.0), {"plano": ((1.0, 1.0, 1.0), 2.5)}, target=(3.4, 3.9, 0.0))
 
 
@@ -1390,6 +1449,7 @@ def cameras():
     camera("Cam_entrada", (2.75, 2.2, 1.6), (3.25, 0.0, 0.9))         # la puerta: alguien toca
     camera("Cam_cocina", (5.15, 0.35, 1.6), (6.9, 2.9, 0.95))
     camera("Cam_dormitorio", (3.05, 4.75, 1.6), (0.3, 6.3, 0.75))
+    camera("Cam_dosis", (2.55, 5.80, 1.6), (1.62, 6.58, 0.05))         # junto al colchon: asoma la media
     camera("Cam_plano", (3.6, 3.7, 12.0), None, ortho=8.0)            # desde arriba, sin techo
 
 
@@ -1468,6 +1528,8 @@ VIEWS = {
     "entrada": dict(cam="Cam_entrada", state="abstinencia", eventos=True),
     "cocina": dict(cam="Cam_cocina", state="abstinencia"),
     "dormitorio": dict(cam="Cam_dormitorio", state="abstinencia"),
+    "dormitorio_efecto": dict(cam="Cam_dormitorio", state="efecto"),
+    "dosis": dict(cam="Cam_dosis", state="abstinencia"),
     "plano": dict(cam="Cam_plano", state="plano", res=(360, 360), up=3),
 }
 SHEET = [["sala", "sala_efecto"], ["bano", "entrada"], ["cocina", "dormitorio"]]
