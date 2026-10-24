@@ -1,11 +1,14 @@
 using UnityEngine;
 
 /// <summary>
-/// Lo que la partida va acumulando. Más adelante se guarda en el cuaderno (6.8) y cuenta para
-/// el final (sección 7).
+/// Lo que la partida va acumulando. Se guarda al escribir en el cuaderno (6.8, ver Guardado) y
+/// cuenta para el final (sección 7).
 /// </summary>
 public static class Partida
 {
+    /// <summary>La noche que se está jugando. Por ahora solo existe la Noche 1.</summary>
+    public static int Noche { get; private set; } = 1;
+
     /// <summary>Días sin consumir. La Noche 1 es el primero.</summary>
     public static int DiasLimpio { get; private set; } = 1;
 
@@ -22,6 +25,7 @@ public static class Partida
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     public static void Reiniciar()
     {
+        Noche = 1;
         DiasLimpio = 1;
         Dosis = 0;
         Dependencia = 0;

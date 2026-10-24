@@ -510,6 +510,7 @@ def build_materials():
         "vidrio_verde": S("VidrioVerde", (0.05, 0.13, 0.05), rough=0.1, spec=0.7),
         "vidrio_ambar": S("VidrioAmbar", (0.22, 0.09, 0.02), rough=0.1, spec=0.7),
         "botella_agua": S("BotellaAgua", (0.42, 0.52, 0.58), rough=0.15, spec=0.6),
+        "agua": S("Agua", (0.55, 0.66, 0.72), rough=0.1, spec=0.7),
         "jeringa": S("Jeringa", (0.78, 0.78, 0.74), rough=0.25, spec=0.5),
         "media": S("Media", (0.66, 0.64, 0.55), rough=0.95, spec=0.1),
         "media_franja": S("MediaFranja", (0.40, 0.08, 0.06), rough=0.95, spec=0.1),
@@ -669,6 +670,16 @@ def empty(name, loc, rot=(0, 0, 0)):
 def parent(children, root):
     for c in children:
         c.parent = root
+    return root
+
+
+def group(name, origin, children):
+    """Junta piezas sueltas (ubicadas en el mundo) bajo un vacio en origin, sin moverlas: para
+    llevarlas juntas (un rastro que Elias recoge). El vacio no gira, asi que basta con restar."""
+    root = empty(name, origin)
+    for c in children:
+        c.parent = root
+        c.location = Vector(c.location) - Vector(origin)
     return root
 
 
@@ -1034,23 +1045,28 @@ def sala(M):
     box("marca_cuadro", (1.25, 4.197, 1.30), (1.85, 4.2, 1.75), M["papel_marca"], uv=(4.0, 4.0, H))
     box("clavo", (1.545, 4.17, 1.72), (1.555, 4.2, 1.73), M["metal_oscuro"])
 
-    # Lo que dejo el consumo: en la mesa de centro y alrededor
-    cyl("cenicero", (1.55, 2.62, 0.42), 0.06, 0.02, M["vidrio"])
+    # Lo que dejo el consumo: en la mesa de centro y alrededor. Cada rastro es un objeto, o un
+    # vacio con sus piezas, con el origen en su base: en la Noche 1 Elias los recoge (los clips
+    # recoger_mesa y recoger_piso de brazos_animaciones.py)
+    piezas = [cyl("cenicero_vidrio", (1.55, 2.62, 0.42), 0.06, 0.02, M["vidrio"])]
     for i in range(6):
         a = rng.uniform(0, 2 * math.pi)
-        cyl(f"colilla_{i}", (1.55 + 0.03 * math.cos(a), 2.62 + 0.03 * math.sin(a), 0.445), 0.005, 0.028,
-            M["colilla"], rot=(R(90), 0, a), seg=5)
-    mesh_obj("cuchara", lambda bm: bmesh.ops.create_icosphere(bm, subdivisions=1, radius=1.0), M["metal"],
-             loc=(1.78, 2.80, 0.428), scale=(0.022, 0.016, 0.006))
-    mesh_obj("cuchara_hollin", lambda bm: bmesh.ops.create_icosphere(bm, subdivisions=1, radius=1.0), M["negro"],
-             loc=(1.78, 2.80, 0.4245), scale=(0.018, 0.013, 0.004))
-    box("cuchara_mango", (1.80, 2.796, 0.424), (1.93, 2.806, 0.428), M["metal"], rot=(0, 0, R(12)))
+        piezas.append(cyl(f"colilla_{i}", (1.55 + 0.03 * math.cos(a), 2.62 + 0.03 * math.sin(a), 0.445), 0.005,
+                          0.028, M["colilla"], rot=(R(90), 0, a), seg=5))
+    group("cenicero", (1.55, 2.62, 0.42), piezas)
+    group("cuchara", (1.84, 2.80, 0.42), [
+        mesh_obj("cuchara_cazo", lambda bm: bmesh.ops.create_icosphere(bm, subdivisions=1, radius=1.0), M["metal"],
+                 loc=(1.78, 2.80, 0.428), scale=(0.022, 0.016, 0.006)),
+        mesh_obj("cuchara_hollin", lambda bm: bmesh.ops.create_icosphere(bm, subdivisions=1, radius=1.0),
+                 M["negro"], loc=(1.78, 2.80, 0.4245), scale=(0.018, 0.013, 0.004)),
+        box("cuchara_mango", (1.80, 2.796, 0.424), (1.93, 2.806, 0.428), M["metal"], rot=(0, 0, R(12)))])
     syringe("jeringa_mesa", (1.86, 2.57, 0.42), R(-20), M)
     syringe("jeringa_piso", (2.35, 2.62, 0.0), R(70), M)
-    for i, (x, y, yaw) in enumerate(((1.42, 2.88, 0), (1.53, 2.90, 15), (1.64, 2.88, 30), (1.73, 2.85, 45))):
-        box(f"cinturon_{i}", (x - 0.06, y - 0.015, 0.42), (x + 0.06, y + 0.015, 0.424), M["cuero"],
-            pivot=(x, y, 0.42), rot=(0, 0, R(yaw)))
-    box("hebilla", (1.34, 2.865, 0.42), (1.37, 2.895, 0.426), M["laton"])
+    piezas = [box(f"cinturon_{i}", (x - 0.06, y - 0.015, 0.42), (x + 0.06, y + 0.015, 0.424), M["cuero"],
+                  pivot=(x, y, 0.42), rot=(0, 0, R(yaw)))
+              for i, (x, y, yaw) in enumerate(((1.42, 2.88, 0), (1.53, 2.90, 15), (1.64, 2.88, 30), (1.73, 2.85, 45)))]
+    piezas.append(box("hebilla", (1.34, 2.865, 0.42), (1.37, 2.895, 0.426), M["laton"]))
+    group("cinturon", (1.56, 2.875, 0.42), piezas)
     box("encendedor", (1.96, 2.86, 0.42), (2.04, 2.885, 0.435), M["plastico_rojo"], rot=(0, 0, R(-25)))
     bottle("botella_mesa", (2.06, 2.56, 0.42), M["vidrio_ambar"])
     bottle("botella_sofa", (0.42, 3.28, 0.0), M["vidrio_verde"])
@@ -1105,6 +1121,15 @@ def cocina(M):
               M["metal"])
     cyl("llave_agua", (7.14, 0.92, 0.90), 0.012, 0.2, M["metal"], seg=6)
     box("llave_agua_pico", (7.0, 0.91, 1.075), (7.152, 0.93, 1.095), M["metal"])
+    # La manija en cruz, arriba de la llave: gira un cuarto de vuelta para abrir el agua. Su
+    # origen esta en el eje de la llave (ver brazos_animaciones.py, el clip tomar_agua).
+    boxes_obj("llave_agua_manija", [((7.135, 0.915, 1.10), (7.145, 0.925, 1.112)),
+                                    ((7.105, 0.914, 1.112), (7.175, 0.926, 1.124)),
+                                    ((7.134, 0.885, 1.112), (7.146, 0.955, 1.124))],
+              M["metal"], origin=(7.14, 0.92, 1.10))
+    # El chorro: sale de la punta del pico y cae dentro de la taza que se pone abajo. No se ve
+    # en los renders del 4B; en Unity lo muestra el fregadero mientras corre el agua.
+    cyl("chorro_agua", (7.012, 0.92, 0.94), 0.005, 0.135, M["agua"], seg=5).hide_render = True
     # estufa de cuatro hornillas y el tanque de gas
     box("estufa", (6.62, 1.95, 0.0), (7.18, 2.55, 0.88), M["esmalte"])
     box("estufa_respaldo", (7.12, 1.95, 0.88), (7.18, 2.55, 1.0), M["esmalte"])

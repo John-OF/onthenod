@@ -11,6 +11,11 @@ Sonidos (se sintetizan):
   telefono_estatica    la linea sin nadie (6.5): ruido en la banda del telefono, chasquidos y
                        un zumbido de la red electrica. En bucle, sin saltos.
   golpes_puerta        tres golpes con los nudillos en la puerta de entrada, oidos desde adentro
+  llave_manija         la manija de la llave del fregadero al girar: chirrido de metal
+  agua_taza            el agua que cae en la taza (1,75 s, lo que corre en el clip tomar_agua):
+                       el tono sube a medida que la taza se llena; al cerrar, dos gotas
+  taza_loza            la taza de loza contra el fregadero de metal (al tomarla y al dejarla)
+  beber                tres tragos y el aire que sale despues
 
 Voces PROVISIONALES (sintesis de voz de Windows, bajada de tono para que suene masculina).
 Hay que reemplazarlas por voces grabadas:
@@ -211,6 +216,117 @@ def golpes_puerta():
 
 
 # ---------------------------------------------------------------------------
+# El agua del fregadero (el clip tomar_agua de brazos_animaciones.py)
+# ---------------------------------------------------------------------------
+AGUA_CORRE = 1.75  # cuanto corre el agua en el clip (AGUA en brazos_animaciones.py)
+
+
+def filtro_que_cambia(x, centro, ancho=0.3):
+    """Resonancia que se mueve en el tiempo: centro(t) es su frecuencia (Hz) a los t segundos.
+    Se filtra por ventanas que se solapan; ancho es su ancho, en octavas naturales."""
+    n, salto = 1024, 256
+    ventana = np.hanning(n)
+    f = np.maximum(np.fft.rfftfreq(n, 1 / SR), 1.0)
+    largo = np.concatenate([x, np.zeros(n)])
+    y, peso = np.zeros(len(largo)), np.zeros(len(largo))
+    for i in range(0, len(x), salto):
+        g = np.exp(-0.5 * (np.log(f / centro((i + n / 2) / SR)) / ancho) ** 2)
+        y[i:i + n] += np.fft.irfft(np.fft.rfft(largo[i:i + n] * ventana) * g, n) * ventana
+        peso[i:i + n] += ventana ** 2
+    return y[:len(x)] / np.maximum(peso[:len(x)], 1e-3)
+
+
+def suavizar_bordes(x, entra=0.005, sale=0.05):
+    a, b = int(entra * SR), int(sale * SR)
+    x[:a] *= np.linspace(0, 1, a)
+    x[-b:] *= np.linspace(1, 0, b)
+    return x
+
+
+def llave_manija():
+    # El metal se pega y se suelta muchas veces por segundo (stick-slip): un tren de pulsos
+    # que acelera mientras gira, con las resonancias de la llave
+    largo = 0.45
+    t = tiempo(largo)
+    f0 = 150 + 110 * t / largo + 20 * np.sin(2 * np.pi * 6 * t)
+    pulsos = np.maximum(np.sin(2 * np.pi * np.cumsum(f0) / SR), 0) ** 14
+    chirrido = filtro(pulsos, bajo=900, alto=3400, orden=3)
+    roce = filtro(rng.standard_normal(len(t)), bajo=1500, alto=6000) * 0.12
+    temblor = filtro(rng.standard_normal(len(t)), alto=25)
+    temblor = 0.7 + 0.3 * temblor / np.max(np.abs(temblor))
+    x = (chirrido / np.max(np.abs(chirrido)) + roce) * np.sin(np.pi * t / largo) ** 0.6 * temblor
+    guardar("llave_manija", eco(suavizar_bordes(x), cola=0.3, mezcla=0.2))
+
+
+def gota(f=2100):
+    t = tiempo(0.12)
+    barrido = f * (1 + 0.6 * np.exp(-t / 0.01))  # la gota "plink": el tono cae al principio
+    return np.sin(2 * np.pi * np.cumsum(barrido) / SR) * np.exp(-t / 0.025)
+
+
+def agua_taza():
+    largo = AGUA_CORRE + 0.5
+    n = int(largo * SR)
+    t = np.arange(n) / SR
+    corre = t < AGUA_CORRE
+    # el chorro: ruido que borbotea al azar, sin los agudos (si no, suena a estatica)
+    borboteo = filtro(rng.standard_normal(n), alto=35)
+    borboteo /= np.max(np.abs(borboteo))
+    chorro = filtro(rng.standard_normal(n), bajo=400, alto=2500, orden=3) * (0.7 + 0.3 * borboteo)
+    # la taza se llena: su resonancia sube de 380 a 1500 Hz
+    subida = lambda s: 380 * (1500 / 380) ** min(s / AGUA_CORRE, 1.0)  # noqa: E731
+    llena = filtro_que_cambia(rng.standard_normal(n), subida)
+    # burbujas: cada una es un "plip" corto cuyo tono sube, cerca de la resonancia de la taza
+    burbujas = np.zeros(n)
+    for _ in range(int(AGUA_CORRE * 45)):
+        en = rng.uniform(0.0, AGUA_CORRE - 0.03)
+        f = subida(en) * rng.uniform(1.2, 2.2)
+        tb = tiempo(rng.uniform(0.012, 0.03))
+        plip = np.sin(2 * np.pi * np.cumsum(f * (1 + 0.5 * tb / tb[-1])) / SR) * np.exp(-tb / (tb[-1] / 3))
+        mezclar(burbujas, plip * rng.uniform(0.3, 1.0), en)
+    # las canerias viejas del edificio
+    canerias = filtro(rng.standard_normal(n), bajo=60, alto=180)
+    x = (0.25 * chorro / np.max(np.abs(chorro)) + llena / np.max(np.abs(llena))
+         + 0.6 * burbujas / np.max(np.abs(burbujas)) + 0.2 * canerias / np.max(np.abs(canerias)))
+    x = filtro(x, alto=4500)
+    entra = np.minimum(1.0, t / 0.03)
+    sale = np.clip((AGUA_CORRE - t) / 0.12, 0.0, 1.0)  # la llave se cierra
+    x *= entra * np.where(corre, 1.0, sale)
+    mezclar(x, gota(2300) * 0.35, AGUA_CORRE + 0.12)
+    mezclar(x, gota(1900) * 0.25, AGUA_CORRE + 0.31)
+    guardar("agua_taza", eco(x, cola=0.35, mezcla=0.2), pico=0.75)
+
+
+def taza_loza():
+    # la loza: parciales agudos que se apagan rapido; el fregadero: un golpe de metal sordo
+    largo = 0.45
+    s = np.zeros(int(largo * SR))
+    for f, a, d in ((2380, 1.0, 0.07), (3950, 0.6, 0.045), (5650, 0.35, 0.03), (430, 0.5, 0.03)):
+        s += a * golpe(f * rng.uniform(0.99, 1.01), d, largo, rng.uniform(0, 2 * np.pi))
+    t = tiempo(largo)
+    s += filtro(rng.standard_normal(len(t)), bajo=1200, alto=7000) * np.exp(-t / 0.003) * 0.6
+    guardar("taza_loza", eco(s, cola=0.3, mezcla=0.2))
+
+
+def trago():
+    t = tiempo(0.3)
+    garganta = np.sin(2 * np.pi * np.cumsum(260 - 120 * np.minimum(t / 0.08, 1)) / SR) * np.exp(-t / 0.05)
+    humedo = filtro(rng.standard_normal(len(t)), bajo=700, alto=3000) * np.exp(-t / 0.012) * 0.5
+    return garganta + humedo
+
+
+def beber():
+    x = np.zeros(int(1.4 * SR))
+    for en, fuerza in ((0.05, 1.0), (0.42, 0.9), (0.78, 0.8)):
+        mezclar(x, trago() * fuerza, en + rng.uniform(-0.02, 0.02))
+    # el aire que sale por la nariz despues de beber
+    t = tiempo(0.45)
+    aire = filtro(rng.standard_normal(len(t)), bajo=300, alto=2500) * np.sin(np.pi * t / 0.45) ** 2 * 0.35
+    mezclar(x, aire, 0.95)
+    guardar("beber", suavizar_bordes(x), pico=0.8)
+
+
+# ---------------------------------------------------------------------------
 # Voces provisionales
 # ---------------------------------------------------------------------------
 def voz(nombre, texto, tono=0.8, detras_de_puerta=False):
@@ -242,6 +358,10 @@ def main():
     telefono_colgar()
     telefono_estatica()
     golpes_puerta()
+    llave_manija()
+    agua_taza()
+    taza_loza()
+    beber()
     if "--sin-voces" not in sys.argv:
         voz("voz_tomas_otra_vez_sin_dormir", "¿Otra vez sin dormir?")
         voz("voz_eli_abreme", "Eli... ábreme.", detras_de_puerta=True)

@@ -18,6 +18,16 @@ Clips (30 cuadros por segundo):
   sacar_dosis         4.0 s: se arrodilla junto al colchon, apoya la izquierda, saca de abajo
                       la media con la jeringa y la levanta frente a la cara (la dosis de la
                       Noche 1; en Unity sigue un corte a negro)
+  tomar_agua          8.6 s: en el fregadero de la cocina, toma con la izquierda la taza sucia,
+                      la pone bajo la llave, abre el agua con la derecha (la manija en cruz), la
+                      cierra, bebe y deja la taza donde estaba (Noche 1, el tutorial)
+  tomar_cuaderno      3.6 s: se agacha frente a la mesa de centro, toma el cuaderno por el borde
+                      y lo levanta frente a la cara (en Unity sigue un corte a negro: escribe y
+                      se guarda la partida)
+  recoger_mesa        3.0 s: se agacha, recoge algo chico de la mesa de centro y lo guarda (la
+                      mano baja fuera de cuadro). Hecho con la jeringa de la mesa; en Unity sirve
+                      para cualquier rastro sobre la mesa (Noche 1: limpiar)
+  recoger_piso        3.4 s: igual, de rodillas, del piso. Hecho con la jeringa del piso de la sala
 
 Requiere scenes/departamento_4b.blend y scenes/brazos_primera_persona.blend
 (se generan con departamento_4b.py y brazos_primera_persona.py).
@@ -36,11 +46,13 @@ Salidas (dentro de la carpeta blender/):
 
 Y en el proyecto de Unity (ver exportar_unity.py):
   unity/Assets/Art/BrazosElias/brazos_elias.fbx          esqueleto, malla, forma "consumido"
-                                                         y los nueve clips (con mirar_brazos)
+                                                         y los trece clips (con mirar_brazos)
   unity/Assets/Art/BrazosElias/brazos_elias_escena.json  luz de los brazos, camara, los cuatro
                                                          estados, los clips y, por clip, el
                                                          movimiento de la cabeza, la puerta,
-                                                         el auricular, la jeringa y la dosis
+                                                         el auricular, la jeringa, la dosis,
+                                                         la taza, la manija de la llave y el
+                                                         cuaderno
   unity/Assets/Art/BrazosElias/Textures/brazos_estado0..3.png
   Para exportar sin renderizar las vistas previas: ... -- blender reposo
 """
@@ -96,6 +108,8 @@ SPREAD = curls((3, 6, 4), (2, 5, 3), (5, 7, 5), (8, 10, 6), (-8, 2, 6))
 GRIP_KNOB = curls((55, 70, 40), (60, 75, 45), (62, 75, 45), (65, 70, 40), (20, 25, 20))
 GRIP_PHONE = curls((50, 60, 35), (55, 65, 40), (58, 65, 40), (60, 60, 35), (25, 20, 15))
 GRIP_SMALL = curls((38, 45, 30), (60, 70, 45), (68, 75, 45), (72, 72, 45), (20, 18, 15))  # pinza: algo chico
+GRIP_CUP = curls((40, 50, 30), (45, 55, 35), (48, 55, 35), (50, 50, 30), (20, 20, 15))     # rodea una taza
+GRIP_EDGE = curls((20, 30, 20), (25, 35, 20), (30, 40, 25), (35, 40, 25), (35, 25, 15))    # el borde del cuaderno
 
 scene = bpy.context.scene
 
@@ -210,6 +224,17 @@ def pose_hang(side):
     def f(ctx):
         G = S_REST[side] + ctx.root + Vector((0.03 * side, 0.11, -0.58))
         return dict(G=G, R=rot.copy(), pole=Vector((0.25 * side, -1, 0.1)).normalized(), curls=RELAX)
+    return f
+
+
+def pose_hang_holding(side, cur):
+    """Brazo colgando, fuera de cuadro, con algo en la mano (lo guarda en el bolsillo)."""
+    base = pose_hang(side)
+
+    def f(ctx):
+        pose = base(ctx)
+        pose["curls"] = cur
+        return pose
     return f
 
 
@@ -331,9 +356,12 @@ HINGE = Vector((3.40, 5.29, 0.0))           # bisagra de la puerta del dormitori
 KNOB_REL = Vector((0.065, -0.69, 1.01))     # perilla (lado del pasillo) respecto de la bisagra
 DOOR_REST = -28.0                           # asi quedo entreabierta en el 4B
 HS = {}                                     # auricular: centro y matriz en reposo
-# Lo que la mano toma en un clip (la jeringa de la mesa de centro, la dosis bajo el colchon):
-# el punto por donde lo agarra y su matriz en reposo.
+# Lo que la mano toma en un clip (la jeringa de la mesa de centro, la dosis bajo el colchon, la
+# taza del fregadero, el cuaderno): el punto por donde lo agarra y su matriz en reposo.
 AGARRABLES = {}
+# La llave del fregadero: la manija en cruz (gira para abrir) y el chorro (ver departamento_4b.py)
+MANIJA, CHORRO = "llave_agua_manija", "chorro_agua"
+PICO = Vector((7.012, 0.92, 1.075))         # por donde sale el agua
 
 
 def knob_at(angle):
@@ -491,7 +519,7 @@ def clip_tomar_jeringa():
             (3.40, (1.84, 2.12, 1.07), 3.0, -22.0)]
     lean = [(0.0, (0, 0, 0)), (0.8, (0, 0.18, -0.04)), (1.45, (0, 0.18, -0.04)), (2.35, (0, 0.03, 0))]
     return dict(dur=3.4, head=head, lean=lean, arms={1: right, -1: [(0.0, pose_hang(-1))]},
-                objeto=("jeringa_mesa", 1.30))
+                objeto=dict(nombre="jeringa_mesa", agarre=1.30))
 
 
 def clip_sacar_dosis():
@@ -543,7 +571,188 @@ def clip_sacar_dosis():
             (1.40, (2.06, 6.54, 0.62), 88.0, -58.0), (2.00, (2.15, 6.54, 0.66), 89.0, -60.0),
             (2.90, (2.15, 6.54, 0.92), 92.0, -24.0), (4.00, (2.15, 6.54, 0.93), 93.0, -22.0)]
     lean = [(0.0, (0, 0, 0)), (0.8, (0, 0.18, -0.04)), (2.0, (0, 0.18, -0.04)), (2.9, (0, 0.03, 0))]
-    return dict(dur=4.0, head=head, lean=lean, arms={1: right, -1: left}, objeto=("dosis_colchon", 1.40))
+    return dict(dur=4.0, head=head, lean=lean, arms={1: right, -1: left},
+                objeto=dict(nombre="dosis_colchon", agarre=1.40))
+
+
+def manija_angulo(t):
+    """La manija de la llave: un cuarto de vuelta (70 grados) para abrir y de vuelta para cerrar."""
+    if t < 2.15:
+        return 0.0
+    if t < 3.95:
+        return 70.0 * smooth((t - 2.15) / 0.4)
+    return 70.0 * (1.0 - smooth((t - 3.95) / 0.4))
+
+
+AGUA = (2.45, 4.20)  # cuando corre el agua en tomar_agua (segundos)
+
+
+def clip_tomar_agua():
+    """El agua de la Noche 1 (el tutorial, seccion 5): parado frente al fregadero de la cocina,
+    toma con la izquierda la taza sucia que esta en el fregadero, la pone bajo el pico de la llave,
+    abre el agua con la derecha (la manija en cruz, un cuarto de vuelta), la cierra cuando la taza
+    se llena, se endereza y bebe echando la cabeza atras. Despues deja la taza donde estaba."""
+    taza = AGARRABLES["taza_1"]["agarre"]          # el centro de la taza en el fregadero
+    bajo_pico = Vector((PICO.x, PICO.y, 0.975))    # la taza bajo el chorro
+    manija = bpy.data.objects[MANIJA].matrix_world.translation + Vector((0, 0, 0.02))
+
+    # La izquierda rodea la taza por su lado izquierdo: la palma hacia la taza (hacia la derecha
+    # de Elias, que mira hacia +X), los dedos hacia adelante y el pulgar arriba.
+    rot_taza = hand_rot((1.0, -0.15, 0.0), (0.0, -1.0, 0.0), -1)
+
+    def cup(centro, up=0.0, cur=GRIP_CUP):
+        g = centro + Vector((0.0, 0.025, 0.005 + up))
+        return pose_world(lambda t: g, lambda t: rot_taza.copy(), (-0.6, -0.3, -1.0), cur)
+
+    def at_mouth(tilt, centro):
+        # Frente a la cara (un poco adelantada, para que se vea), inclinada hacia la boca
+        rx = Matrix.Rotation(R(tilt), 3, "X")
+        rot = rx @ hand_rot((0.0, 1.0, 0.0), (1.0, 0.0, 0.0), -1)
+        return pose_rig(Vector(centro) + rx @ Vector((-0.025, 0.0, 0.005)), rot, (-0.6, -0.4, -1.0), GRIP_CUP)
+
+    # La derecha agarra la manija desde arriba, la palma abajo, y la gira con ella
+    def handle(up=0.0, cur=GRIP_KNOB):
+        base = hand_rot((math.cos(R(-40)), math.sin(R(-40)), -0.35), (0, 0, -1), 1)
+
+        def r_fn(t):
+            return Matrix.Rotation(R(manija_angulo(t)), 3, "Z") @ base
+        return pose_world(lambda t: manija + Vector((0, 0, up)), r_fn, (0.6, -0.2, -1.0), cur)
+
+    left = [
+        (0.0, pose_hang(-1)),
+        (0.85, cup(taza, up=0.06, cur=OPEN)),
+        (1.05, cup(taza, cur=OPEN)),
+        (1.25, cup(taza)),                          # la agarra
+        (1.45, cup(taza, up=0.06)),
+        (2.05, cup(bajo_pico)),                     # bajo el chorro
+        (4.40, cup(bajo_pico)),
+        (4.65, cup(bajo_pico + Vector((-0.12, 0.02, 0.0)))),   # la saca de abajo del pico
+        (5.15, at_mouth(10.0, (0.0, 0.25, -0.08))),            # la mira: llena
+        (5.60, at_mouth(50.0, (0.0, 0.16, -0.075))),
+        (6.25, at_mouth(85.0, (0.0, 0.14, -0.065))),           # bebe
+        (6.60, at_mouth(30.0, (0.0, 0.18, -0.11))),
+        (7.30, cup(taza, up=0.04)),
+        (7.45, cup(taza)),                          # la deja
+        (7.60, cup(taza, cur=OPEN)),
+        (7.80, cup(taza, up=0.05, cur=OPEN)),
+        (8.60, pose_hang(-1)),
+    ]
+    right = [
+        (0.0, pose_hang(1)),
+        (1.45, pose_hang(1)),
+        (1.95, handle(up=0.07, cur=OPEN)),
+        (2.08, handle(cur=OPEN)),
+        (2.15, handle()),                           # agarra la manija y abre (manija_angulo)
+        (4.35, handle()),                           # ya la cerro
+        (4.45, handle(up=0.05, cur=OPEN)),
+        (5.10, pose_hang(1)),
+        (8.60, pose_hang(1)),
+    ]
+    # Inclinado sobre el fregadero (la llave queda al fondo: para alcanzarla se inclina mas); se
+    # endereza para beber y se vuelve a inclinar para dejar la taza
+    head = [(0.0, (6.25, 0.98, 1.58), -90.0, -30.0), (0.80, (6.45, 1.00, 1.38), -80.0, -58.0),
+            (1.30, (6.45, 1.00, 1.38), -80.0, -56.0), (2.00, (6.60, 0.98, 1.32), -92.0, -34.0),
+            (4.45, (6.60, 0.98, 1.32), -92.0, -33.0), (5.20, (6.30, 0.98, 1.56), -90.0, -4.0),
+            (6.25, (6.29, 0.98, 1.57), -90.0, 18.0), (6.70, (6.30, 0.98, 1.56), -88.0, -10.0),
+            (7.40, (6.43, 1.00, 1.40), -80.0, -55.0), (7.80, (6.43, 1.00, 1.40), -80.0, -52.0),
+            (8.60, (6.27, 0.98, 1.57), -88.0, -25.0)]
+    lean = [(0.0, (0, 0, 0)), (0.8, (0, 0.16, -0.04)), (1.3, (0, 0.16, -0.04)), (2.0, (0, 0.20, -0.04)),
+            (4.45, (0, 0.20, -0.04)), (5.2, (0, 0.02, 0)), (6.7, (0, 0.02, 0)), (7.4, (0, 0.16, -0.04)),
+            (7.8, (0, 0.16, -0.04)), (8.6, (0, 0, 0))]
+    return dict(dur=8.6, head=head, lean=lean, arms={1: right, -1: left},
+                objeto=dict(nombre="taza_1", agarre=1.25, mano="hand.L", suelta=7.45),
+                manija=manija_angulo, agua=AGUA)
+
+
+def clip_tomar_cuaderno():
+    """El cuaderno (6.8): se agacha frente a la mesa de centro, toma el cuaderno por el borde de
+    adelante y lo levanta frente a la cara, con la tapa hacia el. En Unity sigue un corte a negro:
+    Elias escribe y se guarda la partida."""
+    c = AGARRABLES["cuaderno"]["agarre"]
+    yaw = bpy.data.objects["cuaderno"].matrix_world.to_euler().z
+
+    def on_table(up=0.0, cur=OPEN):
+        # La mano sobre el borde, la palma abajo y los dedos hacia el otro lado del cuaderno
+        rot = hand_rot((-math.sin(yaw) * 0.8, math.cos(yaw) * 0.8, -0.55), (0, 0, -1), 1)
+        return pose_world(lambda t: c + Vector((0, 0, up)), lambda t: rot.copy(), (0.6, -0.3, -1.0), cur)
+
+    def in_view(dx=0.0):
+        # Los dedos hacia arriba y el dorso hacia la cara: el cuaderno queda parado frente a
+        # los ojos, con la tapa hacia Elias, un poco echado hacia atras
+        rot = hand_rot((-0.15, 0.6, 1.0), (0.1, 1.0, -0.6), 1)
+        return pose_rig((0.05 + dx, 0.42, -0.15), rot, (0.6, -0.4, -1.0), GRIP_EDGE)
+
+    right = [
+        (0.0, pose_hang(1)),
+        (0.85, on_table(up=0.07)),
+        (1.05, on_table(up=0.01)),
+        (1.30, on_table(up=0.01, cur=GRIP_EDGE)),   # lo agarra
+        (1.45, on_table(up=0.04, cur=GRIP_EDGE)),
+        (2.40, in_view()),
+        (3.60, in_view(dx=-0.01)),
+    ]
+    head = [(0.0, (1.19, 1.98, 1.58), 0.0, -34.0), (0.80, (1.19, 2.20, 0.99), -2.0, -62.0),
+            (1.45, (1.19, 2.24, 0.97), -2.0, -60.0), (2.40, (1.19, 2.12, 1.08), 1.0, -16.0),
+            (3.60, (1.19, 2.12, 1.09), 2.0, -14.0)]
+    lean = [(0.0, (0, 0, 0)), (0.8, (0, 0.18, -0.04)), (1.45, (0, 0.18, -0.04)), (2.4, (0, 0.03, 0))]
+    return dict(dur=3.6, head=head, lean=lean, arms={1: right, -1: [(0.0, pose_hang(-1))]},
+                objeto=dict(nombre="cuaderno", agarre=1.30))
+
+
+def clip_recoger_mesa():
+    """Limpiar los rastros del consumo (Noche 1, el tutorial): se agacha frente a la mesa de
+    centro, recoge algo chico con la derecha y lo guarda (la mano baja fuera de cuadro). Se hizo
+    con la jeringa de la mesa, tomada por su origen; en Unity se lleva a cualquier rastro de la
+    mesa (la cuchara, el cenicero, el cinturon...), girado hacia el lado desde donde viene Elias."""
+    c = AGARRABLES["jeringa_mesa"]["reposo"].translation + Vector((0, 0, 0.004))
+
+    def on_table(up=0.0, cur=OPEN):
+        rot = hand_rot((0.15, 0.75, -0.65), (0, 0, -1), 1)  # dedos hacia la mesa, palma abajo
+        return pose_world(lambda t: c + Vector((0, 0, up)), lambda t: rot.copy(), (0.6, -0.3, -1.0), cur)
+
+    right = [
+        (0.0, pose_hang(1)),
+        (0.80, on_table(up=0.07)),
+        (1.00, on_table(up=0.012)),
+        (1.20, on_table(up=0.012, cur=GRIP_SMALL)),   # lo agarra
+        (1.40, on_table(up=0.05, cur=GRIP_SMALL)),
+        (2.20, pose_hang_holding(1, GRIP_SMALL)),     # al bolsillo
+        (3.00, pose_hang(1)),
+    ]
+    head = [(0.0, (1.86, 1.98, 1.58), 0.0, -32.0), (0.80, (1.84, 2.18, 1.00), -2.0, -62.0),
+            (1.40, (1.84, 2.20, 0.99), -2.0, -60.0), (2.20, (1.85, 2.06, 1.40), 0.0, -35.0),
+            (3.00, (1.86, 1.98, 1.58), 0.0, -28.0)]
+    lean = [(0.0, (0, 0, 0)), (0.8, (0, 0.18, -0.04)), (1.4, (0, 0.18, -0.04)), (2.2, (0, 0.03, 0)), (3.0, (0, 0, 0))]
+    return dict(dur=3.0, head=head, lean=lean, arms={1: right, -1: [(0.0, pose_hang(-1))]},
+                objeto=dict(nombre="jeringa_mesa", agarre=1.20))
+
+
+def clip_recoger_piso():
+    """Como recoger_mesa, pero del piso: se arrodilla, recoge algo chico y lo guarda. Se hizo con
+    la jeringa del piso de la sala; en Unity se lleva a cualquier rastro del piso (la jeringa
+    junto al colchon)."""
+    c = AGARRABLES["jeringa_piso"]["reposo"].translation + Vector((0, 0, 0.004))
+
+    def on_floor(up=0.0, cur=OPEN):
+        rot = hand_rot((0.1, 0.6, -0.8), (0, 0, -1), 1)
+        return pose_world(lambda t: c + Vector((0, 0, up)), lambda t: rot.copy(), (0.6, -0.3, -1.0), cur)
+
+    right = [
+        (0.0, pose_hang(1)),
+        (0.95, on_floor(up=0.07)),
+        (1.15, on_floor(up=0.01)),
+        (1.35, on_floor(up=0.01, cur=GRIP_SMALL)),    # lo agarra
+        (1.55, on_floor(up=0.05, cur=GRIP_SMALL)),
+        (2.40, pose_hang_holding(1, GRIP_SMALL)),     # al bolsillo
+        (3.40, pose_hang(1)),
+    ]
+    # De rodillas: la cabeza baja hasta 66 cm, como al sacar la dosis de abajo del colchon
+    head = [(0.0, (2.35, 2.02, 1.58), 0.0, -42.0), (0.90, (2.35, 2.30, 0.66), -2.0, -62.0),
+            (1.55, (2.35, 2.31, 0.66), -2.0, -60.0), (2.40, (2.35, 2.16, 1.05), 0.0, -35.0),
+            (3.40, (2.35, 2.02, 1.57), 0.0, -28.0)]
+    lean = [(0.0, (0, 0, 0)), (0.9, (0, 0.18, -0.04)), (1.55, (0, 0.18, -0.04)), (2.4, (0, 0.03, 0)), (3.4, (0, 0, 0))]
+    return dict(dur=3.4, head=head, lean=lean, arms={1: right, -1: [(0.0, pose_hang(-1))]},
+                objeto=dict(nombre="jeringa_piso", agarre=1.35))
 
 
 CLIPS = {
@@ -554,8 +763,13 @@ CLIPS = {
     "telefono_colgar": clip_telefono_colgar,
     "tomar_jeringa": clip_tomar_jeringa,
     "sacar_dosis": clip_sacar_dosis,
+    "tomar_agua": clip_tomar_agua,
+    "tomar_cuaderno": clip_tomar_cuaderno,
+    "recoger_mesa": clip_recoger_mesa,
+    "recoger_piso": clip_recoger_piso,
 }
-PREVIEW = ["mirar_manos", "abrir_puerta", "telefono_contestar", "telefono_colgar", "tomar_jeringa", "sacar_dosis"]
+PREVIEW = ["mirar_manos", "abrir_puerta", "telefono_contestar", "telefono_colgar", "tomar_jeringa", "sacar_dosis",
+           "tomar_agua", "tomar_cuaderno", "recoger_mesa", "recoger_piso"]
 
 
 def nframes(dur):
@@ -641,10 +855,38 @@ def bake_clip(rig, head, door, name, clip):
         door_act.use_fake_user = True
         door.animation_data.action = None
         door.rotation_euler.z = R(DOOR_REST)
+
+    # La manija de la llave gira; el chorro se ve mientras corre el agua
+    manija_act = chorro_act = None
+    if clip.get("manija"):
+        manija = bpy.data.objects[MANIJA]
+        manija.animation_data_create()
+        manija.animation_data.action = None
+        for f in range(1, n + 1):
+            manija.rotation_euler.z = R(clip["manija"]((f - 1) / FPS))
+            manija.keyframe_insert("rotation_euler", index=2, frame=f)
+        manija_act = manija.animation_data.action
+        manija_act.name = "manija_" + name
+        manija_act.use_fake_user = True
+        manija.animation_data.action = None
+        manija.rotation_euler.z = 0.0
+    if clip.get("agua"):
+        chorro = bpy.data.objects[CHORRO]
+        chorro.animation_data_create()
+        chorro.animation_data.action = None
+        desde, hasta = clip["agua"]
+        for f in range(1, n + 1):
+            chorro.hide_render = not desde <= (f - 1) / FPS < hasta
+            chorro.keyframe_insert("hide_render", frame=f)
+        chorro_act = chorro.animation_data.action
+        chorro_act.name = "chorro_" + name
+        chorro_act.use_fake_user = True
+        chorro.animation_data.action = None
+        chorro.hide_render = True
     lado = "derecho" if REACH.get("lado", 1) > 0 else "izquierdo"
     print(f"[clip] {name}: {n} cuadros; alcance sobrante {-REACH['max'] * 100:.1f} cm (brazo {lado}); "
           f"desfase del hombro {up_loc * 1000:.2f} mm")
-    return dict(action=act, head=head_act, door=door_act, frames=n)
+    return dict(action=act, head=head_act, door=door_act, manija=manija_act, chorro=chorro_act, frames=n)
 
 
 def bake_tremor(rig):
@@ -717,6 +959,13 @@ def preview_setup(rig, head, door, handset, info, tremor, clip):
         if ob.animation_data:
             ob.animation_data.action = None
         ob.matrix_world = a["reposo"]
+    for nombre, clave in ((MANIJA, "manija"), (CHORRO, "chorro")):
+        ob = bpy.data.objects[nombre]
+        ob.animation_data_create()
+        ob.animation_data.action = info[clave]
+        if info[clave] is None:
+            ob.rotation_euler.z = 0.0
+            ob.hide_render = nombre == CHORRO
     scene.frame_start, scene.frame_end = 1, info["frames"]
 
 
@@ -726,11 +975,12 @@ def bake_handset(rig, handset, info, clip, store):
     return bake_follow(rig, handset, HS["rest"], info, grab, release, store)
 
 
-def bake_follow(rig, ob, rest, info, grab, release, store):
-    """El objeto sigue a la mano derecha mientras esta agarrado (se hornea con el temblor
-    incluido). grab o release en None: lo agarro en otro clip o no lo suelta. store guarda
-    donde lo agarro la mano, para soltarlo en otro clip (el auricular)."""
-    pb = rig.pose.bones["hand.R"]
+def bake_follow(rig, ob, rest, info, grab, release, store, mano="hand.R"):
+    """El objeto sigue a la mano mientras esta agarrado (se hornea con el temblor incluido).
+    grab o release en None: lo agarro en otro clip o no lo suelta. Con los dos, lo tiene en la
+    mano entre uno y otro, y al soltarlo vuelve a su reposo (la mano lo deja donde lo tomo: la
+    taza). store guarda donde lo agarro la mano, para soltarlo en otro clip (el auricular)."""
+    pb = rig.pose.bones[mano]
     ob.animation_data_create()
     ob.animation_data.action = None
     ob.rotation_mode = "QUATERNION"
@@ -741,7 +991,10 @@ def bake_follow(rig, ob, rest, info, grab, release, store):
         hand_w = rig.matrix_world @ pb.matrix
         if f_grab is not None and f == f_grab:
             store["offset"] = hand_w.inverted() @ rest
-        held = (f_grab is not None and f >= f_grab) or (f_rel is not None and f <= f_rel)
+        if f_grab is not None and f_rel is not None:
+            held = f_grab <= f < f_rel
+        else:
+            held = (f_grab is not None and f >= f_grab) or (f_rel is not None and f <= f_rel)
         m = hand_w @ store["offset"] if held else rest
         loc, rot, _s = m.decompose()
         ob.location, ob.rotation_quaternion = loc, rot
@@ -810,11 +1063,16 @@ def setup_scene():
     HS["center"], HS["rest"] = c, hs.matrix_world.copy()
 
     # Lo que la mano agarra. La jeringa de la mesa de centro, por el medio del cuerpo; la dosis
-    # bajo el colchon, por la parte de la media que asoma (cerca de la punta).
+    # bajo el colchon, por la parte de la media que asoma (cerca de la punta); la taza del
+    # fregadero, por su centro (la mano la rodea); el cuaderno, por el borde de adelante, sobre
+    # la tapa.
     body = bpy.data.objects["jeringa_mesa_cuerpo"]
     co = [body.matrix_world @ v.co for v in body.data.vertices]
     agarres = {"jeringa_mesa": Vector([(min(p[i] for p in co) + max(p[i] for p in co)) / 2 for i in range(3)]),
-               "dosis_colchon": bpy.data.objects["dosis_colchon"].matrix_world @ Vector((0.0, -0.075, 0.0216))}
+               "dosis_colchon": bpy.data.objects["dosis_colchon"].matrix_world @ Vector((0.0, -0.075, 0.0216)),
+               "jeringa_piso": bpy.data.objects["jeringa_piso"].matrix_world.translation.copy(),
+               "taza_1": bpy.data.objects["taza_1"].matrix_world @ Vector((0.0, 0.0, 0.045)),
+               "cuaderno": bpy.data.objects["cuaderno"].matrix_world @ Vector((0.0, -0.12, 0.015))}
     for nombre, agarre in agarres.items():
         ob = bpy.data.objects[nombre]
         ob.rotation_mode = "QUATERNION"
@@ -936,9 +1194,10 @@ def main():
         if clip.get("handset"):
             bake_handset(rig, handset, info, clip, store).name = "auricular_" + name
         if clip.get("objeto"):
-            nombre, grab = clip["objeto"]
-            bake_follow(rig, bpy.data.objects[nombre], AGARRABLES[nombre]["reposo"], info, grab, None,
-                        {}).name = nombre + "_" + name
+            o = clip["objeto"]
+            nombre = o["nombre"]
+            bake_follow(rig, bpy.data.objects[nombre], AGARRABLES[nombre]["reposo"], info, o["agarre"],
+                        o.get("suelta"), {}, o.get("mano", "hand.R")).name = nombre + "_" + name
         if ONLY and name not in ONLY:
             continue
         v = render_preview(name, info["frames"], ffmpeg)
@@ -995,43 +1254,50 @@ def cargar_imagen(nombre):
 def exportar_a_unity(rig, head, door, handset, infos, clips):
     """Un solo FBX con el esqueleto, la malla y los clips. En Unity los brazos cuelgan de la
     camara, asi que se exportan con la cabeza en el origen. El movimiento de la cabeza (la
-    camara de Unity), de la puerta, del auricular, de la jeringa y de la dosis en cada clip va
-    en el JSON, cuadro a cuadro: lo usa la camara de interaccion. La pista de lo que la mano
-    agarra en el clip (la jeringa, la dosis) dice ademas con que mano y desde cuando: desde ahi,
-    Unity lo pega a la mano, para que tiemble con ella."""
+    camara de Unity), de la puerta, de la manija de la llave, del auricular y de lo que se agarra
+    en cada clip va en el JSON, cuadro a cuadro: lo usa la camara de interaccion. La pista de lo
+    que la mano agarra en el clip (la jeringa, la dosis, la taza, el cuaderno) dice ademas con
+    que mano, desde cuando y, si lo suelta, hasta cuando: mientras tanto Unity lo pega a la
+    mano, para que tiemble con ella. El chorro de agua no va: Unity lo muestra por su cuenta."""
     arms = bpy.data.objects["Brazos"]
     rig.animation_data.action = None
     for tr in list(rig.animation_data.nla_tracks):
         rig.animation_data.nla_tracks.remove(tr)
     reset_pose(rig)
 
-    # Puerta, auricular y lo que se agarra en reposo: las pistas se aplican como cambio desde aqui
+    # Puerta, manija de la llave, auricular y lo que se agarra en reposo: las pistas se aplican
+    # como cambio desde aqui
     agarrables = [bpy.data.objects[nombre] for nombre in AGARRABLES]
+    manija = bpy.data.objects[MANIJA]
 
     def en_reposo():
         door.rotation_euler.z = R(DOOR_REST)
+        manija.rotation_euler.z = 0.0
         handset.matrix_world = HS["rest"]
         for ob in agarrables:
             ob.matrix_world = AGARRABLES[ob.name]["reposo"]
         bpy.context.view_layer.update()
 
-    for ob in [door, handset] + agarrables:
+    for ob in [door, manija, handset] + agarrables:
         if ob.animation_data:
             ob.animation_data.action = None
     en_reposo()
-    reposo = {ob.name: exportar_unity.matriz(ob) for ob in [door, handset] + agarrables}
+    reposo = {ob.name: exportar_unity.matriz(ob) for ob in [door, manija, handset] + agarrables}
 
     pistas = []
     for name, info in infos.items():
         n = info["frames"]
         pistas.append({"clip": name, "objeto": head.name, "reposo": [], "matrices": muestrear(head, info["head"], n)})
-        moviles = [(door, info["door"]), (handset, bpy.data.actions.get("auricular_" + name))]
+        moviles = [(door, info["door"]), (manija, info["manija"]), (handset, bpy.data.actions.get("auricular_" + name))]
         moviles += [(ob, bpy.data.actions.get(ob.name + "_" + name)) for ob in agarrables]
         for ob, accion in moviles:
             if accion is not None:
                 pista = {"clip": name, "objeto": ob.name, "reposo": reposo[ob.name], "matrices": muestrear(ob, accion, n)}
-                if clips[name].get("objeto", (None,))[0] == ob.name:
-                    pista["mano"], pista["agarre"] = "hand.R", clips[name]["objeto"][1]
+                o = clips[name].get("objeto")
+                if o and o["nombre"] == ob.name:
+                    pista["mano"], pista["agarre"] = o.get("mano", "hand.R"), o["agarre"]
+                    if o.get("suelta") is not None:
+                        pista["suelta"] = o["suelta"]
                 pistas.append(pista)
     en_reposo()
 

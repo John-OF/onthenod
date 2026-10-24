@@ -224,7 +224,7 @@ Cada capítulo es una noche. Entre noches, Elías despierta en el 4B y escribe e
 | Final | El 4B | El teléfono. | — | ~10 min |
 
 ### Noche 1 — El 4B
-- Elías despierta en el suelo, temblando. Tutorial integrado: buscar agua, ordenar el cuarto, escribir en el cuaderno.
+- Elías despierta en el suelo, temblando. Tutorial integrado: buscar agua, ordenar el cuarto (limpiar los rastros del consumo: las jeringas, la cuchara quemada, el cenicero con las colillas, el cinturón y el encendedor) y escribir en el cuaderno. Lo guían sus pensamientos, sin indicadores (6.9).
 - El teléfono suena; al contestar solo hay estática. (Es su madre; el jugador aún no lo sabe.)
 - Tomás vivo aparece en el sofá: *«¿Otra vez sin dormir?»*. Al voltear, ya no está.
 - Hay droga escondida en el departamento: bajo el colchón, envuelta en una media. Elías la escondió de sí mismo. Primera oportunidad de consumir.
@@ -415,6 +415,7 @@ Hecho el 19 de octubre de 2026. La prueba de estilo está recreada en Unity, en 
 | Shader PS1 | El de todos los objetos: luz difusa sin brillos, temblor de vértices (cada vértice salta de píxel en píxel de la imagen chica) y niebla. | `Rendering/PS1.shader` (`OnTheNod/PS1`) |
 | Niebla iluminada | Las luces iluminan la niebla que tienen cerca: el halo de los focos y la bruma fría del fondo. Imita la niebla volumétrica de Blender. | componente `NieblaPS1` |
 | Máscara de foco | Corta la luz que sale hacia arriba de los focos colgantes: en Blender la tapa la bombilla y el techo encima del foco queda negro. | `Rendering/Foco_Mascara.cubemap` (menú *On the Nod > Crear máscara de foco*) |
+| Texto | Letreros sobre la imagen chica: la pantalla de guardado del cuaderno, al centro, y los pensamientos de Elías, abajo como subtítulos. Se dibujan a 480×270 con una sombra de un píxel, y la pantalla los pone encima del corte a negro, antes de los 15 bits: salen con los mismos píxeles duros y el mismo dithering. | `Scripts/TextoPS1.cs` |
 | Importación | Lo que llega a `Art/` se configura solo: texturas con filtro Point, sin compresión, sin mipmaps y sin reescalar; materiales con el shader PS1 y los colores y la emisión de Blender; los personajes (Tomás, Doña Carmen), como *Humanoid*. En los escenarios, colisión en lo que mide al menos 25 cm, salvo lo que está tirado en el piso y mide menos de 20 cm de alto y 1 m de largo (ropa, cojines caídos, papeles), y todo listo para la luz precalculada. | `Editor/ImportadorArte.cs` |
 
 **Para darle el estilo a una escena nueva:**
@@ -463,17 +464,24 @@ Primer asset del juego (18 de octubre de 2026). Se generan con `blender/scripts/
 | `telefono_colgar` | 1,8 s | Devuelve el auricular a la base y baja la mano. |
 | `tomar_jeringa` | 3,4 s | Una dosis sobre una mesa (20 de octubre de 2026): se agacha frente a la mesa de centro, toma la jeringa con la derecha y la levanta frente a la cara. Ya no es la dosis de la Noche 1; queda para las dosis que estén sobre una mesa. |
 | `sacar_dosis` | 4 s | La dosis de la Noche 1 (23 de octubre de 2026): se arrodilla junto al colchón del dormitorio, apoya la izquierda en el borde, saca de abajo la media con la jeringa y la levanta frente a la cara: por la boca de la media asoma la jeringa. En el juego sigue un corte a negro. |
+| `tomar_agua` | 8,6 s | El agua de la Noche 1 (23 de octubre de 2026). Frente al fregadero de la cocina, toma con la izquierda la taza sucia que está en el fregadero, la pone bajo la llave y abre el agua con la derecha (la manija en cruz gira 70°). Cuando la taza se llena, cierra, se endereza y bebe echando la cabeza atrás. Después se vuelve a inclinar y deja la taza donde estaba. |
+| `tomar_cuaderno` | 3,6 s | El cuaderno (23 de octubre de 2026): se agacha frente a la mesa de centro, toma el cuaderno por el borde de adelante y lo levanta frente a la cara, con la tapa hacia él. En el juego sigue un corte a negro: Elías escribe y se guarda la partida. |
+| `recoger_mesa` | 3 s | Limpiar los rastros del consumo (23 de octubre de 2026): se agacha frente a la mesa de centro, recoge algo chico con la derecha y lo guarda (la mano baja fuera de cuadro). Se hizo con la jeringa de la mesa; en el juego sirve para cualquier rastro de la mesa. |
+| `recoger_piso` | 3,4 s | Igual, de rodillas y del piso. Se hizo con la jeringa del piso de la sala. |
 
 - **Tomar algo chico:** la mano lo agarra con una pinza y, desde ese momento, lo lleva. Como los brazos van pegados a la cabeza, al mirar hacia abajo los hombros se van hacia atrás: para llegar a la mesa de centro, la cabeza se inclina sobre el borde, y para llegar abajo del colchón, que está en el piso, baja hasta 62 cm (de rodillas e inclinado).
 - **La media en la mano:** se agarra por la punta, con los dedos a lo largo de la media. Al levantarla, los dedos apuntan hacia arriba y la palma hacia la cara, así que la media queda parada y se ve de costado, con la jeringa arriba.
+- **La taza:** la izquierda la rodea por su costado, con el pulgar arriba. La llave está al fondo del fregadero: para alcanzar la manija, Elías se inclina sobre el borde de la encimera, con los ojos a 1,32 m. Para beber, la taza se ve un poco más adelante de la boca que en la realidad (si no, quedaría fuera de cuadro) y se inclina hacia la cara mientras la cabeza se echa atrás. La mano la suelta en el mismo lugar donde la tomó, así que la taza vuelve exacta a su lugar.
+- **El chorro:** solo se ve mientras corre el agua (de 2,45 a 4,2 s). En las vistas previas se prende y apaga con el clip; en Unity lo prende el fregadero.
+- **El cuaderno en la mano:** la mano lo toma desde arriba, con la palma sobre la tapa. Al levantarlo, los dedos apuntan hacia arriba y el dorso hacia la cara: se ve la tapa, con la mano abajo, sobre el borde.
 - **Cámara de interacción:** abrir una puerta o contestar el teléfono mueve la cámara a un punto fijo frente al objeto (inclinado sobre la mesita, frente a la perilla), y desde ahí corre la animación. Así la mano siempre llega al objeto.
 - **Luz de los brazos:** una luz tenue pegada a la cámara, que solo ilumina los brazos, para que se lean en los cuartos oscuros.
 
 **En Unity** (19 de octubre de 2026). Los exporta `brazos_animaciones.py` (no `brazos_primera_persona.py`), porque es el que junta el modelo con los clips: `Assets/Art/BrazosElias/` tiene `brazos_elias.fbx`, las cuatro texturas y `brazos_elias_escena.json`. La escena de prueba es `Assets/Scenes/PruebaBrazosElias.unity`: el 4B con los brazos colgando de la cámara.
-- **El FBX:** esqueleto genérico con su *Avatar*, la malla con la forma `consumido` y los nueve clips (`reposo`, `temblor`, `mirar_manos`, `abrir_puerta`, `telefono_contestar`, `telefono_colgar`, `tomar_jeringa`, `sacar_dosis` y la pose `mirar_brazos`). `reposo` y `temblor` van en bucle.
+- **El FBX:** esqueleto genérico con su *Avatar*, la malla con la forma `consumido` y los trece clips (`reposo`, `temblor`, `mirar_manos`, `abrir_puerta`, `telefono_contestar`, `telefono_colgar`, `tomar_jeringa`, `sacar_dosis`, `tomar_agua`, `tomar_cuaderno`, `recoger_mesa`, `recoger_piso` y la pose `mirar_brazos`). `reposo` y `temblor` van en bucle. Cuando se agrega un clip, hay que sumarlo a la lista `clips` del componente `BrazosElias` de la escena.
 - **El temblor:** va en una capa aditiva. El clip trae un cuadro de reposo antes del primero, y Unity lo usa como referencia de la capa; así el temblor se suma sin mover la pose de base.
 - **Los cuatro estados** están en el JSON: la textura de cada uno y el valor de `consumido` (0, 0, 0,45 y 1; en Unity el *blendshape* va de 0 a 100). Los define `brazos_primera_persona.py`, que los guarda en el `.blend`.
-- **La cámara de interacción:** el JSON trae, para cada clip y cuadro a cuadro, dónde está la cabeza (la cámara de Unity), y cómo se mueven la puerta del dormitorio, el auricular, la jeringa de la mesa y la dosis bajo el colchón. La cabeza está en las coordenadas del 4B. La luz de los brazos y la cámara van relativas a la cabeza. La pista de lo que la mano agarra (la jeringa, la dosis) dice además con qué mano se agarra y desde qué segundo: desde ahí, Unity lo pega a esa mano, para que tiemble con ella.
+- **La cámara de interacción:** el JSON trae, para cada clip y cuadro a cuadro, dónde está la cabeza (la cámara de Unity), y cómo se mueven la puerta del dormitorio, la manija de la llave, el auricular, la jeringa de la mesa, la dosis bajo el colchón, la taza y el cuaderno. La cabeza está en las coordenadas del 4B. La luz de los brazos y la cámara van relativas a la cabeza. La pista de lo que la mano agarra dice además con qué mano se agarra (la taza va en la izquierda), desde qué segundo y, si la suelta, hasta cuál: mientras tanto, Unity lo pega a esa mano, para que tiemble con ella; después vuelve a seguir su pista. El chorro de agua no va en el JSON: lo prende el fregadero de Unity.
 - **Comparación con Blender:** cuatro cuadros de las vistas previas (`anim_*_claves.png`), con la cámara, la puerta y el auricular siguiendo esas pistas y el temblor sumado. Cada píxel difiere en promedio entre 4 y 6 niveles de 255; las manos y los dedos coinciden, y lo único distinto es la luz que falta en el fondo del pasillo (la precalculada del 4B).
 
 ### Tomás
@@ -560,6 +568,8 @@ Segundo asset (18 de octubre de 2026). Se genera con `blender/scripts/departamen
 - **La contestadora** tiene la luz roja encendida: hay mensajes sin escuchar.
 - **Los pies bajo la puerta.** Cuando tocan (Noche 1), la luz del pasillo que entra por debajo de la puerta se corta en dos sombras. Por la mirilla no hay nadie.
 - **El cuaderno** (donde se guarda la partida) está en la mesa de centro, junto a la cuchara quemada, la jeringa y el cinturón. Esa jeringa está vacía: es parte del desorden.
+- **Los rastros del consumo** (23 de octubre de 2026): la jeringa, la cuchara quemada, el cenicero con las colillas, el cinturón y el encendedor de la mesa de centro, la jeringa del piso de la sala y la que está junto al colchón. Cada uno es un solo objeto con el origen en su base: la cuchara, el cenicero y el cinturón juntan sus piezas bajo un vacío. Así Elías los recoge de una vez en el tutorial de la Noche 1 (ver *El 4B jugable*).
+- **La llave del fregadero** (23 de octubre de 2026). Tiene una manija en cruz que gira para abrir el agua, y un chorro que sale del pico y cae dentro de la taza que se pone abajo. El chorro no se ve en las vistas del 4B: aparece solo mientras Elías llena la taza (ver `tomar_agua` en *Brazos de Elías*). En el fregadero, entre los platos sucios, está la taza que usa.
 - **La dosis bajo el colchón** (23 de octubre de 2026). Elías la escondió de sí mismo: una media blanca de franjas rojas con una jeringa adentro, metida bajo el borde del colchón que da al cuarto, cerca de la almohada. Solo asoma la punta de la media (6 cm, pálida contra el piso oscuro); la jeringa sale por la boca de la media, del lado de abajo del colchón, y no se ve hasta sacarla. Junto al colchón ya había una jeringa usada tirada.
 
 **Las dos versiones en una escena.** Los objetos están en colecciones: `Estructura` y `Muebles` (siempre), `Deterioro` (abstinencia) y `Efecto` (bajo el efecto). Paredes, pisos, techo y sofá tienen dos texturas, la sucia y la limpia (`*_limpio.png`). En Unity, cambiar de mundo es mostrar u ocultar un grupo de objetos y cambiar esas texturas.
@@ -587,18 +597,21 @@ Primer recorrido jugable (20 de octubre de 2026): `Assets/Scenes/Departamento4B.
   - la puerta del dormitorio, desde el pasillo; queda abierta;
   - el teléfono: contesta, escucha hasta que se vuelve a apretar Usar, y cuelga;
   - la dosis escondida bajo el colchón del dormitorio (ver abajo);
+  - el cuaderno de la mesa de centro: guarda la partida, desde 1,8 m (ver *El cuaderno*);
+  - la llave del fregadero de la cocina: llena una taza y bebe (ver *El agua*);
+  - los rastros del consumo: los de la mesa de centro desde 1,8 m y los del piso desde 2 m (ver *El tutorial*);
   - la mirilla de la puerta de entrada: mira por ella hasta que se vuelve a apretar Usar;
   - la puerta de entrada, solo al final de la Noche 1 (ver *La Noche 1*).
 
-  Todos menos la mirilla corren con la cámara de interacción de los brazos (ver *Brazos de Elías*): la cámara va al punto donde empieza el clip y desde ahí sigue a la cabeza de Blender, mientras la puerta, el auricular o la dosis siguen sus pistas. Comparadas en cámara lenta con las hojas de cuadros de Blender (`anim_*_claves.png`), la mano agarra la perilla, el auricular, la jeringa y la media igual que en Blender.
+  Todos menos la mirilla corren con la cámara de interacción de los brazos (ver *Brazos de Elías*): la cámara va al punto donde empieza el clip y desde ahí sigue a la cabeza de Blender, mientras la puerta, el auricular, la dosis, la taza, la manija o el cuaderno siguen sus pistas. Comparadas en cámara lenta con las hojas de cuadros de Blender (`anim_*_claves.png`) y con las vistas previas, la mano agarra la perilla, el auricular, la jeringa, la media, la taza, la manija y el cuaderno igual que en Blender.
 - **Los brazos** cuelgan de la cámara, con el temblor sumado según la abstinencia. Su luz ilumina solo la capa de luz `Brazos`, y tampoco la niebla. Unity los anima aunque no se vean: si no, en reposo (fuera de cuadro) quedaban congelados y al empezar un clip nunca entraban en cuadro.
 - **El código** está en `Assets/Scripts/`:
   - `Elias`: caminar, mirar, usar y la cámara de interacción;
   - `BrazosElias`: el clip de turno, el temblor encima y el estado de los brazos;
-  - `PuertaInteractiva`, `TelefonoInteractivo` y `DosisInteractiva`: derivan de `Interactuable`, que es lo que hay que heredar para agregar algo que se pueda usar;
-  - `Abstinencia`, `Partida` (lo que la partida va acumulando) y `Fundido` (el corte a negro);
+  - `PuertaInteractiva`, `TelefonoInteractivo`, `DosisInteractiva`, `CuadernoInteractivo` y `AguaInteractiva`: derivan de `Interactuable`, que es lo que hay que heredar para agregar algo que se pueda usar;
+  - `Abstinencia`, `Partida` (lo que la partida va acumulando), `Guardado` (el archivo de la partida), `Fundido` (el corte a negro) y `TextoPS1` (el texto sobre la imagen);
   - `EstadosDelMundo`: los dos mundos;
-  - `NocheUno`: el orden de la Noche 1, con sus eventos en `AparicionTomas`, `GolpesEnLaPuerta`, `MirillaInteractiva`, `VistaMirilla` (la cámara con ojo de pez) y `PuertaDeEntrada`.
+  - `NocheUno`: el orden de la Noche 1, con el tutorial (`RastroInteractivo` y `Pensamientos`) y sus eventos en `AparicionTomas`, `GolpesEnLaPuerta`, `MirillaInteractiva`, `VistaMirilla` (la cámara con ojo de pez) y `PuertaDeEntrada`.
 
 **La abstinencia** (6.2) es un valor oculto que empieza en 35 (la Noche 1 es el primer día sin consumir) y sube 1,5 por minuto. Por ahora se nota en dos cosas:
 - **El temblor de las manos:** no hay por debajo de 10, y llega al de las vistas previas de Blender en 60.
@@ -610,11 +623,35 @@ Primer recorrido jugable (20 de octubre de 2026): `Assets/Scenes/Departamento4B.
 3. Al volver, el efecto. La abstinencia baja a 0 y no hay temblor.
 4. A los 3 minutos llega el bajón, de golpe: la abstinencia vuelve 15 puntos más alta que antes de consumir.
 
-Lo que cuesta queda registrado en `Partida`: los días limpio vuelven a 0 y suman la dosis y la Dependencia (sección 7); se guardará con el cuaderno. La dosis se usa una sola vez. La jeringa de la mesa de centro ya no se usa: está vacía.
+Lo que cuesta queda registrado en `Partida`: los días limpio vuelven a 0 y suman la dosis y la Dependencia (sección 7); se guarda con el cuaderno (ver *El cuaderno*). La dosis se usa una sola vez. La jeringa de la mesa de centro ya no se usa: está vacía.
 
 - **Para encontrarla:** la colisión de la dosis (lo que la mirada de Elías tiene que tocar) cubre la punta de la media y un poco de piso alrededor, de 18 × 16 cm y 8 cm de alto. Elías no choca con ella: está tirada en el piso, como la ropa.
 - **Comparación con Blender:** probada en *Play* con la E, en cámara lenta, y capturada en los mismos seis segundos que `anim_sacar_dosis_claves.png`. La mano, la media y la jeringa quedan en el mismo lugar que en Blender. Cada píxel difiere en promedio entre 7 y 12 niveles de 255, y es la luz: en Unity el colchón y la pared del fondo salen más claros, y faltan los granos de la niebla de Blender.
 - **Al volver del negro:** Elías está parado junto al colchón, en el dormitorio bajo el efecto: cálido, con el foco prendido y el atardecer sobre la cama (ver *Departamento 4B*).
+
+**El cuaderno** (6.8; 23 de octubre de 2026) está en la mesa de centro de la sala. Escribir en él guarda la partida. Se puede usar en cualquier momento de la noche y todas las veces que se quiera, también bajo el efecto:
+1. Elías se agacha frente a la mesa de centro, toma el cuaderno y lo levanta frente a la cara (el clip `tomar_cuaderno`).
+2. Corte a negro. A oscuras, el cuaderno vuelve a la mesa, Elías se para y se guarda la partida.
+3. Sobre el negro aparece lo que Elías escribe, los días limpio: «Día 1. No consumí.», o «Día 0.» si consumió. Se queda 3 segundos.
+4. La imagen vuelve: Elías está parado frente a la mesa de centro.
+
+- **Lo que se guarda:** la noche, la abstinencia (y si estaba bajo el efecto) y lo que lleva `Partida`: días limpio, dosis, Dependencia y llamadas contestadas y perdidas. Va en `partida.json`, en la carpeta de datos del juego (en Windows, `AppData\LocalLow\Junipshade\On the Nod\`, dentro de la carpeta del usuario). Se escribe primero en un archivo aparte y después se cambia por el anterior: si el juego se cierra a mitad de camino, la partida de antes queda entera. Por ahora solo se guarda; se cargará desde el menú, cuando exista.
+- **El texto** lo dibuja `TextoPS1` (ver *Estilo PS1 en Unity*): 16 píxeles de alto en la imagen de 480×270, color crema sucio. La letra es provisional: la que trae Unity.
+- **Para encontrarlo:** se alcanza desde 1,8 m, porque está a 42 cm del piso; basta con pararse junto a la mesa de centro.
+- **Probado en Play** con la E, por los dos caminos: sin consumir («Día 1. No consumí.») y después de la dosis («Día 0.»). El archivo quedó con los valores de cada momento, también al sobrescribirse. Con el clip, el cuaderno sigue a la mano como en Blender y vuelve a la mesa.
+- **Falta:** cargar la partida y que lo que Elías escribe cambie según lo que hizo y descubrió (6.8).
+
+**El agua** (sección 5; 23 de octubre de 2026) sale de la llave del fregadero de la cocina: es el «buscar agua» del tutorial de la Noche 1. Se usa mirando la llave o el fregadero:
+1. Elías toma con la izquierda la taza sucia del fregadero y la pone bajo la llave (el clip `tomar_agua`).
+2. Abre el agua con la derecha: la manija chirría al girar y el chorro cae en la taza. El agua suena más aguda a medida que la taza se llena, y al cerrar caen dos gotas.
+3. Se endereza y bebe: se oyen tres tragos y el aire que sale después.
+4. Deja la taza donde estaba.
+
+- **Solo en la abstinencia:** la taza es parte del deterioro (bajo el efecto no hay platos ni tazas en el fregadero) y bajo el efecto Elías no tiene sed.
+- **Para encontrarla:** la llave es demasiado fina para que la mirada la encuentre, así que una caja invisible cubre la llave y el fregadero (53 × 60 cm y 43 cm de alto).
+- **El chorro y los sonidos** los maneja `AguaInteractiva`, con los segundos del clip (los mismos que en `brazos_animaciones.py`). La manija, el agua y la taza suenan en el fregadero; los tragos, en la cabeza de Elías.
+- **Probado en Play** con la E, en cámara lenta: la taza sigue a la mano izquierda como en las vistas previas, el chorro aparece solo mientras corre el agua, la manija gira y vuelve, y al final la taza queda exacta en su lugar y Elías parado frente al fregadero.
+- Beber es el primer paso del tutorial (ver *El tutorial*).
 
 **Los dos mundos.** La dosis pasa de la abstinencia al efecto y el bajón lo devuelve. El cambio lo hace el componente `EstadosDelMundo` (el objeto `Mundos` de la escena), que lee el JSON del 4B:
 - muestra `Deterioro` o `Efecto`;
@@ -626,12 +663,29 @@ Elías se entera del cambio: bajo el efecto sus brazos se ven sanos (estado 0, l
 
 **La Noche 1** (sección 5). La lleva el componente `NocheUno` (el objeto `Noche 1` de la escena), en este orden:
 1. **El despertar.** La imagen aclara desde negro en 3 segundos mientras Elías, en el suelo de la sala, se mira las manos (`mirar_manos`) y se levanta.
-2. **El teléfono.** A los 40 segundos suena. Si Elías contesta, el timbre se corta al levantar el auricular y en la oreja solo hay estática hasta que cuelga. Si no, se corta solo después de 8 timbres (40 segundos). `Partida` cuenta las llamadas contestadas y las perdidas.
-3. **Tomás.** 15 segundos después de la llamada aparece sentado en el sofá, pero solo mientras Elías no mira hacia ahí; la ropa tirada en el sofá se esconde mientras él está. Cuando Elías lo ve, a los 0,8 segundos dice: «¿Otra vez sin dormir?». En cuanto Elías deja de mirarlo, ya no está. Se ve según el mundo: «vivo, mal» en la abstinencia y sonriente bajo el efecto.
-4. **Los golpes.** 40 segundos después tocan la puerta de entrada: tres golpes cada 7 segundos, hasta 5 veces o hasta que Elías mira por la mirilla. Por la mirilla, el pasillo vacío. Cuando deja de mirar (o después del último golpe), una voz detrás de la puerta: «Eli, ábreme».
-5. **La puerta.** Desde ahí se puede usar la puerta de entrada: Elías agarra la perilla (el clip `abrir_puerta`, llevado de la puerta del dormitorio a esta) y, al primer segundo, corte a negro. Ahí empezará la Noche 2.
+2. **El tutorial:** buscar agua, limpiar los rastros del consumo y escribir en el cuaderno (ver *El tutorial*).
+3. **El teléfono.** 20 segundos después del tutorial, suena. Si Elías contesta, el timbre se corta al levantar el auricular y en la oreja solo hay estática hasta que cuelga. Si no, se corta solo después de 8 timbres (40 segundos). `Partida` cuenta las llamadas contestadas y las perdidas.
+4. **Tomás.** 15 segundos después de la llamada aparece sentado en el sofá, pero solo mientras Elías no mira hacia ahí; la ropa tirada en el sofá se esconde mientras él está. Cuando Elías lo ve, a los 0,8 segundos dice: «¿Otra vez sin dormir?». En cuanto Elías deja de mirarlo, ya no está. Se ve según el mundo: «vivo, mal» en la abstinencia y sonriente bajo el efecto.
+5. **Los golpes.** 40 segundos después tocan la puerta de entrada: tres golpes cada 7 segundos, hasta 5 veces o hasta que Elías mira por la mirilla. Por la mirilla, el pasillo vacío. Cuando deja de mirar (o después del último golpe), una voz detrás de la puerta: «Eli, ábreme».
+6. **La puerta.** Desde ahí se puede usar la puerta de entrada: Elías agarra la perilla (el clip `abrir_puerta`, llevado de la puerta del dormitorio a esta) y, al primer segundo, corte a negro. Ahí empezará la Noche 2.
 
-Los tiempos se cambian en el inspector de `Noche 1`. Se probó entera en *Play*, por los dos caminos del teléfono.
+Los tiempos y los pensamientos se cambian en el inspector de `Noche 1`; para probar lo que viene después del tutorial, se apaga `tutorial`. Se probó entera en *Play*, por los dos caminos del teléfono.
+
+**El tutorial** (sección 5; 23 de octubre de 2026). Elías tiene que tomar agua, limpiar los rastros del consumo y escribir en el cuaderno. No hay indicadores (6.9): lo guían sus pensamientos, frases cortas abajo en la pantalla, como subtítulos (todavía sin voz; las dice el componente `Pensamientos`). Cada pensamiento aparece solo si todavía hace falta, así que el orden no es obligatorio:
+
+| Cuándo | Pensamiento |
+|---|---|
+| Al levantarse | «Tengo la boca seca.» |
+| Si al minuto no tomó agua | «Agua. En la cocina tiene que haber agua.» |
+| Después de tomar agua, si quedan rastros | «Tengo que sacar todo esto de aquí. Las jeringas, todo.» |
+| Si pasa un minuto sin recoger nada | «Todavía queda algo.» |
+| Al recoger el último | «Ya está. Lo voy a escribir.» |
+
+- **Los rastros** son siete: la jeringa, la cuchara quemada, el cenicero con las colillas, el cinturón y el encendedor de la mesa de centro; la jeringa del piso de la sala y la que está junto al colchón, a pasos de la dosis escondida. Elías se agacha (o se arrodilla, en el piso), lo recoge, lo guarda y vuelve a donde estaba. Solo existen en la abstinencia: bajo el efecto, el 4B está limpio.
+- **Dos clips para todos:** `recoger_mesa` y `recoger_piso` (ver *Brazos de Elías*) se hicieron con las jeringas de la mesa y del piso; `RastroInteractivo` los lleva a cada rastro, girados hacia el lado desde donde lo mira Elías. Al terminar, la cámara vuelve a donde estaba Elías, para que no quede parado adentro de un mueble.
+- **Para encontrarlos:** cada rastro lleva una caja invisible un poco más grande que sus piezas (3 cm de margen). Elías no choca con ellas.
+- **Termina** cuando escribe en el cuaderno después de haber hecho todo; 20 segundos después suena el teléfono. Si en 6 minutos no lo terminó, la noche sigue igual.
+- **Probado en Play** entero, con la E: los cinco rastros de la mesa desde distintos lados (por el sur, por el norte entre la mesa y el sofá, por el este), los dos del piso, los pensamientos en su momento y el teléfono a los 20 segundos de escribir. También el pensamiento que insiste, con la espera acortada.
 
 - **La mirilla** es una cámara del lado de afuera de la puerta, a la altura de la mirilla y con 170° de campo. Su imagen pasa por el shader `OnTheNod/Mirilla` (`Assets/Rendering/`), que hace el mismo ojo de pez que `fisheye()` en `dona_carmen.py`: un círculo del 97 % del alto, con los bordes borrosos y oscuros. Mientras se mira, la cámara de Elías no dibuja. Comparada con `carmen_mirilla_vacio.png`, la imagen de Unity sale un 19 % más clara: la pared casi igual, el techo un 30 % y el piso un 57 % (en Blender el piso tiene un brillo que el shader PS1 no copia igual).
 - **El pasillo de afuera** es el de la prueba de estilo (`Assets/Art/PruebaEstiloPasillo/`), puesto contra la puerta de entrada como en las vistas de Doña Carmen. Se le esconden la pared y la puerta que ya pone el 4B, y la silueta de Tomás. Sus cuatro luces salen de su JSON.
@@ -688,6 +742,10 @@ Lo que queda distinto:
 | `golpes_puerta` | Tres golpes de nudillos en la puerta de entrada, oídos desde adentro. |
 | `voz_tomas_otra_vez_sin_dormir` | Tomás en el sofá: «¿Otra vez sin dormir?». **Provisional.** |
 | `voz_eli_abreme` | La voz detrás de la puerta: «Eli, ábreme», apagada por la puerta. **Provisional.** |
+| `llave_manija` | La manija de la llave del fregadero al girar: el chirrido del metal que se pega y se suelta. |
+| `agua_taza` | El agua que cae en la taza mientras corre (1,75 s): burbujas y un tono que sube a medida que la taza se llena, con las cañerías viejas abajo. Al cerrar, dos gotas. |
+| `taza_loza` | La taza de loza contra el fregadero de metal, al tomarla y al dejarla. |
+| `beber` | Tres tragos y el aire que sale por la nariz después. |
 
 - **Las voces son provisionales:** son la voz sintética de Windows (la única en español es de mujer), con el tono bajado para que suene a hombre. Hay que grabarlas y reemplazar los archivos con el mismo nombre.
 
@@ -709,8 +767,8 @@ Lo que queda distinto:
 - Elevador: exterior e interior.
 
 **Objetos**
-- Teléfono fijo, teléfono público del pasillo, cuaderno, Polaroid, fotos.
-- Jeringas, cucharas, cinturón, dosis. La dosis de la Noche 1 (**hecho**: la media con la jeringa bajo el colchón, jugable en el 4B; ver *Departamento 4B* y *El 4B jugable* en la sección 10).
+- Teléfono fijo, teléfono público del pasillo, cuaderno, Polaroid, fotos. El cuaderno de la mesa de centro (**hecho**: guarda la partida, jugable en el 4B; ver *El cuaderno* en *El 4B jugable*, sección 10).
+- Jeringas, cucharas, cinturón, dosis. La dosis de la Noche 1 (**hecho**: la media con la jeringa bajo el colchón, jugable en el 4B; ver *Departamento 4B* y *El 4B jugable* en la sección 10). Los rastros del consumo del 4B (**hecho**: se recogen en el tutorial de la Noche 1; ver *El tutorial* en la sección 10).
 - Sofá, cama, mesa, sillas, refrigerador, tele vieja, ventanas tapadas con cartón y periódicos, basura, botellas.
 
 **Personajes**
@@ -719,14 +777,14 @@ Lo que queda distinto:
 - Doña Carmen y su plato tapado (**hecho**: dos vestuarios y las vistas por la mirilla, ya exportada a Unity como *Humanoid*; ver sección 10). En la demo solo se ve por la mirilla.
 
 **Animaciones**
-- Brazos de Elías: abrir puertas, contestar y colgar el teléfono, temblor, mirarse las manos, tomar la jeringa y sacar la dosis de abajo del colchón (**hecho**, ver sección 10). Faltan: tomar otros objetos (el agua, el cuaderno) y usar la cámara.
+- Brazos de Elías: abrir puertas, contestar y colgar el teléfono, temblor, mirarse las manos, tomar la jeringa, sacar la dosis de abajo del colchón, llenar una taza en el fregadero y beber, tomar el cuaderno y recoger algo de la mesa o del piso (**hecho**, ver sección 10). Falta: usar la cámara.
 - Tomás vivo: sentado, de pie, caminar, gestos. (Ya tiene las poses sentado y de pie; el resto, con Mixamo en Unity.)
 - Tomás muerto: quieto, aparecer de golpe, caminar, perseguir. (Ya tiene las poses de pie y sentado; el resto, con Mixamo en Unity.)
 - Doña Carmen: tocar la puerta, dejar el plato e irse. (Ya tiene las poses; el resto, con Mixamo en Unity.)
 - Escenario: puertas, elevador, luces que parpadean, objetos que se mueven.
 
 **Sonido**
-- La Noche 1: el teléfono (timbre, auricular y estática), los golpes en la puerta y las dos voces (**hecho**, con las voces provisionales; ver sección 11).
+- La Noche 1: el teléfono (timbre, auricular y estática), los golpes en la puerta, el agua del fregadero (la manija, el chorro, la taza y los tragos) y las dos voces (**hecho**, con las voces provisionales; ver sección 11).
 - Falta: el ambiente, Elías (respiración, latidos), la música y el resto de las noches.
 
 ### Herramientas y flujo

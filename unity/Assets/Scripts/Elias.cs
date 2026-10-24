@@ -268,8 +268,9 @@ public class Elias : MonoBehaviour
 
         yield return LlevarCamara(espacioCabeza * cabeza.EnTiempo(0f, fps));
 
-        // Lo que la mano agarra (la pista dice con qué mano y desde cuándo) la sigue desde ese
-        // momento: así tiembla con ella. Antes, sigue su pista como la puerta.
+        // Lo que la mano agarra (la pista dice con qué mano, desde cuándo y, si lo suelta, hasta
+        // cuándo) la sigue mientras la tiene: así tiembla con ella. Antes y después, sigue su
+        // pista como la puerta (la taza vuelve a su lugar en el fregadero).
         var enLaMano = new Matrix4x4?[objetos.Length];
         bool hayManos = System.Array.Exists(pistas, p => p != null && !string.IsNullOrEmpty(p.mano));
         for (float t = 0f; ; t += Time.deltaTime)
@@ -287,7 +288,7 @@ public class Elias : MonoBehaviour
                 var objeto = objetos[i].objeto;
                 var cambio = espacio.localToWorldMatrix * p.CambioEnTiempo(tc, fps) * espacio.worldToLocalMatrix;
                 var segunPista = cambio * reposos[objeto];
-                if (string.IsNullOrEmpty(p.mano) || tc < p.agarre)
+                if (!p.LoTiene(tc))
                 {
                     Poner(objeto, segunPista);
                     continue;
@@ -314,6 +315,15 @@ public class Elias : MonoBehaviour
     }
 
     EscenaBlender.Pista PistaCabeza(string clip) => datos.BuscarPista(clip, Cabeza);
+
+    /// <summary>Dónde empieza la cabeza en el clip (en las coordenadas del escenario de Blender).</summary>
+    public Matrix4x4 CabezaAlEmpezar(string clip) => PistaCabeza(clip).EnTiempo(0f, Fps(clip));
+
+    /// <summary>
+    /// Dónde está en reposo el objeto de la pista <paramref name="pista"/> del clip (en las
+    /// coordenadas del escenario): para llevar el clip a otro objeto (ver RastroInteractivo).
+    /// </summary>
+    public Matrix4x4 ReposoDePista(string clip, string pista) => EscenaBlender.MatrizDeBlender(datos.BuscarPista(clip, pista).reposo);
 
     float Fps(string clip) => datos.BuscarAnimacion(clip).fps;
 

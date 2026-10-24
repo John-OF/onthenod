@@ -11,6 +11,10 @@
 // El corte a negro (Assets/Scripts/Fundido.cs) oscurece la imagen antes de cuantizarla, así que
 // el fundido sale con el mismo dithering, como en la PS1. Es un valor global (_PS1Oscuridad):
 // 0 se ve normal, 1 todo negro.
+//
+// Encima del fundido va el texto de TextoPS1 (la pantalla de guardado del cuaderno, los
+// pensamientos de Elías), con su sombra: se ve aunque todo esté a negro, y también se cuantiza
+// con dithering.
 Shader "OnTheNod/PS1 Pantalla"
 {
     Properties
@@ -81,6 +85,13 @@ Shader "OnTheNod/PS1 Pantalla"
             float _Dithering;
             float _PS1Oscuridad; // global; sin poner vale 0
 
+            // El texto (TextoPS1), del mismo tamaño que la imagen: cuánto tapa la letra cada
+            // píxel, en el canal rojo, y su sombra, en el verde. Globales; sin poner, la
+            // opacidad vale 0 y no se lee.
+            Texture2D _PS1Texto;
+            float _PS1TextoOpacidad;
+            float4 _PS1TextoColor; // sRGB
+
             static const float kBayer[16] =
             {
                  0,  8,  2, 10,
@@ -123,6 +134,13 @@ Shader "OnTheNod/PS1 Pantalla"
                     c = LinealASrgb(c);
                 #endif
                 c *= 1.0 - saturate(_PS1Oscuridad);
+                if (_PS1TextoOpacidad > 0.0)
+                {
+                    float2 letra = _PS1Texto.Load(int3(texel, 0)).rg;
+                    float opacidad = saturate(_PS1TextoOpacidad);
+                    c *= 1.0 - letra.g * opacidad;
+                    c = lerp(c, _PS1TextoColor.rgb, letra.r * opacidad);
+                }
 
                 uint indice = ((uint)texel.y & 3u) * 4u + ((uint)texel.x & 3u);
                 float umbral = (kBayer[indice] / 16.0 - 0.5 + 1.0 / 32.0) * _Dithering;
