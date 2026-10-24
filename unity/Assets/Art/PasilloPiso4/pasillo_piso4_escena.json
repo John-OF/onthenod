@@ -1,0 +1,3701 @@
+{
+ "version": 1,
+ "luces": [
+  {
+   "nombre": "luz_foco_1",
+   "tipo": "POINT",
+   "posicion": [
+    3.8,
+    -1.04,
+    2.13
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_foco_2",
+   "tipo": "POINT",
+   "posicion": [
+    7.8,
+    -1.04,
+    2.13
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_foco_3",
+   "tipo": "POINT",
+   "posicion": [
+    11.8,
+    -1.04,
+    2.13
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_foco_4",
+   "tipo": "POINT",
+   "posicion": [
+    15.8,
+    -1.04,
+    2.13
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_fluor_vestibulo",
+   "tipo": "AREA",
+   "posicion": [
+    17.1,
+    -1.04,
+    2.51
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.0,
+   "tamano": [
+    0.06,
+    1.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_fluor_corto",
+   "tipo": "AREA",
+   "posicion": [
+    16.9,
+    -5.0,
+    2.51
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.0,
+   "tamano": [
+    1.0,
+    0.06
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_indicador",
+   "tipo": "POINT",
+   "posicion": [
+    17.6,
+    -1.04,
+    2.42
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.05,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_cartel_a",
+   "tipo": "POINT",
+   "posicion": [
+    1.65,
+    -1.64,
+    2.29
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.1,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_cartel_b",
+   "tipo": "POINT",
+   "posicion": [
+    16.9,
+    -7.7,
+    2.29
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.1,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "esca_luz_rellano",
+   "tipo": "POINT",
+   "posicion": [
+    1.65,
+    -2.64,
+    4.73
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "esca_luz_descanso",
+   "tipo": "POINT",
+   "posicion": [
+    1.65,
+    -6.16,
+    3.39
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "esca_luz_abajo",
+   "tipo": "POINT",
+   "posicion": [
+    1.65,
+    -2.64,
+    2.09
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "escb_luz_rellano",
+   "tipo": "POINT",
+   "posicion": [
+    16.9,
+    -8.7,
+    2.13
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "escb_luz_descanso",
+   "tipo": "POINT",
+   "posicion": [
+    16.9,
+    -12.22,
+    0.79
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "escb_luz_abajo",
+   "tipo": "POINT",
+   "posicion": [
+    16.9,
+    -8.7,
+    -0.51
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.03,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "luz_cabina",
+   "tipo": "AREA",
+   "posicion": [
+    18.7,
+    -1.04,
+    2.27
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.0,
+   "tamano": [
+    0.7,
+    0.5
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "farola_4c",
+   "tipo": "SPOT",
+   "posicion": [
+    10.1,
+    -7.6,
+    3.4
+   ],
+   "direccion": [
+    -0.13375,
+    0.82162,
+    -0.55412
+   ],
+   "radio": 0.1,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 40.0,
+   "suavizado": 0.2,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  },
+  {
+   "nombre": "rebote_4c",
+   "tipo": "POINT",
+   "posicion": [
+    9.9,
+    -3.6,
+    0.45
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "radio": 0.5,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": false,
+   "truco": "rebote",
+   "precalculada": false
+  },
+  {
+   "nombre": "sol_plano",
+   "tipo": "SUN",
+   "posicion": [
+    9.0,
+    -5.0,
+    12.0
+   ],
+   "direccion": [
+    0.01666,
+    -0.01666,
+    -0.99972
+   ],
+   "radio": 0.0,
+   "tamano": [
+    0.0,
+    0.0
+   ],
+   "cono": 0.0,
+   "suavizado": 0.0,
+   "sombras": true,
+   "truco": "",
+   "precalculada": false
+  }
+ ],
+ "camaras": [
+  {
+   "nombre": "Cam_comienzo",
+   "posicion": [
+    1.4,
+    -1.12,
+    1.6
+   ],
+   "direccion": [
+    0.99963,
+    -0.02011,
+    -0.01829
+   ],
+   "arriba": [
+    0.01828,
+    -0.00037,
+    0.99983
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_esquina",
+   "posicion": [
+    16.9,
+    -0.75,
+    1.6
+   ],
+   "direccion": [
+    0.0,
+    -0.99808,
+    -0.06195
+   ],
+   "arriba": [
+    -0.0,
+    -0.06195,
+    0.99808
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_escalera",
+   "posicion": [
+    17.65,
+    -11.95,
+    0.3
+   ],
+   "direccion": [
+    -0.10501,
+    0.85172,
+    -0.51337
+   ],
+   "arriba": [
+    -0.06282,
+    0.50951,
+    0.85817
+   ],
+   "lente": 20.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_vuelta1",
+   "posicion": [
+    6.9,
+    -1.55,
+    1.6
+   ],
+   "direccion": [
+    0.77792,
+    0.62678,
+    -0.04445
+   ],
+   "arriba": [
+    0.03461,
+    0.02789,
+    0.99901
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_vuelta2",
+   "posicion": [
+    6.0,
+    -1.75,
+    1.6
+   ],
+   "direccion": [
+    -0.8703,
+    0.47781,
+    -0.11945
+   ],
+   "arriba": [
+    -0.10471,
+    0.05749,
+    0.99284
+   ],
+   "lente": 20.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_vuelta3",
+   "posicion": [
+    14.75,
+    -1.55,
+    1.6
+   ],
+   "direccion": [
+    0.73271,
+    0.63817,
+    -0.23636
+   ],
+   "arriba": [
+    0.17823,
+    0.15524,
+    0.97167
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_vuelta4",
+   "posicion": [
+    16.9,
+    -2.3,
+    1.6
+   ],
+   "direccion": [
+    0.0,
+    -0.99617,
+    -0.08738
+   ],
+   "arriba": [
+    -0.0,
+    -0.08738,
+    0.99617
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_vuelta5",
+   "posicion": [
+    5.0,
+    -1.1,
+    1.6
+   ],
+   "direccion": [
+    0.99936,
+    0.00625,
+    -0.03513
+   ],
+   "arriba": [
+    0.03513,
+    0.00022,
+    0.99938
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_escondite",
+   "posicion": [
+    18.45,
+    -4.5,
+    1.55
+   ],
+   "direccion": [
+    -0.99586,
+    0.04065,
+    -0.08129
+   ],
+   "arriba": [
+    -0.08123,
+    0.00332,
+    0.99669
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_4c",
+   "posicion": [
+    10.15,
+    -2.25,
+    1.6
+   ],
+   "direccion": [
+    -0.36127,
+    -0.89366,
+    -0.2662
+   ],
+   "arriba": [
+    -0.09977,
+    -0.24679,
+    0.96392
+   ],
+   "lente": 20.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_ascensor",
+   "posicion": [
+    16.2,
+    -1.35,
+    1.6
+   ],
+   "direccion": [
+    0.97861,
+    0.13762,
+    -0.15291
+   ],
+   "arriba": [
+    0.15142,
+    0.02129,
+    0.98824
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 0.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  },
+  {
+   "nombre": "Cam_plano",
+   "posicion": [
+    9.6,
+    -5.8,
+    20.0
+   ],
+   "direccion": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "arriba": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "lente": 24.0,
+   "sensor": 36.0,
+   "orto": 22.0,
+   "cerca": 0.03,
+   "lejos": 60.0
+  }
+ ],
+ "estados": [
+  {
+   "nombre": "abstinencia",
+   "luces": [
+    {
+     "nombre": "luz_foco_1",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_2",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_foco_3",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_4",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_vestibulo",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_corto",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "luz_indicador",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.45,
+      0.1
+     ],
+     "potencia": 0.6
+    },
+    {
+     "nombre": "luz_cartel_a",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "luz_cartel_b",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "esca_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "esca_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "esca_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "escb_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "escb_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "escb_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "luz_cabina",
+     "encendida": false,
+     "color": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "farola_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 3200.0
+    },
+    {
+     "nombre": "rebote_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "sol_plano",
+     "encendida": false,
+     "color": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "potencia": 2.5
+    }
+   ],
+   "materiales": [
+    {
+     "nombre": "AceroCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "acero_cabina"
+    },
+    {
+     "nombre": "CartelEscalera",
+     "emision": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "fuerza": 3.0,
+     "textura": ""
+    },
+    {
+     "nombre": "EscaleraPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_escalera"
+    },
+    {
+     "nombre": "EscaleraPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "concreto_escalera"
+    },
+    {
+     "nombre": "EtiquetaPlano",
+     "emision": [
+      1.0,
+      0.95,
+      0.85
+     ],
+     "fuerza": 1.5,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoEscalera",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoPasillo",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 10.0,
+     "textura": ""
+    },
+    {
+     "nombre": "GomaCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "goma_cabina"
+    },
+    {
+     "nombre": "LedAmbar",
+     "emision": [
+      1.0,
+      0.42,
+      0.08
+     ],
+     "fuerza": 6.0,
+     "textura": ""
+    },
+    {
+     "nombre": "MetalOxidado",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "metal_oxidado"
+    },
+    {
+     "nombre": "PanelCabina",
+     "emision": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "fuerza": 0.0,
+     "textura": ""
+    },
+    {
+     "nombre": "Pared4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_4c"
+    },
+    {
+     "nombre": "PasilloPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_pasillo"
+    },
+    {
+     "nombre": "PasilloPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_baldosa"
+    },
+    {
+     "nombre": "PasilloTecho",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "techo"
+    },
+    {
+     "nombre": "Piso4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_4c"
+    },
+    {
+     "nombre": "PuertaDepartamento",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "puerta_madera"
+    },
+    {
+     "nombre": "ResplandorCalle",
+     "emision": [
+      1.0,
+      0.45,
+      0.15
+     ],
+     "fuerza": 1.2,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboTramoCorto",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboVestibulo",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    }
+   ],
+   "formas": [],
+   "colecciones_ocultas": [
+    "Efecto",
+    "Plano",
+    "SoloRender",
+    "Vuelta1",
+    "Vuelta2",
+    "Vuelta3",
+    "Vuelta4"
+   ],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.004,
+     0.005,
+     0.007
+    ],
+    "niebla_densidad": 0.022,
+    "niebla_color": [
+     0.75,
+     0.8,
+     0.72
+    ]
+   }
+  },
+  {
+   "nombre": "efecto",
+   "luces": [
+    {
+     "nombre": "luz_foco_1",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_foco_2",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_foco_3",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_foco_4",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_vestibulo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 25.0
+    },
+    {
+     "nombre": "luz_fluor_corto",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 25.0
+    },
+    {
+     "nombre": "luz_indicador",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.45,
+      0.1
+     ],
+     "potencia": 0.6
+    },
+    {
+     "nombre": "luz_cartel_a",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 1.5
+    },
+    {
+     "nombre": "luz_cartel_b",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 1.5
+    },
+    {
+     "nombre": "esca_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 28.0
+    },
+    {
+     "nombre": "esca_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "esca_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "escb_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 28.0
+    },
+    {
+     "nombre": "escb_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "escb_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "luz_cabina",
+     "encendida": false,
+     "color": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "farola_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 2400.0
+    },
+    {
+     "nombre": "rebote_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "sol_plano",
+     "encendida": false,
+     "color": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "potencia": 2.5
+    }
+   ],
+   "materiales": [
+    {
+     "nombre": "AceroCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "acero_cabina"
+    },
+    {
+     "nombre": "CartelEscalera",
+     "emision": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "fuerza": 3.0,
+     "textura": ""
+    },
+    {
+     "nombre": "EscaleraPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_escalera_limpio"
+    },
+    {
+     "nombre": "EscaleraPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "concreto_escalera_limpio"
+    },
+    {
+     "nombre": "EtiquetaPlano",
+     "emision": [
+      1.0,
+      0.95,
+      0.85
+     ],
+     "fuerza": 1.5,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoEscalera",
+     "emision": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "fuerza": 20.0,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoPasillo",
+     "emision": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "fuerza": 25.0,
+     "textura": ""
+    },
+    {
+     "nombre": "GomaCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "goma_cabina"
+    },
+    {
+     "nombre": "LedAmbar",
+     "emision": [
+      1.0,
+      0.42,
+      0.08
+     ],
+     "fuerza": 6.0,
+     "textura": ""
+    },
+    {
+     "nombre": "MetalOxidado",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "metal_oxidado"
+    },
+    {
+     "nombre": "PanelCabina",
+     "emision": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "fuerza": 0.0,
+     "textura": ""
+    },
+    {
+     "nombre": "Pared4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_4c"
+    },
+    {
+     "nombre": "PasilloPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_pasillo_limpio"
+    },
+    {
+     "nombre": "PasilloPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_baldosa_limpio"
+    },
+    {
+     "nombre": "PasilloTecho",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "techo_limpio"
+    },
+    {
+     "nombre": "Piso4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_4c"
+    },
+    {
+     "nombre": "PuertaDepartamento",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "puerta_madera"
+    },
+    {
+     "nombre": "ResplandorCalle",
+     "emision": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "fuerza": 3.0,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboTramoCorto",
+     "emision": [
+      1.0,
+      0.85,
+      0.6
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboVestibulo",
+     "emision": [
+      1.0,
+      0.85,
+      0.6
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    }
+   ],
+   "formas": [],
+   "colecciones_ocultas": [
+    "Deterioro",
+    "Plano",
+    "SoloRender",
+    "Vuelta1",
+    "Vuelta2",
+    "Vuelta3",
+    "Vuelta4"
+   ],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.07,
+     0.045,
+     0.025
+    ],
+    "niebla_densidad": 0.018,
+    "niebla_color": [
+     1.0,
+     0.82,
+     0.6
+    ]
+   }
+  },
+  {
+   "nombre": "vuelta1",
+   "luces": [
+    {
+     "nombre": "luz_foco_1",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_2",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_foco_3",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_4",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_vestibulo",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_corto",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "luz_indicador",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.45,
+      0.1
+     ],
+     "potencia": 0.6
+    },
+    {
+     "nombre": "luz_cartel_a",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "luz_cartel_b",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "esca_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "esca_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "esca_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "escb_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "escb_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "escb_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "luz_cabina",
+     "encendida": false,
+     "color": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "farola_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 3200.0
+    },
+    {
+     "nombre": "rebote_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "sol_plano",
+     "encendida": false,
+     "color": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "potencia": 2.5
+    }
+   ],
+   "materiales": [
+    {
+     "nombre": "AceroCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "acero_cabina"
+    },
+    {
+     "nombre": "CartelEscalera",
+     "emision": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "fuerza": 3.0,
+     "textura": ""
+    },
+    {
+     "nombre": "EscaleraPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_escalera"
+    },
+    {
+     "nombre": "EscaleraPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "concreto_escalera"
+    },
+    {
+     "nombre": "EtiquetaPlano",
+     "emision": [
+      1.0,
+      0.95,
+      0.85
+     ],
+     "fuerza": 1.5,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoEscalera",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoPasillo",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 10.0,
+     "textura": ""
+    },
+    {
+     "nombre": "GomaCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "goma_cabina"
+    },
+    {
+     "nombre": "LedAmbar",
+     "emision": [
+      1.0,
+      0.42,
+      0.08
+     ],
+     "fuerza": 6.0,
+     "textura": ""
+    },
+    {
+     "nombre": "MetalOxidado",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "metal_oxidado"
+    },
+    {
+     "nombre": "PanelCabina",
+     "emision": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "fuerza": 0.0,
+     "textura": ""
+    },
+    {
+     "nombre": "Pared4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_4c"
+    },
+    {
+     "nombre": "PasilloPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_pasillo"
+    },
+    {
+     "nombre": "PasilloPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_baldosa"
+    },
+    {
+     "nombre": "PasilloTecho",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "techo"
+    },
+    {
+     "nombre": "Piso4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_4c"
+    },
+    {
+     "nombre": "PuertaDepartamento",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "puerta_madera"
+    },
+    {
+     "nombre": "ResplandorCalle",
+     "emision": [
+      1.0,
+      0.45,
+      0.15
+     ],
+     "fuerza": 1.2,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboTramoCorto",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboVestibulo",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    }
+   ],
+   "formas": [],
+   "colecciones_ocultas": [
+    "Efecto",
+    "Plano",
+    "SoloRender",
+    "Vuelta1_Fuera",
+    "Vuelta2",
+    "Vuelta3",
+    "Vuelta4"
+   ],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.004,
+     0.005,
+     0.007
+    ],
+    "niebla_densidad": 0.022,
+    "niebla_color": [
+     0.75,
+     0.8,
+     0.72
+    ]
+   }
+  },
+  {
+   "nombre": "vuelta2",
+   "luces": [
+    {
+     "nombre": "luz_foco_1",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_2",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_foco_3",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_4",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_vestibulo",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_corto",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "luz_indicador",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.45,
+      0.1
+     ],
+     "potencia": 0.6
+    },
+    {
+     "nombre": "luz_cartel_a",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "luz_cartel_b",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "esca_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "esca_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "esca_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "escb_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "escb_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "escb_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "luz_cabina",
+     "encendida": false,
+     "color": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "farola_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 3200.0
+    },
+    {
+     "nombre": "rebote_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "sol_plano",
+     "encendida": false,
+     "color": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "potencia": 2.5
+    }
+   ],
+   "materiales": [
+    {
+     "nombre": "AceroCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "acero_cabina"
+    },
+    {
+     "nombre": "CartelEscalera",
+     "emision": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "fuerza": 3.0,
+     "textura": ""
+    },
+    {
+     "nombre": "EscaleraPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_escalera"
+    },
+    {
+     "nombre": "EscaleraPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "concreto_escalera"
+    },
+    {
+     "nombre": "EtiquetaPlano",
+     "emision": [
+      1.0,
+      0.95,
+      0.85
+     ],
+     "fuerza": 1.5,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoEscalera",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoPasillo",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 10.0,
+     "textura": ""
+    },
+    {
+     "nombre": "GomaCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "goma_cabina"
+    },
+    {
+     "nombre": "LedAmbar",
+     "emision": [
+      1.0,
+      0.42,
+      0.08
+     ],
+     "fuerza": 6.0,
+     "textura": ""
+    },
+    {
+     "nombre": "MetalOxidado",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "metal_oxidado"
+    },
+    {
+     "nombre": "PanelCabina",
+     "emision": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "fuerza": 0.0,
+     "textura": ""
+    },
+    {
+     "nombre": "Pared4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_4c"
+    },
+    {
+     "nombre": "PasilloPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_pasillo"
+    },
+    {
+     "nombre": "PasilloPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_baldosa"
+    },
+    {
+     "nombre": "PasilloTecho",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "techo"
+    },
+    {
+     "nombre": "Piso4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_4c"
+    },
+    {
+     "nombre": "PuertaDepartamento",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "puerta_madera"
+    },
+    {
+     "nombre": "ResplandorCalle",
+     "emision": [
+      1.0,
+      0.45,
+      0.15
+     ],
+     "fuerza": 1.2,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboTramoCorto",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboVestibulo",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    }
+   ],
+   "formas": [],
+   "colecciones_ocultas": [
+    "Efecto",
+    "Plano",
+    "SoloRender",
+    "Vuelta1",
+    "Vuelta3",
+    "Vuelta4"
+   ],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.004,
+     0.005,
+     0.007
+    ],
+    "niebla_densidad": 0.022,
+    "niebla_color": [
+     0.75,
+     0.8,
+     0.72
+    ]
+   }
+  },
+  {
+   "nombre": "vuelta3",
+   "luces": [
+    {
+     "nombre": "luz_foco_1",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_2",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_foco_3",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_4",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_vestibulo",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_corto",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "luz_indicador",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.45,
+      0.1
+     ],
+     "potencia": 0.6
+    },
+    {
+     "nombre": "luz_cartel_a",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "luz_cartel_b",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "esca_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "esca_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "esca_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "escb_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "escb_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "escb_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "luz_cabina",
+     "encendida": false,
+     "color": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "farola_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 3200.0
+    },
+    {
+     "nombre": "rebote_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "sol_plano",
+     "encendida": false,
+     "color": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "potencia": 2.5
+    }
+   ],
+   "materiales": [
+    {
+     "nombre": "AceroCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "acero_cabina"
+    },
+    {
+     "nombre": "CartelEscalera",
+     "emision": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "fuerza": 3.0,
+     "textura": ""
+    },
+    {
+     "nombre": "EscaleraPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_escalera"
+    },
+    {
+     "nombre": "EscaleraPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "concreto_escalera"
+    },
+    {
+     "nombre": "EtiquetaPlano",
+     "emision": [
+      1.0,
+      0.95,
+      0.85
+     ],
+     "fuerza": 1.5,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoEscalera",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoPasillo",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 10.0,
+     "textura": ""
+    },
+    {
+     "nombre": "GomaCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "goma_cabina"
+    },
+    {
+     "nombre": "LedAmbar",
+     "emision": [
+      1.0,
+      0.42,
+      0.08
+     ],
+     "fuerza": 6.0,
+     "textura": ""
+    },
+    {
+     "nombre": "MetalOxidado",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "metal_oxidado"
+    },
+    {
+     "nombre": "PanelCabina",
+     "emision": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "fuerza": 0.0,
+     "textura": ""
+    },
+    {
+     "nombre": "Pared4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_4c"
+    },
+    {
+     "nombre": "PasilloPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_pasillo"
+    },
+    {
+     "nombre": "PasilloPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_baldosa"
+    },
+    {
+     "nombre": "PasilloTecho",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "techo"
+    },
+    {
+     "nombre": "Piso4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_4c"
+    },
+    {
+     "nombre": "PuertaDepartamento",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "puerta_madera"
+    },
+    {
+     "nombre": "ResplandorCalle",
+     "emision": [
+      1.0,
+      0.45,
+      0.15
+     ],
+     "fuerza": 1.2,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboTramoCorto",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboVestibulo",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    }
+   ],
+   "formas": [],
+   "colecciones_ocultas": [
+    "Efecto",
+    "Plano",
+    "SoloRender",
+    "Vuelta1",
+    "Vuelta2",
+    "Vuelta4"
+   ],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.004,
+     0.005,
+     0.007
+    ],
+    "niebla_densidad": 0.022,
+    "niebla_color": [
+     0.75,
+     0.8,
+     0.72
+    ]
+   }
+  },
+  {
+   "nombre": "vuelta4",
+   "luces": [
+    {
+     "nombre": "luz_foco_1",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_2",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_foco_3",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_4",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_vestibulo",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_corto",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "luz_indicador",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.45,
+      0.1
+     ],
+     "potencia": 0.6
+    },
+    {
+     "nombre": "luz_cartel_a",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "luz_cartel_b",
+     "encendida": false,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "esca_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "esca_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "esca_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "escb_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "escb_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "escb_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "luz_cabina",
+     "encendida": false,
+     "color": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "farola_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 3200.0
+    },
+    {
+     "nombre": "rebote_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "sol_plano",
+     "encendida": false,
+     "color": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "potencia": 2.5
+    }
+   ],
+   "materiales": [
+    {
+     "nombre": "AceroCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "acero_cabina"
+    },
+    {
+     "nombre": "CartelEscalera",
+     "emision": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "fuerza": 3.0,
+     "textura": ""
+    },
+    {
+     "nombre": "EscaleraPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_escalera"
+    },
+    {
+     "nombre": "EscaleraPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "concreto_escalera"
+    },
+    {
+     "nombre": "EtiquetaPlano",
+     "emision": [
+      1.0,
+      0.95,
+      0.85
+     ],
+     "fuerza": 1.5,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoEscalera",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoPasillo",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 10.0,
+     "textura": ""
+    },
+    {
+     "nombre": "GomaCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "goma_cabina"
+    },
+    {
+     "nombre": "LedAmbar",
+     "emision": [
+      1.0,
+      0.42,
+      0.08
+     ],
+     "fuerza": 6.0,
+     "textura": ""
+    },
+    {
+     "nombre": "MetalOxidado",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "metal_oxidado"
+    },
+    {
+     "nombre": "PanelCabina",
+     "emision": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "fuerza": 0.0,
+     "textura": ""
+    },
+    {
+     "nombre": "Pared4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_4c"
+    },
+    {
+     "nombre": "PasilloPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_pasillo"
+    },
+    {
+     "nombre": "PasilloPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_baldosa"
+    },
+    {
+     "nombre": "PasilloTecho",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "techo"
+    },
+    {
+     "nombre": "Piso4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_4c"
+    },
+    {
+     "nombre": "PuertaDepartamento",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "puerta_madera"
+    },
+    {
+     "nombre": "ResplandorCalle",
+     "emision": [
+      1.0,
+      0.45,
+      0.15
+     ],
+     "fuerza": 1.2,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboTramoCorto",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboVestibulo",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    }
+   ],
+   "formas": [],
+   "colecciones_ocultas": [
+    "Efecto",
+    "Plano",
+    "SoloRender",
+    "Vuelta1",
+    "Vuelta2",
+    "Vuelta3",
+    "Vuelta4_Fuera"
+   ],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.004,
+     0.005,
+     0.007
+    ],
+    "niebla_densidad": 0.022,
+    "niebla_color": [
+     0.75,
+     0.8,
+     0.72
+    ]
+   }
+  },
+  {
+   "nombre": "vuelta5",
+   "luces": [
+    {
+     "nombre": "luz_foco_1",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_2",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_foco_3",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 22.0
+    },
+    {
+     "nombre": "luz_foco_4",
+     "encendida": false,
+     "color": [
+      1.0,
+      0.78,
+      0.5
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_vestibulo",
+     "encendida": false,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 30.0
+    },
+    {
+     "nombre": "luz_fluor_corto",
+     "encendida": true,
+     "color": [
+      0.75,
+      1.0,
+      0.85
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "luz_indicador",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.45,
+      0.1
+     ],
+     "potencia": 0.6
+    },
+    {
+     "nombre": "luz_cartel_a",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "luz_cartel_b",
+     "encendida": true,
+     "color": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "potencia": 2.0
+    },
+    {
+     "nombre": "esca_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "esca_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "esca_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "escb_luz_rellano",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 18.0
+    },
+    {
+     "nombre": "escb_luz_descanso",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "escb_luz_abajo",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.68,
+      0.38
+     ],
+     "potencia": 8.0
+    },
+    {
+     "nombre": "luz_cabina",
+     "encendida": true,
+     "color": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "potencia": 24.0
+    },
+    {
+     "nombre": "farola_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 3200.0
+    },
+    {
+     "nombre": "rebote_4c",
+     "encendida": true,
+     "color": [
+      1.0,
+      0.5,
+      0.18
+     ],
+     "potencia": 16.0
+    },
+    {
+     "nombre": "sol_plano",
+     "encendida": false,
+     "color": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "potencia": 2.5
+    }
+   ],
+   "materiales": [
+    {
+     "nombre": "AceroCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "acero_cabina"
+    },
+    {
+     "nombre": "CartelEscalera",
+     "emision": [
+      0.15,
+      1.0,
+      0.35
+     ],
+     "fuerza": 3.0,
+     "textura": ""
+    },
+    {
+     "nombre": "EscaleraPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_escalera"
+    },
+    {
+     "nombre": "EscaleraPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "concreto_escalera"
+    },
+    {
+     "nombre": "EtiquetaPlano",
+     "emision": [
+      1.0,
+      0.95,
+      0.85
+     ],
+     "fuerza": 1.5,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoEscalera",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 8.0,
+     "textura": ""
+    },
+    {
+     "nombre": "FocoPasillo",
+     "emision": [
+      1.0,
+      0.72,
+      0.42
+     ],
+     "fuerza": 0.0,
+     "textura": ""
+    },
+    {
+     "nombre": "GomaCabina",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "goma_cabina"
+    },
+    {
+     "nombre": "LedAmbar",
+     "emision": [
+      1.0,
+      0.42,
+      0.08
+     ],
+     "fuerza": 6.0,
+     "textura": ""
+    },
+    {
+     "nombre": "MetalOxidado",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "metal_oxidado"
+    },
+    {
+     "nombre": "PanelCabina",
+     "emision": [
+      0.85,
+      0.95,
+      1.0
+     ],
+     "fuerza": 9.0,
+     "textura": ""
+    },
+    {
+     "nombre": "Pared4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_4c"
+    },
+    {
+     "nombre": "PasilloPared",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "pared_pasillo"
+    },
+    {
+     "nombre": "PasilloPiso",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_baldosa"
+    },
+    {
+     "nombre": "PasilloTecho",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "techo"
+    },
+    {
+     "nombre": "Piso4C",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "piso_4c"
+    },
+    {
+     "nombre": "PuertaDepartamento",
+     "emision": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fuerza": 0.0,
+     "textura": "puerta_madera"
+    },
+    {
+     "nombre": "ResplandorCalle",
+     "emision": [
+      1.0,
+      0.45,
+      0.15
+     ],
+     "fuerza": 1.2,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboTramoCorto",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 5.0,
+     "textura": ""
+    },
+    {
+     "nombre": "TuboVestibulo",
+     "emision": [
+      0.8,
+      1.0,
+      0.88
+     ],
+     "fuerza": 0.0,
+     "textura": ""
+    }
+   ],
+   "formas": [],
+   "colecciones_ocultas": [
+    "Efecto",
+    "Plano",
+    "SoloRender",
+    "Vuelta1",
+    "Vuelta2",
+    "Vuelta3",
+    "Vuelta4"
+   ],
+   "objetos_ocultos": [],
+   "mundo": {
+    "fondo": [
+     0.002,
+     0.003,
+     0.005
+    ],
+    "niebla_densidad": 0.02,
+    "niebla_color": [
+     0.62,
+     0.72,
+     0.82
+    ]
+   }
+  }
+ ],
+ "animaciones": [],
+ "humanoide": false,
+ "accesorios": [],
+ "anclas_escalera": {
+  "A": [
+   1.649999976158142,
+   -2.0399999618530273,
+   2.5999999046325684
+  ],
+  "B": [
+   16.899999618530273,
+   -8.100000381469727,
+   0.0
+  ]
+ }
+}

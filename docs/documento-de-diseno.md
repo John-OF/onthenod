@@ -236,6 +236,18 @@ Cada capítulo es una noche. Entre noches, Elías despierta en el 4B y escribe e
 - Primera aparición de Tomás muerto al fondo del pasillo, a contraluz del elevador. Primera persecución: huir y esconderse.
 - El elevador lleva a pisos que no deberían existir.
 
+**Cómo se juega** (decidido el 24 de octubre de 2026; el plano está en `blender/renders/pasillo4_plano.png` y el pasillo, en *Pasillo del 4º piso*, sección 10):
+- **En L, como en P.T.** El pasillo largo empieza junto a la escalera, pasa frente al 4B y al 4A y termina en el elevador; ahí dobla en un tramo corto que acaba en otra puerta de la escalera. Elías baja un piso por esa escalera y sale otra vez al comienzo del pasillo largo: es el 4º piso de nuevo. El teléfono público está junto al elevador. Lo que hay a la vuelta de la esquina no se ve desde el pasillo largo: ahí puede cambiar algo sin que el jugador lo vea.
+- **La regla.** En cada vuelta cambia una sola cosa. Cuando Elías la encuentra y la mira, dice algo (un pensamiento), y recién entonces la escalera lleva a la vuelta siguiente. Si baja sin haberla visto, se repite la misma vuelta, con la diferencia un poco más notoria cada vez, para que nadie se quede trabado.
+- **Las vueltas:**
+  0. Todo normal. El plato de Doña Carmen frente al 4B (6.10). El elevador no viene: solo queda la escalera.
+  1. Un número distinto: la puerta del 4D, la segunda después de la suya, también dice «4B».
+  2. Una mancha de humedad en el techo, sobre la puerta del 4B, que gotea.
+  3. Suena el teléfono público (contestar o no cuenta para el final, 6.5). En su repisa está la Polaroid de Tomás.
+  4. La puerta de la escalera desapareció: el tramo corto termina en una pared. La primera foto (6.4) muestra la puerta; cuando la foto termina de revelarse, la puerta está ahí.
+  5. Los focos apagados y el elevador abierto, con luz adentro. Tomás muerto, frente al elevador y de espaldas, cuenta hasta diez (6.7): la primera persecución. Elías se esconde en el 4C, que está entreabierto y vacío, o en el cuarto de limpieza del tramo corto. Cuando Tomás se va, el elevador sigue abierto, esperando: lleva a pisos que no deberían existir.
+- **El 4B sigue siendo el refugio:** queda abierto toda la noche para guardar en el cuaderno, menos en la vuelta 5, cuando la puerta no abre.
+
 ### Noche 3 — La casa
 - El 3er piso se convierte en la casa donde creció. Todo está como era, pero faltan cosas: la tele, el joyero de su madre, la foto familiar.
 - Puzzle: reconstruir la foto familiar. Las piezas que faltan son las cosas que Elías vendió (las boletas de la casa de empeño son las pistas).
@@ -728,6 +740,50 @@ Lo que queda distinto:
 - Faltan los haces de luz en la niebla: el del sol en el efecto y el de la farola en el dormitorio. La niebla iluminada de Unity no tiene sombras.
 - A los costados de la puerta del baño se ven hilos de luz: el temblor de vértices abre rendijas de un píxel entre la puerta y el marco, y por ahí se ve el baño iluminado. Lo mismo pasa bajo el efecto en el dormitorio: debajo de la cortina izquierda se ve una línea punteada de luz, por la rendija entre el muro de abajo de la ventana y el de al lado, porque detrás está el resplandor de afuera.
 
+### Pasillo del 4º piso
+Tercer escenario (24 de octubre de 2026) y el primero de la Noche 2. Se genera con `blender/scripts/pasillo_piso4.py`; las vistas están juntas en `blender/renders/pasillo4_hoja.png` y el plano en `blender/renders/pasillo4_plano.png`. Cómo se juega: *Noche 2*, sección 5.
+
+**Distribución** (en L, techo de 2,6 m, con las texturas de la prueba de estilo):
+- **El pasillo largo** (17 × 1,8 m) empieza en la puerta de la escalera A y pasa frente a los departamentos: de un lado el 4B, el 4D y el 4F; del otro, el 4A (Doña Carmen, con una estampita de la Virgen en la puerta), el 4C y el 4E. Los focos se alternan, uno prendido y otro quemado, como en la prueba de estilo.
+- **El vestíbulo del elevador**, al fondo: el elevador de frente, bajo un fluorescente frío y con un papel pegado que dice «NO FUNCIONA»; a la izquierda, el teléfono público con su repisa y el «PISO 4» pintado en rojo.
+- **El tramo corto** (6 m) dobla a la derecha y termina en la puerta de la escalera B, con un cartel verde encima. A mitad de camino está el cuarto de limpieza, con puerta de celosía.
+- **Las dos escaleras** son iguales: una U de dos tramos con un descanso y un muro en el medio, un foco en cada rellano, una lámpara con jaula en el descanso, el «PISO 4» pintado junto a la puerta de arriba y junto a la de abajo, y un 4 grande en el descanso. Elías baja por la B y sale por la A.
+- **Los escondites.** El 4C, un departamento vacío detrás de la puerta entreabierta: un ropero hueco con una puerta entreabierta, muebles tapados con sábanas, cajas y la ventana clavada con tablas, por donde entra la luz naranja de la calle. Y el cuarto de limpieza (1 × 1 m): repisas con latas y botellas, el balde con el trapeador, una escoba y la caja de fusibles; desde adentro se ve el pasillo entre las tablillas.
+- **El elevador por dentro:** cabina de acero rayado con piso de goma, pasamanos, un panel de luz en el techo y la botonera, del 6 al 1, PB y un botón sin número: el piso que no debería existir.
+
+Está en las coordenadas del 4B: su puerta de entrada (x 3,0–3,9) da a este pasillo, y el 4B y el 4A quedan donde estaban en la prueba de estilo, así que la mirilla y las vistas de Doña Carmen siguen valiendo. La puerta del 4D se corrió 1,4 m, porque en la prueba caía encima de la cocina del 4B. Del lado del 4B, el muro del pasillo es una piel de 4 cm delante del muro del 4B: en Unity tapa el papel tapiz del 4B, que hoy se ve desde el pasillo.
+
+| Vista | Qué muestra |
+|---|---|
+| `pasillo4_comienzo` | Recién salido de la escalera A: el pasillo largo con el elevador al fondo (la composición de la prueba de estilo). |
+| `pasillo4_efecto` | La misma vista bajo el efecto. |
+| `pasillo4_esquina` | El tramo corto desde el vestíbulo: el cuarto de limpieza y la puerta de la escalera B. |
+| `pasillo4_escalera` | Bajando por la escalera B, desde el descanso: abajo, la puerta y el «PISO 4». |
+| `pasillo4_vuelta1` … `pasillo4_vuelta5` | Lo que cambia en cada vuelta (ver abajo). |
+| `pasillo4_vuelta4_foto` | La Polaroid de la vuelta 4: la misma vista, pero con la puerta. No va en la hoja. |
+| `pasillo4_escondite` | Desde el cuarto de limpieza, entre las tablillas. |
+| `pasillo4_4c` | El 4C por dentro, desde la puerta. No va en la hoja. |
+| `pasillo4_ascensor` | La cabina abierta, en la vuelta 5. No va en la hoja. |
+| `pasillo4_plano` | Vista desde arriba, sin techo. |
+
+**Las vueltas.** Lo que aparece en una vuelta está en la colección `VueltaN`; lo que desaparece, en `VueltaN_Fuera`.
+
+| Vuelta | Qué cambia en el modelo |
+|---|---|
+| 1 | El número del 4D dice «4B» (`Vuelta1`) en lugar de «4D» (`Vuelta1_Fuera`). |
+| 2 | Una mancha de humedad en el techo, sobre la puerta del 4B, con el borde amarillento que deja el agua; baja por el muro hasta el marco. Abajo, un charco y tres gotas. |
+| 3 | La Polaroid de Tomás en la repisa del teléfono: la misma cámara que lleva Tomás vivo. |
+| 4 | Desaparecen la puerta de la escalera B, su marco y su cartel (`Vuelta4_Fuera`), y el vano queda tapado con muro (`Vuelta4`). Se apaga la luz del cartel. |
+| 5 | Se apagan los focos y el fluorescente del vestíbulo, y el del tramo corto queda débil. El elevador se abre (en Unity hay que animarlo: cada hoja se corre 56 cm) y se prende la luz de la cabina. En el render, Tomás es una silueta (`SoloRender`). |
+
+**Las dos versiones.** Como en el 4B: `Deterioro` (focos quemados, bolsas de basura, periódicos, manchas, colillas, la planta seca del vestíbulo) y `Efecto` (los cuatro focos prendidos, la planta viva, tapetes frente al 4A y al 4D, y un cuadro entre el 4D y el 4F, del que en la abstinencia solo queda el clavo). El piso, las paredes y el techo del pasillo y de las escaleras tienen su textura limpia (`*_limpio.png`).
+
+**La vuelta en Unity** (falta armarla). Las dos escaleras son copias exactas, con las texturas pegadas a cada escalera y no al mundo, para que no se corran. Al pasar por el descanso de la B, Elías se mueve lo que separa `EscaleraB_ancla` de `EscaleraA_ancla` (en el JSON, `anclas_escalera`), sin girar: las dos escaleras miran hacia el mismo lado. Desde el descanso no se ven las puertas, así que el salto no se nota.
+
+**Técnica:** unos 7.700 triángulos en 328 objetos, sin contar lo que es solo para los renders. Los pisos, techos y muros del pasillo van por tramos de unos 4 m, para que ninguna pieza tenga demasiadas luces cerca. Las puertas que se abren (el 4C, las de las escaleras, la del cuarto de limpieza y las del ropero) tienen el origen en la bisagra; las hojas del elevador, en su centro. Quedan fuera de Unity, porque son solo para los renders: la puerta del 4B vista desde afuera (`Fachada4B`; en Unity va la del 4B), la silueta de Tomás y las etiquetas del plano. La puerta del 4B todavía no tiene número ni mirilla del lado de afuera, y la vuelta 1 necesita que se vea el «4B». Con `-- blender --sin-unity`, el script renderiza sin exportar.
+
+**En Unity.** El script exporta `Assets/Art/PasilloPiso4/`: el FBX en la vuelta 0, las 16 texturas y `pasillo_piso4_escena.json` con 19 luces, las cámaras de las vistas y siete estados (`abstinencia`, que es la vuelta 0, `efecto` y `vuelta1` a `vuelta5`). Va en el origen, sin girar, como el 4B. Se importa con las reglas de `ImportadorArte`: un grupo por colección, el shader PS1 y colisión en 171 piezas. Todavía no está en la escena jugable.
+
 ---
 
 ## 11. Sonido
@@ -778,11 +834,11 @@ Lo que queda distinto:
 
 **Escenarios**
 - Departamento 4B: sala, cocina, dormitorio y baño (**hecho**: primera versión, ya exportada a Unity; ver sección 10). El interior del baño ya está modelado; falta su versión para la Noche 5.
-- Pasillo modular: tramos de pared, piso y techo, puertas con marco, focos, fluorescentes, tuberías.
-- Elevador: exterior e interior.
+- Pasillo modular: tramos de pared, piso y techo, puertas con marco, focos, fluorescentes, tuberías (**hecho**: el pasillo del 4º piso, en L, con las dos escaleras, el 4C vacío y el cuarto de limpieza; ya exportado a Unity, falta llevarlo a la escena jugable; ver *Pasillo del 4º piso*, sección 10).
+- Elevador: exterior e interior (**hecho**: primera versión, en el pasillo del 4º piso).
 
 **Objetos**
-- Teléfono fijo, teléfono público del pasillo, cuaderno, Polaroid, fotos. El cuaderno de la mesa de centro (**hecho**: guarda la partida, jugable en el 4B; ver *El cuaderno* en *El 4B jugable*, sección 10).
+- Teléfono fijo, teléfono público del pasillo, cuaderno, Polaroid, fotos. El teléfono público (**hecho**, en el pasillo del 4º piso). La Polaroid ya existe como objeto (colgada del cuello de Tomás vivo y en la repisa del teléfono, en la vuelta 3); falta poder sacar fotos. El cuaderno de la mesa de centro (**hecho**: guarda la partida, jugable en el 4B; ver *El cuaderno* en *El 4B jugable*, sección 10).
 - Jeringas, cucharas, cinturón, dosis. La dosis de la Noche 1 (**hecho**: la media con la jeringa bajo el colchón, jugable en el 4B; ver *Departamento 4B* y *El 4B jugable* en la sección 10). Los rastros del consumo del 4B (**hecho**: se recogen en el tutorial de la Noche 1; ver *El tutorial* en la sección 10).
 - Sofá, cama, mesa, sillas, refrigerador, tele vieja, ventanas tapadas con cartón y periódicos, basura, botellas.
 
