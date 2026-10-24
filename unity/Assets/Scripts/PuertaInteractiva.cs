@@ -2,12 +2,13 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Una puerta que Elías abre con el clip abrir_puerta de sus brazos: agarra la perilla, la gira
-/// y empuja. Después queda abierta. Va en la puerta (el objeto con el origen en la bisagra), y su
-/// nombre es el de su pista en el JSON de los brazos.
+/// Una puerta que Elías abre con un clip de sus brazos: abrir_puerta (agarra la perilla, la gira
+/// y empuja; para una puerta cerrada) o empujar_puerta (apoya la mano en la perilla y empuja;
+/// para la puerta del dormitorio, que está entreabierta). Después queda abierta. Va en la puerta
+/// (el objeto con el origen en la bisagra), y su nombre es el de su pista en el JSON de los brazos.
 ///
-/// Por ahora el clip está hecho para la puerta del dormitorio del 4B y desde el pasillo: desde el
-/// dormitorio no se puede abrir (Elias.LlegaAlInicio).
+/// Por ahora los clips están hechos para la puerta del dormitorio del 4B y desde el pasillo: desde
+/// el dormitorio no se puede abrir (Elias.LlegaAlInicio).
 /// </summary>
 public class PuertaInteractiva : Interactuable
 {

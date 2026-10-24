@@ -1306,11 +1306,35 @@ def backdrops(M):
         BACKDROPS.append(ob)
 
 
+LUZ_PASILLO = (3.45, -1.4, 0.25)  # la luz-truco pasillo_edificio, que se cuela bajo la puerta de entrada
+
+
 def eventos(M):
-    """Golpes en la puerta (Noche 1): alguien parado afuera tapa la luz que entra por abajo."""
+    """Golpes en la puerta (Noche 1): alguien parado afuera tapa la luz que entra por abajo.
+
+    En Blender, los pies tapan la luz y dejan dos sombras en el piso de adentro. En Unity esa luz
+    esta precalculada y los pies no la tapan, asi que van tambien las sombras ya hechas: la forma
+    de cada pie proyectada desde la luz sobre el piso de adentro, hasta donde llega la franja de
+    luz. No salen en los renders (aqui ya estan las de verdad); en Unity las muestra
+    GolpesEnLaPuerta, sin los pies, que se verian por la mirilla."""
     use("Eventos")
-    box("pie_izq", (3.22, -0.32, 0.0), (3.36, -0.06, 0.10), M["negro"])
-    box("pie_der", (3.54, -0.30, 0.0), (3.68, -0.05, 0.10), M["negro"])
+    pies = {"izq": ((3.22, -0.32, 0.0), (3.36, -0.06, 0.10)), "der": ((3.54, -0.30, 0.0), (3.68, -0.05, 0.10))}
+    lx, ly, _ = LUZ_PASILLO
+    for lado, (mn, mx) in pies.items():
+        box("pie_" + lado, mn, mx, M["negro"])
+        # En cada borde de la sombra (y de adentro), el ancho que tapa el pie visto desde la luz
+        bordes = []
+        for yp in (0.0, 0.22):
+            ks = [(yp - ly) / (yf - ly) for yf in (mn[1], mx[1])]
+            d = [(x - lx) * k for x in (mn[0], mx[0]) for k in ks]
+            bordes.append((lx + min(d), lx + max(d), yp))
+
+        def build(bm, b=bordes):
+            (a0, a1, y0), (c0, c1, y1) = b
+            bm.faces.new([bm.verts.new(p) for p in ((a0, y0, 0.003), (a1, y0, 0.003), (c1, y1, 0.003), (c0, y1, 0.003))])
+        sombra = mesh_obj("sombra_pie_" + lado, build, M["negro"], uv=None)
+        sombra.hide_render = True
+        sombra.visible_shadow = False
 
 
 def labels(M):
@@ -1370,7 +1394,7 @@ def lights():
     # Trucos: luces bajas para que la luz se cuele por debajo de las puertas.
     # La propiedad "truco" va al JSON de Unity (ver exportar_unity.py).
     light("fuga_bano", "POINT", (4.1, 6.2, 0.12), {"abstinencia": ((0.62, 0.78, 0.95), 25)}, radius=0.02)["truco"] = "fuga"
-    light("pasillo_edificio", "POINT", (3.45, -1.4, 0.25), {"abstinencia": (WARM, 100)}, radius=0.02)["truco"] = "fuga"
+    light("pasillo_edificio", "POINT", LUZ_PASILLO, {"abstinencia": (WARM, 100)}, radius=0.02)["truco"] = "fuga"
     # Rebote: Eevee no hace rebotar la luz; una luz tenue sin sombra junto a la
     # ventana del dormitorio hace de luz rebotada del piso. En Unity no se usan: el
     # rebote lo da la luz precalculada.

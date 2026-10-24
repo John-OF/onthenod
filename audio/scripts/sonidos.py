@@ -17,6 +17,20 @@ Sonidos (se sintetizan):
   taza_loza            la taza de loza contra el fregadero de metal (al tomarla y al dejarla)
   beber                tres tragos y el aire que sale despues
 
+El ambiente del 4B (los que dicen "bucle" van en bucle, sin saltos):
+  ambiente_ciudad      la ciudad de noche, lejos: un rumor grave y dos autos que pasan. Bucle de 40 s
+  zumbido_fluorescente el fluorescente de la cocina: el zumbido de 120 Hz del balasto y sus
+                       chasquidos. Bucle de 4 s
+  canerias             las canerias viejas del edificio: dos golpes de metal y el agua que corre
+  vecino_golpe         algo pesado que cae en el departamento de arriba
+  vecinos_murmullo     dos voces apagadas a traves de la pared (no se entiende nada)
+
+Elias (la abstinencia, 6.2):
+  respiracion          un ciclo de respiracion: inspira y espira. Bucle de 3,6 s; en Unity se
+                       acelera y sube de volumen con la abstinencia
+  latido               un latido (los dos golpes del corazon); en Unity suena a un ritmo que sube
+                       con la abstinencia
+
 Voces PROVISIONALES (sintesis de voz de Windows, bajada de tono para que suene masculina).
 Hay que reemplazarlas por voces grabadas:
   voz_tomas_otra_vez_sin_dormir   Tomas en el sofa (Noche 1): "¿Otra vez sin dormir?"
@@ -327,6 +341,129 @@ def beber():
 
 
 # ---------------------------------------------------------------------------
+# El ambiente del 4B (seccion 11)
+# ---------------------------------------------------------------------------
+def envolvente_ciclica(n, centro, ancho):
+    """Una campana de ancho 'ancho' (s) centrada en 'centro' (s) que da la vuelta: para bucles."""
+    t = np.arange(n) / SR
+    largo = n / SR
+    d = np.minimum(np.abs(t - centro), largo - np.abs(t - centro))
+    return np.exp(-0.5 * (d / ancho) ** 2)
+
+
+def ambiente_ciudad():
+    largo = 40.0
+    n = int(largo * SR)
+    t = np.arange(n) / SR
+    # el rumor de la ciudad, grave, que respira despacio (el filtro da la vuelta: bucle sin saltos)
+    rumor = filtro(rng.standard_normal(n), bajo=30, alto=220, orden=3)
+    rumor /= np.max(np.abs(rumor))
+    rumor *= 0.75 + 0.25 * np.sin(2 * np.pi * t / largo * 2)
+    # dos autos que pasan lejos: un soplido que crece y se va, mas brillante al pasar
+    autos = np.zeros(n)
+    for centro, ancho in ((9.0, 2.2), (27.0, 3.0)):
+        env = envolvente_ciclica(n, centro, ancho)
+        auto = filtro(rng.standard_normal(n), bajo=150, alto=1100, orden=2)
+        autos += auto / np.max(np.abs(auto)) * env
+    x = rumor + 0.5 * autos
+    guardar("ambiente_ciudad", x, pico=0.5)
+
+
+def zumbido_fluorescente():
+    largo = 4.0  # 120 Hz da 480 vueltas enteras: el bucle no salta
+    n = int(largo * SR)
+    t = np.arange(n) / SR
+    # el balasto: 120 Hz y sus armonicos, algo aspero
+    zumbido = sum(a * np.sin(2 * np.pi * 120 * k * t + rng.uniform(0, 2 * np.pi))
+                  for k, a in ((1, 1.0), (2, 0.55), (3, 0.35), (4, 0.2), (5, 0.12), (7, 0.06)))
+    zumbido = np.tanh(1.5 * zumbido)
+    # el tubo que parpadea: chasquidos cortos de vez en cuando
+    chasq = np.zeros(n)
+    for _ in range(5):
+        i = rng.integers(0, n - 400)
+        chasq[i:i + 300] += rng.standard_normal(300) * np.exp(-np.arange(300) / 40)
+    x = zumbido + 1.5 * filtro(chasq, bajo=1500, alto=7000)
+    guardar("zumbido_fluorescente", x, pico=0.6)
+
+
+def canerias():
+    largo = 3.2
+    x = np.zeros(int(largo * SR))
+    for en, fuerza in ((0.0, 1.0), (0.42, 0.7)):
+        t = tiempo(0.8)
+        golpe_metal = (np.sin(2 * np.pi * 70 * t) * np.exp(-t / 0.06)
+                       + 0.5 * sum(np.sin(2 * np.pi * f * t) * np.exp(-t / d) for f, d in ((430, 0.25), (910, 0.15), (1520, 0.08))))
+        mezclar(x, golpe_metal * fuerza, en)
+    # el agua que corre por el cano: un borboteo apagado
+    t = np.arange(len(x)) / SR
+    agua = filtro(rng.standard_normal(len(x)), bajo=150, alto=900)
+    borboteo = filtro(rng.standard_normal(len(x)), alto=12)
+    agua *= (0.6 + 0.4 * borboteo / np.max(np.abs(borboteo))) * np.clip((t - 0.5) / 0.4, 0, 1) * np.clip((largo - t) / 1.2, 0, 1)
+    x += 0.35 * agua / np.max(np.abs(agua))
+    # se oye a traves de la pared: sin agudos
+    guardar("canerias", eco(filtro(x, alto=2500), cola=0.5, mezcla=0.3, brillo=1500), pico=0.7)
+
+
+def vecino_golpe():
+    largo = 1.6
+    x = np.zeros(int(largo * SR))
+    t = tiempo(1.0)
+    golpe_sordo = sum(a * np.sin(2 * np.pi * f * t) * np.exp(-t / d) for f, a, d in ((48, 1.0, 0.12), (75, 0.6, 0.09), (130, 0.3, 0.05)))
+    golpe_sordo += filtro(rng.standard_normal(len(t)), bajo=60, alto=400) * np.exp(-t / 0.03) * 0.8
+    mezclar(x, golpe_sordo, 0.0)
+    mezclar(x, golpe_sordo * 0.25, 0.22)  # rebota
+    # algo que tiembla en el techo
+    t = tiempo(0.5)
+    mezclar(x, filtro(rng.standard_normal(len(t)), bajo=800, alto=3000) * np.exp(-t / 0.08) * 0.08, 0.02)
+    guardar("vecino_golpe", eco(filtro(x, alto=600), cola=0.4, mezcla=0.25, brillo=800), pico=0.8)
+
+
+def vecinos_murmullo():
+    largo = 6.0
+    n = int(largo * SR)
+    t = np.arange(n) / SR
+    x = np.zeros(n)
+    # dos voces que se turnan; cada una son silabas de ruido con dos formantes, que nadie entiende
+    turnos = [(0.2, 1.9, 0), (2.1, 3.6, 1), (3.8, 5.6, 0)]
+    for desde, hasta, quien in turnos:
+        f1, f2 = ((350, 1100), (500, 1500))[quien]
+        silabas = np.maximum(0, np.sin(2 * np.pi * rng.uniform(4.0, 5.5) * t + rng.uniform(0, 6))) ** 2
+        frase = np.clip((t - desde) / 0.1, 0, 1) * np.clip((hasta - t) / 0.2, 0, 1)
+        voz = (filtro(rng.standard_normal(n), bajo=f1 * 0.7, alto=f1 * 1.3, orden=3)
+               + 0.5 * filtro(rng.standard_normal(n), bajo=f2 * 0.8, alto=f2 * 1.2, orden=3))
+        # el tono de la voz: un zumbido grave debajo
+        tono = np.sin(2 * np.pi * np.cumsum((120 if quien == 0 else 190) * (1 + 0.08 * np.sin(2 * np.pi * 0.7 * t))) / SR)
+        x += (voz / np.max(np.abs(voz)) + 0.6 * tono) * silabas * frase
+    # a traves de la pared: solo los graves
+    guardar("vecinos_murmullo", eco(filtro(x, bajo=90, alto=550, orden=3), cola=0.4, mezcla=0.3, brillo=700), pico=0.6)
+
+
+# ---------------------------------------------------------------------------
+# Elias: la respiracion y los latidos (6.2)
+# ---------------------------------------------------------------------------
+def respiracion():
+    largo = 3.6
+    n = int(largo * SR)
+    t = np.arange(n) / SR
+    aire = rng.standard_normal(n)
+    inspira = filtro(aire, bajo=500, alto=3200) * np.sin(np.pi * np.clip(t / 1.3, 0, 1)) ** 1.5
+    espira = filtro(aire[::-1].copy(), bajo=250, alto=1800) * np.sin(np.pi * np.clip((t - 1.5) / 1.6, 0, 1)) ** 2 * 1.2
+    # tiembla un poco: la abstinencia
+    temblor = 1 + 0.15 * np.sin(2 * np.pi * 7 * t)
+    x = (inspira + espira) * temblor
+    guardar("respiracion", x, pico=0.7)
+
+
+def latido():
+    x = np.zeros(int(0.6 * SR))
+    for en, fuerza in ((0.0, 1.0), (0.26, 0.65)):  # los dos golpes: "pum-pum"
+        t = tiempo(0.3)
+        golpe_corazon = sum(a * np.sin(2 * np.pi * f * t) * np.exp(-t / d) for f, a, d in ((48, 1.0, 0.07), (75, 0.7, 0.05), (130, 0.35, 0.03)))
+        mezclar(x, golpe_corazon * fuerza, en)
+    guardar("latido", suavizar_bordes(x), pico=0.85)
+
+
+# ---------------------------------------------------------------------------
 # Voces provisionales
 # ---------------------------------------------------------------------------
 def voz(nombre, texto, tono=0.8, detras_de_puerta=False):
@@ -362,6 +499,13 @@ def main():
     agua_taza()
     taza_loza()
     beber()
+    ambiente_ciudad()
+    zumbido_fluorescente()
+    canerias()
+    vecino_golpe()
+    vecinos_murmullo()
+    respiracion()
+    latido()
     if "--sin-voces" not in sys.argv:
         voz("voz_tomas_otra_vez_sin_dormir", "¿Otra vez sin dormir?")
         voz("voz_eli_abreme", "Eli... ábreme.", detras_de_puerta=True)

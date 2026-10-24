@@ -12,6 +12,10 @@
 // el fundido sale con el mismo dithering, como en la PS1. Es un valor global (_PS1Oscuridad):
 // 0 se ve normal, 1 todo negro.
 //
+// El sudor de la abstinencia (Assets/Scripts/Abstinencia.cs, 6.2) pone la imagen borrosa y un
+// poco más oscura en los bordes, cada vez más hacia el centro. Es otro valor global
+// (_PS1Sudor): 0 nada, 1 del todo.
+//
 // Encima del fundido va el texto de TextoPS1 (la pantalla de guardado del cuaderno, los
 // pensamientos de Elías), con su sombra: se ve aunque todo esté a negro, y también se cuantiza
 // con dithering.
@@ -84,6 +88,7 @@ Shader "OnTheNod/PS1 Pantalla"
             float _Niveles;
             float _Dithering;
             float _PS1Oscuridad; // global; sin poner vale 0
+            float _PS1Sudor;     // global; sin poner vale 0
 
             // El texto (TextoPS1), del mismo tamaño que la imagen: cuánto tapa la letra cada
             // píxel, en el canal rojo, y su sombra, en el verde. Globales; sin poner, la
@@ -128,6 +133,28 @@ Shader "OnTheNod/PS1 Pantalla"
                 float2 tamano = float2(ancho, alto);
                 float2 texel = clamp(floor(i.uv * tamano), 0.0, tamano - 1.0);
                 float3 c = _MainTex.Load(int3(texel, 0)).rgb;
+
+                // El sudor: hacia los bordes, el píxel se mezcla con los de alrededor (hasta 3
+                // píxeles de la imagen chica) y se oscurece un poco
+                if (_PS1Sudor > 0.0)
+                {
+                    float2 p = (texel + 0.5) / tamano * 2.0 - 1.0;
+                    float borde = saturate((length(p * float2(1.0, 0.8)) - 0.5) / 0.7) * saturate(_PS1Sudor);
+                    float radio = 3.0 * borde;
+                    if (radio > 0.3)
+                    {
+                        float3 suma = c;
+                        for (int k = 0; k < 8; k++)
+                        {
+                            float a = k * 0.7853982;
+                            float2 d = float2(cos(a), sin(a)) * radio;
+                            suma += _MainTex.Load(int3(clamp(texel + d, 0.0, tamano - 1.0), 0)).rgb;
+                            suma += _MainTex.Load(int3(clamp(texel + d * 0.5, 0.0, tamano - 1.0), 0)).rgb;
+                        }
+                        c = suma / 17.0;
+                    }
+                    c *= 1.0 - 0.3 * borde;
+                }
 
                 // Se cuantiza el color como se guarda en un PNG (sRGB), igual que en Blender.
                 #ifndef UNITY_COLORSPACE_GAMMA

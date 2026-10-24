@@ -943,7 +943,9 @@
     "Plano"
    ],
    "objetos_ocultos": [
-    "chorro_agua"
+    "chorro_agua",
+    "sombra_pie_izq",
+    "sombra_pie_der"
    ],
    "mundo": {
     "fondo": [
@@ -1352,7 +1354,9 @@
     "Plano"
    ],
    "objetos_ocultos": [
-    "chorro_agua"
+    "chorro_agua",
+    "sombra_pie_izq",
+    "sombra_pie_der"
    ],
    "mundo": {
     "fondo": [

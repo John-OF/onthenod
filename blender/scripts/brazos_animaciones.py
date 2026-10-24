@@ -10,7 +10,9 @@ Clips (30 cuadros por segundo):
                       encima de cualquier otro clip (en Unity, una capa aditiva
                       cuyo peso puede seguir al nivel de abstinencia)
   mirar_manos         3.8 s: levanta las manos, las mira, gira las palmas (Noche 1)
-  abrir_puerta        2.8 s: agarra la perilla, la gira y empuja la puerta
+  abrir_puerta        2.8 s: agarra la perilla, la gira y empuja la puerta (una puerta cerrada)
+  empujar_puerta      2.6 s: la puerta del dormitorio, entreabierta: apoya la mano en la perilla y
+                      la empuja
   telefono_contestar  2.4 s: levanta el auricular y se lo lleva al oido
   telefono_colgar     1.8 s: devuelve el auricular y baja la mano
   tomar_jeringa       3.4 s: se agacha frente a la mesa de centro, toma la jeringa y la
@@ -46,7 +48,7 @@ Salidas (dentro de la carpeta blender/):
 
 Y en el proyecto de Unity (ver exportar_unity.py):
   unity/Assets/Art/BrazosElias/brazos_elias.fbx          esqueleto, malla, forma "consumido"
-                                                         y los trece clips (con mirar_brazos)
+                                                         y los catorce clips (con mirar_brazos)
   unity/Assets/Art/BrazosElias/brazos_elias_escena.json  luz de los brazos, camara, los cuatro
                                                          estados, los clips y, por clip, el
                                                          movimiento de la cabeza, la puerta,
@@ -443,6 +445,47 @@ def clip_abrir_puerta():
     return dict(dur=2.8, head=head, lean=lean, arms={1: right, -1: [(0.0, pose_hang(-1))]}, door=door_angle)
 
 
+def push_angle(t):
+    """La puerta del dormitorio entreabierta (DOOR_REST): la mano la empuja hasta -50 y despues
+    sigue abriendose sola."""
+    if t < 0.80:
+        return DOOR_REST
+    if t < 1.30:
+        return DOOR_REST + (-50.0 - DOOR_REST) * smooth((t - 0.80) / 0.5)
+    return -50.0 - 40.0 * ease_out((t - 1.30) / 1.0)
+
+
+def clip_empujar_puerta():
+    """La puerta del dormitorio, que en el 4B quedo entreabierta: Elias apoya la mano en la
+    perilla y la empuja (no hace falta girarla). abrir_puerta queda para las puertas cerradas."""
+    def grip(back=0.0, cur=GRIP_KNOB, frozen=None):
+        def g_fn(t):
+            k, axis, _ = knob_at(push_angle(frozen if frozen is not None else t))
+            return k + axis * back
+
+        def r_fn(t):
+            _, axis, rz = knob_at(push_angle(frozen if frozen is not None else t))
+            return hand_rot(-axis + Vector((0, 0, -0.2)), rz @ Vector((0, -1, 0)), 1)
+        return pose_world(g_fn, r_fn, (0.45, -0.1, -1.0), cur)
+
+    right = [
+        (0.0, pose_hang(1)),
+        (0.55, grip(back=0.09, cur=OPEN)),
+        (0.75, grip()),                                        # la mano en la perilla
+        (1.30, grip()),                                        # empuja: la mano sigue a la perilla
+        (1.50, grip(back=0.07, cur=OPEN, frozen=1.30)),        # suelta
+        (2.10, pose_hang(1)),
+        (2.60, pose_hang(1)),
+    ]
+    # La perilla de la puerta entreabierta queda 33 cm mas adentro que la de la puerta cerrada:
+    # Elias se acerca mas al marco que en abrir_puerta
+    head = [(0.0, (4.10, 4.66, 1.58), 90.0, -20.0), (0.55, (3.59, 4.66, 1.52), 90.0, -40.0),
+            (0.80, (3.59, 4.66, 1.52), 90.0, -40.0), (1.30, (3.48, 4.67, 1.53), 90.0, -30.0),
+            (2.60, (3.55, 4.68, 1.56), 92.0, -10.0)]
+    lean = [(0.0, (0, 0, 0)), (0.5, (0, 0.18, -0.03)), (1.4, (0, 0.18, -0.03)), (2.1, (0, 0, 0))]
+    return dict(dur=2.6, head=head, lean=lean, arms={1: right, -1: [(0.0, pose_hang(-1))]}, door=push_angle)
+
+
 def phone_grip(up=0.0, cur=GRIP_PHONE):
     rot = hand_rot((-0.25, 1, -0.55), (0, 0, -1), 1)  # palma abajo, dedos siguiendo al antebrazo
     return pose_world(lambda t: HS["center"] + Vector((0, 0, up)), lambda t: rot.copy(),
@@ -759,6 +802,7 @@ CLIPS = {
     "reposo": clip_reposo,
     "mirar_manos": clip_mirar_manos,
     "abrir_puerta": clip_abrir_puerta,
+    "empujar_puerta": clip_empujar_puerta,
     "telefono_contestar": clip_telefono_contestar,
     "telefono_colgar": clip_telefono_colgar,
     "tomar_jeringa": clip_tomar_jeringa,
@@ -768,7 +812,7 @@ CLIPS = {
     "recoger_mesa": clip_recoger_mesa,
     "recoger_piso": clip_recoger_piso,
 }
-PREVIEW = ["mirar_manos", "abrir_puerta", "telefono_contestar", "telefono_colgar", "tomar_jeringa", "sacar_dosis",
+PREVIEW = ["mirar_manos", "abrir_puerta", "empujar_puerta", "telefono_contestar", "telefono_colgar", "tomar_jeringa", "sacar_dosis",
            "tomar_agua", "tomar_cuaderno", "recoger_mesa", "recoger_piso"]
 
 
