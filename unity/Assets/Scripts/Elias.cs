@@ -46,6 +46,11 @@ public class Elias : MonoBehaviour
     [Header("Usar")]
     [Tooltip("Hasta qué distancia, en metros, alcanza a usar algo que está mirando (salvo que el objeto diga otra).")]
     public float alcance = 1.4f;
+    [Tooltip("Cuánto perdona la mirada, en metros: si el centro de la vista no cae justo sobre algo que se puede " +
+             "usar, sirve lo que esté a esta distancia de él (la perilla, la llave del fregadero).")]
+    public float radioMirada = 0.06f;
+    [Tooltip("Mostrar el punto del centro cuando se mira algo que se puede usar.")]
+    public bool punto = true;
 
     [Header("Los brazos según el mundo")]
     [Tooltip("Los mundos del escenario (abstinencia y efecto).")]
@@ -94,6 +99,9 @@ public class Elias : MonoBehaviour
         Cursor.visible = true;
         if (mundo != null)
             mundo.Cambio -= CambioDeMundo;
+        // Que el punto no quede prendido en el editor al salir de Play (es un valor global).
+        opacidadPunto = 0f;
+        Shader.SetGlobalFloat(IdPunto, 0f);
     }
 
     void CambioDeMundo(string nuevo)
@@ -106,13 +114,30 @@ public class Elias : MonoBehaviour
     void Update()
     {
         if (!Libre)
+        {
+            MostrarPunto(false);
             return;
+        }
         Mirar();
         Caminar();
         // Después de usar algo, la cámara vuelve sola a la altura de los ojos.
         camara.localPosition = Vector3.MoveTowards(camara.localPosition, new Vector3(0f, alturaOjos, 0f), 0.6f * Time.deltaTime);
-        if (interactuar.WasPressedThisFrame())
-            TratarDeUsar();
+        var objeto = Buscar();
+        MostrarPunto(objeto != null && punto && Fundido.Oscuridad <= 0f);
+        if (objeto != null && interactuar.WasPressedThisFrame())
+            StartCoroutine(Usar(objeto));
+    }
+
+    static readonly int IdPunto = Shader.PropertyToID("_PS1Punto");
+    float opacidadPunto;
+
+    /// <summary>El punto del centro de la pantalla (PS1Pantalla.shader): aparece y se va rápido.</summary>
+    void MostrarPunto(bool ver)
+    {
+        float antes = opacidadPunto;
+        opacidadPunto = Mathf.MoveTowards(opacidadPunto, ver ? 1f : 0f, 8f * Time.unscaledDeltaTime);
+        if (opacidadPunto != antes)
+            Shader.SetGlobalFloat(IdPunto, opacidadPunto);
     }
 
     void LateUpdate()
@@ -152,16 +177,47 @@ public class Elias : MonoBehaviour
         cuerpo.Move((paso + Vector3.up * caida) * Time.deltaTime);
     }
 
-    void TratarDeUsar()
+    /// <summary>
+    /// Lo que Elías puede usar ahora: lo que está mirando, a su alcance y que se deja usar (o null).
+    /// Primero con el centro exacto de la vista; si ahí no hay nada, con una mirada un poco más
+    /// ancha (radioMirada), para no tener que apuntar justo a la perilla.
+    /// </summary>
+    Interactuable Buscar()
     {
         // Se mira hasta lejos y después se compara con el alcance de lo que se miró: lo que está
         // en el piso (la dosis bajo el colchón) se alcanza desde más lejos.
-        if (!Physics.Raycast(camara.position, camara.forward, out var golpe, 3f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-            return;
+        var rayo = new Ray(camara.position, camara.forward);
+        if (Physics.Raycast(rayo, out var golpe, 3f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            var objeto = Candidato(golpe);
+            if (objeto != null)
+                return objeto;
+        }
+        if (radioMirada <= 0f)
+            return null;
+        // La mirada ancha toca también lo de alrededor (el piso junto a la jeringa): sirve lo usable
+        // más cercano, salvo que algo lo tape bastante antes (una pared en el medio).
+        var golpes = Physics.SphereCastAll(rayo, radioMirada, 3f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(golpes, (a, b) => a.distance.CompareTo(b.distance));
+        float tapa = float.PositiveInfinity;
+        foreach (var g in golpes)
+        {
+            if (g.distance > tapa + 0.3f)
+                break;
+            var objeto = Candidato(g);
+            if (objeto != null)
+                return objeto;
+            if (g.distance > 0f && g.collider.GetComponentInParent<Interactuable>() == null)
+                tapa = Mathf.Min(tapa, g.distance);
+        }
+        return null;
+    }
+
+    Interactuable Candidato(RaycastHit golpe)
+    {
         var objeto = golpe.collider.GetComponentInParent<Interactuable>();
-        if (objeto != null && objeto.isActiveAndEnabled && golpe.distance <= (objeto.alcance > 0f ? objeto.alcance : alcance)
-            && objeto.PuedeUsar(this))
-            StartCoroutine(Usar(objeto));
+        return objeto != null && objeto.isActiveAndEnabled && golpe.distance <= (objeto.alcance > 0f ? objeto.alcance : alcance)
+               && objeto.PuedeUsar(this) ? objeto : null;
     }
 
     IEnumerator Usar(Interactuable objeto)

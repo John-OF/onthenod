@@ -18,7 +18,8 @@
 //
 // Encima del fundido va el texto de TextoPS1 (la pantalla de guardado del cuaderno, los
 // pensamientos de Elías), con su sombra: se ve aunque todo esté a negro, y también se cuantiza
-// con dithering.
+// con dithering. Y el punto del centro, que aparece solo cuando Elías mira algo que se puede usar
+// (otro valor global, _PS1Punto, que pone Elias.cs).
 Shader "OnTheNod/PS1 Pantalla"
 {
     Properties
@@ -96,6 +97,8 @@ Shader "OnTheNod/PS1 Pantalla"
             Texture2D _PS1Texto;
             float _PS1TextoOpacidad;
             float4 _PS1TextoColor; // sRGB
+            // El punto que aparece cuando Elías mira algo que se puede usar (Elias.cs): 0 no se ve, 1 entero.
+            float _PS1Punto;
 
             static const float kBayer[16] =
             {
@@ -167,6 +170,18 @@ Shader "OnTheNod/PS1 Pantalla"
                     float opacidad = saturate(_PS1TextoOpacidad);
                     c *= 1.0 - letra.g * opacidad;
                     c = lerp(c, _PS1TextoColor.rgb, letra.r * opacidad);
+                }
+                // El punto: 2×2 píxeles en el centro de la imagen chica, del color del texto, con una
+                // sombra de un píxel corrida hacia abajo y a la derecha (como la del texto)
+                if (_PS1Punto > 0.0)
+                {
+                    float2 d = texel - floor(tamano * 0.5);
+                    float punto = (d.x >= -1.0 && d.x <= 0.0 && d.y >= -1.0 && d.y <= 0.0) ? 1.0 : 0.0;
+                    float2 s = d - float2(1.0, -1.0);
+                    float sombra = (s.x >= -1.0 && s.x <= 0.0 && s.y >= -1.0 && s.y <= 0.0) ? 1.0 - punto : 0.0;
+                    float o = saturate(_PS1Punto);
+                    c *= 1.0 - 0.7 * sombra * o;
+                    c = lerp(c, _PS1TextoColor.rgb, punto * o);
                 }
 
                 uint indice = ((uint)texel.y & 3u) * 4u + ((uint)texel.x & 3u);

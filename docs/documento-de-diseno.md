@@ -328,6 +328,8 @@ Un valor interno de 0 a 100 que nunca se muestra.
 ### 6.9 Sin barra de cordura
 No hay indicadores en pantalla. El jugador tampoco debe saber qué tan mal está Elías: lo nota por cómo se ve y se escucha el mundo.
 
+La única ayuda es un punto chico en el centro de la pantalla, que aparece solo cuando Elías mira algo que puede usar y lo tiene al alcance (decidido el 24 de octubre de 2026): sin él costaba saber con qué se podía interactuar. No dice nada de cómo está Elías. Ver *Usar* en *El 4B jugable*, sección 10.
+
 ### 6.10 La comida de Doña Carmen
 - Cada noche hay un plato tapado frente a la puerta del 4B.
 - Comer baja un poco la abstinencia: es el alivio pequeño y sano frente al alivio grande y destructivo de la dosis.
@@ -423,7 +425,7 @@ Hecho el 19 de octubre de 2026. La prueba de estilo está recreada en Unity, en 
 | Pieza | Qué hace | Dónde (en `unity/Assets/`) |
 |---|---|---|
 | Imagen de 480×270 | La cámara del juego no dibuja en la pantalla sino en esta imagen chica (sin suavizado ni antialiasing). | `Rendering/PS1_Imagen.renderTexture` |
-| Pantalla | Amplía la imagen a la pantalla con píxeles duros (con barras negras si la ventana no es 16:9) y le aplica el color de 15 bits con dithering Bayer 4×4. Usa la misma fórmula que el post-proceso de Blender. También hace el sudor de la abstinencia: la imagen borrosa y más oscura en los bordes. | prefab `Rendering/PS1_Pantalla`, shader `OnTheNod/PS1 Pantalla` |
+| Pantalla | Amplía la imagen a la pantalla con píxeles duros (con barras negras si la ventana no es 16:9) y le aplica el color de 15 bits con dithering Bayer 4×4. Usa la misma fórmula que el post-proceso de Blender. También hace el sudor de la abstinencia: la imagen borrosa y más oscura en los bordes, y dibuja el punto del centro cuando Elías mira algo que puede usar. | prefab `Rendering/PS1_Pantalla`, shader `OnTheNod/PS1 Pantalla` |
 | Shader PS1 | El de todos los objetos: luz difusa sin brillos, temblor de vértices (cada vértice salta de píxel en píxel de la imagen chica) y niebla. | `Rendering/PS1.shader` (`OnTheNod/PS1`) |
 | Niebla iluminada | Las luces iluminan la niebla que tienen cerca: el halo de los focos y la bruma fría del fondo. Imita la niebla volumétrica de Blender. | componente `NieblaPS1` |
 | Máscara de foco | Corta la luz que sale hacia arriba de los focos colgantes: en Blender la tapa la bombilla y el techo encima del foco queda negro. | `Rendering/Foco_Mascara.cubemap` (menú *On the Nod > Crear máscara de foco*) |
@@ -607,7 +609,10 @@ Primer recorrido jugable (20 de octubre de 2026): `Assets/Scenes/Departamento4B.
 | Usar | E | botón de arriba |
 
 - **Caminar:** a 1,3 m/s, con los ojos a 1,6 m, la altura de la cabeza en las animaciones de Blender. Elías choca con paredes y muebles, y pisa la ropa, los cojines caídos y los papeles del piso sin subirse a ellos (ver *Importación* en *Estilo PS1 en Unity*). Todavía no corre ni se agacha (6.1).
-- **Usar:** se mira algo a menos de 1,4 m y se aprieta Usar. Lo que está en el piso se alcanza desde más lejos, porque los ojos están a 1,6 m: la dosis bajo el colchón, desde 2 m (el campo `alcance` de `Interactuable`). Por ahora:
+- **Usar:** se mira algo a menos de 1,4 m y se aprieta Usar. Lo que está en el piso se alcanza desde más lejos, porque los ojos están a 1,6 m: la dosis bajo el colchón, desde 2 m (el campo `alcance` de `Interactuable`).
+  - **El punto** (24 de octubre de 2026): cuando lo que se mira se puede usar, aparece un punto de 2×2 píxeles de la imagen chica en el centro, del color del texto y con una sombra de un píxel; se va en cuanto se deja de mirar. Lo dibuja la pantalla PS1, así que tiene los mismos píxeles duros. No aparece mientras Elías usa algo ni a oscuras, y tampoco en lo que todavía no se puede usar (la puerta de entrada antes de los golpes) o desde donde no se puede (la puerta del dormitorio desde adentro).
+  - **La mirada perdona:** si el centro de la vista no cae justo sobre algo usable, sirve lo que esté a 6 cm de él (`radioMirada` en `Elias`), salvo que una pared lo tape. Así no hay que apuntar exacto a la perilla o a una jeringa del piso (se encuentra hasta 10 cm al costado).
+  - Por ahora se usan:
   - la puerta del dormitorio, desde el pasillo: como está entreabierta, Elías apoya la mano en la perilla y la empuja (`empujar_puerta`); queda abierta;
   - el teléfono: contesta, escucha hasta que se vuelve a apretar Usar, y cuelga;
   - la dosis escondida bajo el colchón del dormitorio (ver abajo);
