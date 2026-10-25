@@ -102,6 +102,10 @@ YT2 = -8.0                  # su pared final, la de la escalera B
 O_A = Vector((1.65, YS - T, H))
 O_B = Vector((16.9, YT2 - T, 0.0))
 
+# Las puertas que Elias abre usan el clip hecho para la puerta del dormitorio del 4B (Unity lo
+# lleva a cada una): la perilla tiene que quedar a la misma distancia de la bisagra.
+PERILLA_CLIP = 0.69
+
 R = math.radians
 rng = np.random.default_rng(404)
 scene = bpy.context.scene
@@ -789,11 +793,12 @@ def marco_ventana(name, axis, n0, n1, a, b, z0, z1, mat, inside, trim=0.06, d=0.
 
 def puerta(nombre, axis, cara, nrm, u0, u1, M, hoja="puerta", numero=None, mirilla=True, abre=False,
            ajar=0.0, hacia_adentro=True, bisagra=1, alto=DOOR_H, grosor=0.04, marco="marco", muro_t=T,
-           z0=0.0, uv=None, mat_numero="numero"):
+           z0=0.0, uv=None, mat_numero="numero", perilla=None):
     """Puerta en el vano de un muro. axis 'x': el muro corre a lo largo de X (n es Y).
     cara: la cara del muro que da al pasillo; nrm: hacia que lado de n queda el pasillo.
     bisagra +1: en u1; -1: en u0. abre: los herrajes y el numero se mueven con la hoja (el
     origen de la hoja esta en la bisagra). ajar: grados abierta, hacia adentro o hacia el pasillo.
+    perilla: a cuantos metros de la bisagra va la manija (PERILLA_CLIP en las que abre Elias).
     Devuelve la hoja, sus piezas, el numero y el marco."""
     nc = cara - nrm * 0.01              # cara de la hoja que da al pasillo
     nr = nc - nrm * grosor              # la que da adentro
@@ -804,7 +809,7 @@ def puerta(nombre, axis, cara, nrm, u0, u1, M, hoja="puerta", numero=None, miril
     w = u1 - u0
     mn, mx = WB(axis, u0 + 0.005, u1 - 0.005, nc, nr, z0 + 0.02, z0 + alto - 0.005)
     slab = box(nombre, mn, mx, M[hoja], uv=uv or (w, w, alto), pivot=hinge, world_uv=False)
-    k = uf + (0.08 if bisagra > 0 else -0.08)
+    k = uf + (0.08 if bisagra > 0 else -0.08) if perilla is None else ub - bisagra * perilla
     hw = [(WB(axis, k - 0.03, k + 0.03, nc, nc + nrm * 0.05, z0 + 0.98, z0 + 1.04), M["laton"]),
           (WB(axis, k - 0.03, k + 0.03, nr, nr - nrm * 0.05, z0 + 0.98, z0 + 1.04), M["laton"])]
     if numero:
@@ -863,7 +868,7 @@ def fluorescente(nombre, x, y, a_lo_largo, mat_tubo, M, techo=H):
 
 
 def persiana(nombre, axis, cara, nrm, u0, u1, M, alto=2.0, grosor=0.035, bisagra=1, hacia_adentro=False,
-             ajar=0.0, z0=0.0):
+             ajar=0.0, z0=0.0, perilla=None):
     """Puerta de celosia (tablillas inclinadas): desde adentro se ve el pasillo entre las rendijas.
     El origen esta en la bisagra."""
     nc = cara - nrm * 0.01
@@ -892,10 +897,10 @@ def persiana(nombre, axis, cara, nrm, u0, u1, M, alto=2.0, grosor=0.035, bisagra
                 bmesh.ops.create_cube(bm, size=1.0, matrix=Matrix.Translation(c) @ tilt @ Matrix.Diagonal((*size, 1.0)))
                 z += 0.05
     slab = mesh_obj(nombre, build, M["persiana"], loc=hinge)
-    k = uf + (0.08 if bisagra > 0 else -0.08)
+    k = uf + (0.08 if bisagra > 0 else -0.08) if perilla is None else ub - bisagra * perilla
     inv = Matrix.Translation(hinge).inverted()
     for i, (n0, n1) in enumerate(((nc, nc + nrm * 0.05), (nr, nr - nrm * 0.05))):
-        kn = box(f"{nombre}_manija_{i}", *WB(axis, k - 0.025, k + 0.025, n0, n1, z0 + 1.0, z0 + 1.06), M["laton"])
+        kn = box(f"{nombre}_manija_{i}", *WB(axis, k - 0.03, k + 0.03, n0, n1, z0 + 0.98, z0 + 1.04), M["laton"])
         kn.parent = slab
         kn.matrix_parent_inverse = inv
     s = (nrm if axis == "x" else -nrm) * bisagra * (1 if hacia_adentro else -1)
@@ -957,9 +962,10 @@ def pasillo(M):
     for num, a, b in PUERTAS_NORTE:
         puertas[num] = puerta(f"puerta_{num.lower()}", "x", YN, -1, a, b, M, numero=num, muro_t=0.04)
     for num, a, b in PUERTAS_SUR:
-        abre = num == "4C"
+        abre = num == "4C"  # entreabierta como la del dormitorio: Elias la empuja (empujar_puerta)
         puertas[num] = puerta(f"puerta_{num.lower()}", "x", YS, 1, a, b, M, numero=num, abre=abre,
-                              ajar=25.0 if abre else 0.0)
+                              ajar=28.0 if abre else 0.0, bisagra=-1 if abre else 1,
+                              perilla=PERILLA_CLIP if abre else None)
     # Doña Carmen (4A): una estampita de la Virgen sobre el numero
     box("estampita_4a", (5.41, YS - 0.01, 1.73), (5.49, YS - 0.006, 1.84), M["estampita"])
 
@@ -1106,38 +1112,40 @@ def polaroid(M, loc, yaw):
 
 
 def cuarto_limpieza(M):
-    """Detras de la puerta de celosia del tramo corto: el escondite de la vuelta 5."""
+    """Detras de la puerta de celosia del tramo corto: el escondite de la vuelta 5. La puerta se
+    abre hacia adentro (Elias la empuja), asi que lo que hay adentro queda fuera de su recorrido."""
     use("Estructura")
-    x0, x1, y0, y1 = XE + T, XE + T + 1.0, -5.0, -4.0
+    x0, x1, y0, y1 = XE + T, XE + T + 1.2, -5.1, -3.9
     boxes_obj("limpieza_muros", [((x1, y0 - T, 0.0), (x1 + T, y1 + T, H)), ((x0, y0 - T, 0.0), (x1, y0, H)),
                                  ((x0, y1, 0.0), (x1, y1 + T, H))], M["esc_pared"], uv=(2, 2, H))
     box("limpieza_piso", (x0, y0, -0.1), (x1, y1, 0.0), M["concreto"], uv=(1, 1, 1))
     CEILINGS.append(box("limpieza_techo", (x0, y0 - T, H), (x1 + T, y1 + T, H + 0.1), M["techo"], uv=(2, 2, 2)))
     marco_puerta("limpieza_marco", "y", XE, XE + T, *LIMPIEZA, 0.0, 2.0, M["marco"])
-    persiana("puerta_limpieza", "y", XE, -1, *LIMPIEZA, M, alto=2.0, ajar=8.0)
+    persiana("puerta_limpieza", "y", XE, -1, *LIMPIEZA, M, alto=2.0, bisagra=-1, hacia_adentro=True,
+             perilla=PERILLA_CLIP)
 
     use("Objetos")
     for i, z in enumerate((1.25, 1.65)):
         box(f"limpieza_repisa_{i}", (x1 - 0.28, y0 + 0.03, z), (x1, y1 - 0.03, z + 0.02), M["ropero"])
     g = np.random.default_rng(7)
-    for i in range(6):
-        z = 1.27 if i < 3 else 1.67
-        y = y0 + 0.15 + (i % 3) * 0.3 + g.uniform(-0.05, 0.05)
+    for i in range(8):
+        z = 1.27 if i < 4 else 1.67
+        y = y0 + 0.17 + (i % 4) * 0.28 + g.uniform(-0.05, 0.05)
         kind = g.integers(0, 3)
         if kind == 0:
             cyl(f"limpieza_lata_{i}", (x1 - 0.14, y, z), 0.04, 0.12, M["lata"])
         else:
             cyl(f"limpieza_botella_{i}", (x1 - 0.14, y, z), 0.035, 0.24,
                 M["botella_azul"] if kind == 1 else M["botella_blanca"], seg=6)
-    cyl("limpieza_balde", (x1 - 0.25, y0 + 0.22, 0.0), 0.15, 0.28, M["balde"], r2=0.17, seg=10)
-    blob("limpieza_trapeador", (x1 - 0.25, y0 + 0.22, 0.2), (0.12, 0.12, 0.08), M["trapeador"], seed=3)
-    bar("limpieza_mango", (x1 - 0.25, y0 + 0.22, 0.2), (x1 - 0.06, y0 + 0.06, 1.5), 0.025, 0.025, M["mango"])
+    cyl("limpieza_balde", (x1 - 0.25, y0 + 0.2, 0.0), 0.15, 0.28, M["balde"], r2=0.17, seg=10)
+    blob("limpieza_trapeador", (x1 - 0.25, y0 + 0.2, 0.2), (0.12, 0.12, 0.08), M["trapeador"], seed=3)
+    bar("limpieza_mango", (x1 - 0.25, y0 + 0.2, 0.2), (x1 - 0.06, y0 + 0.06, 1.5), 0.025, 0.025, M["mango"])
     bar("limpieza_escoba_palo", (x1 - 0.06, y1 - 0.08, 0.12), (x1 - 0.04, y1 - 0.2, 1.35), 0.025, 0.025, M["mango"])
     box("limpieza_escoba", (x1 - 0.12, y1 - 0.2, 0.0), (x1 - 0.02, y1 - 0.04, 0.14), M["trapeador"])
-    box("limpieza_fusibles", (x0 + 0.35, y1 - 0.06, 1.3), (x0 + 0.65, y1, 1.7), M["metal_oscuro"])
-    for i, x in enumerate((x0 + 0.42, x0 + 0.5, x0 + 0.58)):
+    box("limpieza_fusibles", (x0 + 0.4, y1 - 0.06, 1.3), (x0 + 0.7, y1, 1.7), M["metal_oscuro"])
+    for i, x in enumerate((x0 + 0.47, x0 + 0.55, x0 + 0.63)):
         box(f"limpieza_cable_{i}", (x - 0.008, y1 - 0.03, 1.7), (x + 0.008, y1 - 0.015, H), M["negro"])
-    foco_colgante("limpieza_foco", x0 + 0.45, (y0 + y1) / 2, H, M, None, drop=0.3)
+    foco_colgante("limpieza_foco", x0 + 0.55, (y0 + y1) / 2, H, M, None, drop=0.3)
 
 
 def departamento_4c(M):
@@ -1232,6 +1240,12 @@ def escalera(letra, O, M):
     cajas("baranda", [((0.06, -1.23, 0.9), (1.2, -1.17, 0.95))] +
           [((x - 0.015, -1.215, 0.0), (x + 0.015, -1.185, 0.9)) for x in (0.12, 0.62, 1.15)],
           M["pasamanos"], uv=(0.5, 0.5, 0.5))
+    # Rampas: solo colision (Unity no las dibuja), sobre las puntas de los escalones
+    for i, (a, b) in enumerate(((W(-0.63, -1.2, -0.01), W(-0.63, -3.1, -1.31)),
+                                (W(0.63, -3.1, -1.31), W(0.63, -1.2, -H - 0.01)))):
+        rampa = bar(f"{p}rampa_{i + 1}", a, b, 1.14, 0.02, M["negro"])
+        rampa["solo_colision"] = 1
+        rampa.hide_render = True
     bar(p + "pasamanos_1", W(-1.16, -1.1, 0.9), W(-1.16, -3.2, -1.3 + 0.9), 0.04, 0.04, M["pasamanos"])
     bar(p + "pasamanos_2", W(1.16, -3.2, -1.3 + 0.9), W(1.16, -1.1, -H + 0.9), 0.04, 0.04, M["pasamanos"])
     # Luces: un foco en el rellano de arriba y una lampara con jaula en el descanso
@@ -1247,11 +1261,14 @@ def escalera(letra, O, M):
     for nivel, zz in (("arriba", 0.0), ("abajo", -H)):
         text_obj(f"{p}piso_{nivel}", "PISO 4", 0.15, M["pintura_roja"], W(0.86, -0.002, zz + 1.55), face_rot("x", -1))
     text_obj(p + "cuatro", "4", 0.45, M["pintura_roja"], W(0.62, -4.298, -1.3 + 1.5), face_rot("x", 1))
-    # Las dos puertas (abren hacia la escalera) y el cartel verde sobre cada una, del lado del pasillo
+    # Las dos puertas y el cartel verde sobre cada una, del lado del pasillo. Elias siempre empuja:
+    # la de arriba se abre hacia la escalera (se entra desde el tramo corto) y la de abajo hacia
+    # el pasillo (se sale al pasillo largo). La bisagra queda a su derecha.
     puertas = {}
-    for nivel, zz in (("arriba", 0.0), ("abajo", -H)):
+    for nivel, zz, bis, adentro in (("arriba", 0.0, -1, True), ("abajo", -H, 1, False)):
         d = puerta(f"{p}puerta_{nivel}", "x", oy + T, 1, ox - 0.45, ox + 0.45, M, hoja="puerta_esc", mirilla=False,
-                   abre=True, z0=oz + zz, uv=(0.5, 0.5, 0.5))
+                   abre=True, z0=oz + zz, uv=(0.5, 0.5, 0.5), bisagra=bis, hacia_adentro=adentro,
+                   perilla=PERILLA_CLIP)
         cartel = cajas(f"cartel_{nivel}", [((-0.3, T, zz + 2.2), (0.3, T + 0.03, zz + 2.38))], M["cartel"],
                        uv=(0.5, 0.5, 0.5))
         letras = text_obj(f"{p}cartel_{nivel}_texto", "ESCALERA", 0.075, M["numero"], W(0.0, T + 0.031, zz + 2.29),
@@ -1431,6 +1448,9 @@ def lights(focos):
           radius=0.1)
     light("luz_cartel_b", "POINT", (O_B.x, YT2 + 0.3, 2.29),
           {"abstinencia": (GREEN, 2.0), "efecto": (GREEN, 1.5), "vuelta4": None}, radius=0.1)
+    # Luces chicas, sin sombra: en Unity cada luz puntual con sombra ocupa seis mapas de sombra
+    for nombre in ("luz_indicador", "luz_cartel_a", "luz_cartel_b"):
+        LIGHTS[nombre][0].data.use_shadow = False
     for letra, O in (("a", O_A), ("b", O_B)):
         light(f"esc{letra}_luz_rellano", "POINT", (O.x, O.y - 0.6, O.z + H - 0.47),
               {"abstinencia": (WARM, 18), "efecto": (GOLD, 28)}, radius=0.03)
@@ -1543,7 +1563,7 @@ def cameras():
     camera("Cam_vuelta4", (16.9, -2.3, 1.6), (16.9, -8.0, 1.1))               # el tramo corto, sin puerta
     camera("Cam_vuelta5", (5.0, -1.1, 1.6), (17.8, -1.02, 1.15))              # Tomas frente al elevador
     camera("Cam_escondite", (XE + T + 0.55, -4.5, 1.55), (16.0, -4.4, 1.35))  # desde el cuarto de limpieza
-    camera("Cam_4c", (10.15, -2.25, 1.6), (9.2, -4.6, 0.9), lens=20.0)       # adentro del 4C, desde la puerta
+    camera("Cam_4c", (10.85, -2.6, 1.6), (9.0, -4.4, 0.9), lens=20.0)        # adentro del 4C, junto a la puerta
     camera("Cam_ascensor", (16.2, -1.35, 1.6), (19.4, -0.9, 1.1))             # la cabina abierta
     camera("Cam_plano", (9.6, -5.8, 20.0), None, ortho=22.0)                  # desde arriba, sin techo
 

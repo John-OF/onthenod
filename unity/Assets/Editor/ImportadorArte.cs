@@ -20,7 +20,9 @@ using UnityEngine;
 ///   - Escenarios (sin clips): colisión en todo lo que mide al menos 25 cm por algún lado
 ///     (paredes, pisos, muebles, bolsas de basura), para no atravesarlo al caminar. Lo chico
 ///     (jeringas, botellas) no la lleva, ni lo que está tirado en el piso, mide menos de 20 cm
-///     de alto y menos de 1 m de largo (ropa, cojines caídos, papeles): se pisa sin subirse.
+///     de alto y menos de 1 m de largo (ropa, cojines caídos, papeles): se pisa sin subirse. Lo
+///     que en Blender lleva la propiedad solo_colision (las rampas de las escaleras del pasillo)
+///     se choca pero no se dibuja.
 ///   - Escenarios, para la luz precalculada: coordenadas para el mapa de luz y todo marcado
 ///     como fijo (Contribute GI). Lo chico (menos de 25 cm) toma la luz de las sondas en vez
 ///     del mapa de luz. Lo que se mueve en una escena (la puerta que se abre) se desmarca ahí.
@@ -146,11 +148,17 @@ public class ImportadorArte : AssetPostprocessor
     }
 
     readonly System.Collections.Generic.List<GameObject> sinSombra = new System.Collections.Generic.List<GameObject>();
+    readonly System.Collections.Generic.List<GameObject> soloColision = new System.Collections.Generic.List<GameObject>();
 
     void OnPostprocessGameObjectWithUserProperties(GameObject objeto, string[] nombres, object[] valores)
     {
-        if (EsArte(assetPath) && System.Array.IndexOf(nombres, "sin_sombra") >= 0)
+        if (!EsArte(assetPath))
+            return;
+        if (System.Array.IndexOf(nombres, "sin_sombra") >= 0)
             sinSombra.Add(objeto);
+        // Piezas que solo existen para chocar, sin dibujarse (las rampas de las escaleras del pasillo).
+        if (System.Array.IndexOf(nombres, "solo_colision") >= 0)
+            soloColision.Add(objeto);
     }
 
     void OnPostprocessModel(GameObject modelo)
@@ -177,6 +185,15 @@ public class ImportadorArte : AssetPostprocessor
         {
             if (malla.sharedMesh == null)
                 continue;
+            if (soloColision.Contains(malla.gameObject))
+            {
+                // Se choca con ella pero no se ve, ni entra en la luz precalculada.
+                if (malla.TryGetComponent<MeshRenderer>(out var invisible))
+                    Object.DestroyImmediate(invisible);
+                GameObjectUtility.SetStaticEditorFlags(malla.gameObject, 0);
+                malla.gameObject.AddComponent<MeshCollider>().sharedMesh = malla.sharedMesh;
+                continue;
+            }
             var caja = CajaEnElModelo(malla, modelo.transform);
             if (EsChico(caja) && malla.TryGetComponent<MeshRenderer>(out var r))
                 r.receiveGI = ReceiveGI.LightProbes;

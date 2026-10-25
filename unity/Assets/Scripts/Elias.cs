@@ -243,10 +243,17 @@ public class Elias : MonoBehaviour
         /// <summary>Corta el clip en este segundo (por ejemplo, para un corte a negro).</summary>
         public float hasta = float.PositiveInfinity;
         /// <summary>
-        /// Mueve la cabeza del clip (en las coordenadas del escenario): para usar con otra puerta
-        /// el clip que se hizo para una (ver PuertaDeEntrada).
+        /// Mueve el clip (en las coordenadas del escenario): para usar con otra puerta el clip que
+        /// se hizo para una (ver PuertaDeEntrada y PuertaInteractiva). Mueve la cabeza y también lo
+        /// que siguen las pistas de los objetos (la puerta gira alrededor de su propia bisagra).
         /// </summary>
         public Matrix4x4 reubicar = Matrix4x4.identity;
+        /// <summary>
+        /// Los objetos se mueven desde como están en el primer cuadro del clip, no desde su reposo:
+        /// para una puerta cerrada con abrir_puerta, que empieza cerrada aunque la del dormitorio
+        /// descanse entreabierta.
+        /// </summary>
+        public bool desdeElInicio;
     }
 
     public IEnumerator Reproducir(string clip, Transform espacio, bool volverAlReposo, OpcionesClip opciones,
@@ -286,7 +293,8 @@ public class Elias : MonoBehaviour
                 if (p == null)
                     continue;
                 var objeto = objetos[i].objeto;
-                var cambio = espacio.localToWorldMatrix * p.CambioEnTiempo(tc, fps) * espacio.worldToLocalMatrix;
+                var cambioClip = opciones.desdeElInicio ? p.EnTiempo(tc, fps) * p.EnTiempo(0f, fps).inverse : p.CambioEnTiempo(tc, fps);
+                var cambio = espacioCabeza * cambioClip * opciones.reubicar.inverse * espacio.worldToLocalMatrix;
                 var segunPista = cambio * reposos[objeto];
                 if (!p.LoTiene(tc))
                 {

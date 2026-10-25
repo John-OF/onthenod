@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 public static class Partida
 {
-    /// <summary>La noche que se está jugando. Por ahora solo existe la Noche 1.</summary>
+    /// <summary>La noche que se está jugando: la Noche 1 en el 4B y la Noche 2 en el pasillo.</summary>
     public static int Noche { get; private set; } = 1;
 
     /// <summary>Días sin consumir. La Noche 1 es el primero.</summary>
@@ -32,6 +32,9 @@ public static class Partida
         LlamadasContestadas = 0;
         LlamadasPerdidas = 0;
     }
+
+    /// <summary>Pasa a la noche <paramref name="noche"/> (al abrir la puerta del 4B, la Noche 2).</summary>
+    public static void EmpezarNoche(int noche) => Noche = noche;
 
     public static void Llamada(bool contesto)
     {

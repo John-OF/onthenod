@@ -165,7 +165,7 @@
    ],
    "cono": 0.0,
    "suavizado": 0.0,
-   "sombras": true,
+   "sombras": false,
    "truco": "",
    "precalculada": false
   },
@@ -189,7 +189,7 @@
    ],
    "cono": 0.0,
    "suavizado": 0.0,
-   "sombras": true,
+   "sombras": false,
    "truco": "",
    "precalculada": false
   },
@@ -213,7 +213,7 @@
    ],
    "cono": 0.0,
    "suavizado": 0.0,
-   "sombras": true,
+   "sombras": false,
    "truco": "",
    "precalculada": false
   },
@@ -669,19 +669,19 @@
   {
    "nombre": "Cam_4c",
    "posicion": [
-    10.15,
-    -2.25,
+    10.85,
+    -2.6,
     1.6
    ],
    "direccion": [
-    -0.36127,
-    -0.89366,
-    -0.2662
+    -0.69174,
+    -0.67304,
+    -0.26174
    ],
    "arriba": [
-    -0.09977,
-    -0.24679,
-    0.96392
+    -0.1876,
+    -0.18253,
+    0.96514
    ],
    "lente": 20.0,
    "sensor": 36.0,
@@ -1143,7 +1143,12 @@
     "Vuelta3",
     "Vuelta4"
    ],
-   "objetos_ocultos": [],
+   "objetos_ocultos": [
+    "escA_rampa_1",
+    "escA_rampa_2",
+    "escB_rampa_1",
+    "escB_rampa_2"
+   ],
    "mundo": {
     "fondo": [
      0.004,
@@ -1564,7 +1569,12 @@
     "Vuelta3",
     "Vuelta4"
    ],
-   "objetos_ocultos": [],
+   "objetos_ocultos": [
+    "escA_rampa_1",
+    "escA_rampa_2",
+    "escB_rampa_1",
+    "escB_rampa_2"
+   ],
    "mundo": {
     "fondo": [
      0.07,
@@ -1985,7 +1995,12 @@
     "Vuelta3",
     "Vuelta4"
    ],
-   "objetos_ocultos": [],
+   "objetos_ocultos": [
+    "escA_rampa_1",
+    "escA_rampa_2",
+    "escB_rampa_1",
+    "escB_rampa_2"
+   ],
    "mundo": {
     "fondo": [
      0.004,
@@ -2405,7 +2420,12 @@
     "Vuelta3",
     "Vuelta4"
    ],
-   "objetos_ocultos": [],
+   "objetos_ocultos": [
+    "escA_rampa_1",
+    "escA_rampa_2",
+    "escB_rampa_1",
+    "escB_rampa_2"
+   ],
    "mundo": {
     "fondo": [
      0.004,
@@ -2825,7 +2845,12 @@
     "Vuelta2",
     "Vuelta4"
    ],
-   "objetos_ocultos": [],
+   "objetos_ocultos": [
+    "escA_rampa_1",
+    "escA_rampa_2",
+    "escB_rampa_1",
+    "escB_rampa_2"
+   ],
    "mundo": {
     "fondo": [
      0.004,
@@ -3246,7 +3271,12 @@
     "Vuelta3",
     "Vuelta4_Fuera"
    ],
-   "objetos_ocultos": [],
+   "objetos_ocultos": [
+    "escA_rampa_1",
+    "escA_rampa_2",
+    "escB_rampa_1",
+    "escB_rampa_2"
+   ],
    "mundo": {
     "fondo": [
      0.004,
@@ -3667,7 +3697,12 @@
     "Vuelta3",
     "Vuelta4"
    ],
-   "objetos_ocultos": [],
+   "objetos_ocultos": [
+    "escA_rampa_1",
+    "escA_rampa_2",
+    "escB_rampa_1",
+    "escB_rampa_2"
+   ],
    "mundo": {
     "fondo": [
      0.002,

@@ -531,6 +531,7 @@ def build_materials():
         "cortina_bano": S("CortinaBano", (0.38, 0.44, 0.42), rough=0.6),
         "negro": S("Negro", (0.0, 0.0, 0.0), rough=1.0, spec=0.0),
         "mancha": S("Mancha", (0.07, 0.035, 0.02), rough=0.6, spec=0.25),
+        "numero": S("NumeroPuerta", (0.03, 0.025, 0.02), rough=0.6),
         # solo en la version 'efecto'
         "cortina": S("Cortina", (0.72, 0.42, 0.18), rough=0.9, spec=0.1),
         "alfombra": S("Alfombra", (0.46, 0.14, 0.08), rough=0.95, spec=0.1),
@@ -847,7 +848,7 @@ def architecture(M):
 
     # Puerta de entrada (abre hacia adentro): cerrojos, cadena puesta y mirilla
     L = M["laton"]
-    door("puerta_entrada", (3.01, -0.04, 0.03), (3.89, 0.0, 2.09), (3.01, 0.0, 0.0), M["puerta"],
+    entrada = door("puerta_entrada", (3.01, -0.04, 0.03), (3.89, 0.0, 2.09), (3.01, 0.0, 0.0), M["puerta"],
          (0.88, 0.88, 2.09), [
              ((3.78, 0.0, 0.98), (3.84, 0.05, 1.04), L),             # manija
              ((3.78, -0.09, 0.98), (3.84, -0.04, 1.04), L),
@@ -856,7 +857,13 @@ def architecture(M):
              ((3.60, 0.0, 1.90), (3.80, 0.018, 1.93), M["metal"]),   # pasador
              ((3.70, 0.0, 1.62), (3.82, 0.012, 1.645), L),           # riel de la cadena
              ((3.43, 0.0, 1.535), (3.47, 0.012, 1.575), L),          # mirilla
+             # Del lado del pasillo (Noche 2): la placa con el numero y el lente de la mirilla
+             ((3.36, -0.048, 1.64), (3.54, -0.04, 1.76), L),         # placa
+             ((3.43, -0.052, 1.535), (3.47, -0.04, 1.575), L),       # mirilla, por fuera
          ])
+    numero = text_obj("puerta_entrada_numero", "4B", 0.075, M["numero"], (3.45, -0.0485, 1.70), (R(90), 0, 0))
+    numero.parent = entrada
+    numero.matrix_parent_inverse = Matrix.Translation((3.01, 0.0, 0.0)).inverted()
     for i, (x, z) in enumerate(((3.925, 1.618), (3.90, 1.604), (3.875, 1.598), (3.85, 1.603), (3.825, 1.615))):
         box(f"cadena_{i}", (x - 0.012, 0.012, z - 0.006), (x + 0.012, 0.018, z + 0.006), M["metal"])
 

@@ -13,7 +13,8 @@ using UnityEngine;
 /// El primer estado del JSON es el del FBX (en el 4B, la abstinencia): en ese, los materiales son
 /// los del modelo tal cual. En los otros se usan copias, para no tocar el modelo.
 ///
-/// Lo cambia la dosis (Abstinencia.Consumir) y, al terminar el efecto, el bajón.
+/// Lo cambia la dosis (Abstinencia.Consumir) y, al terminar el efecto, el bajón. Otro escenario
+/// puede seguirlo (sigue): el pasillo del 4º piso cambia con el 4B.
 /// </summary>
 public class EstadosDelMundo : MonoBehaviour
 {
@@ -29,6 +30,15 @@ public class EstadosDelMundo : MonoBehaviour
 
     [Tooltip("La luz precalculada de cada mundo. La llena On the Nod > Precalcular la luz de los mundos.")]
     public List<LuzPrecalculada> precalculadas = new List<LuzPrecalculada>();
+    [Tooltip("Si el escenario tiene luz precalculada (el 4B). El pasillo del 4º piso no: lo iluminan sus lámparas en tiempo real.")]
+    public bool tieneLuzPrecalculada = true;
+
+    [Header("Seguir a otro escenario")]
+    [Tooltip("Los mundos de otro escenario (el 4B): cuando cambian, este cambia igual (la dosis cambia todo).")]
+    public EstadosDelMundo sigue;
+    [Tooltip("Lo que se pone cuando el otro vuelve a su primer mundo (la abstinencia). En el pasillo, la vuelta de " +
+             "ahora: abstinencia es la vuelta 0. Vacío: el primer estado de este.")]
+    public string estadoNormal;
 
     /// <summary>El mundo de ahora.</summary>
     public string Actual { get; private set; }
@@ -84,6 +94,24 @@ public class EstadosDelMundo : MonoBehaviour
     public string[] Nombres() => Array.ConvertAll(Escena.estados, e => e.nombre);
 
     void Start() => Poner(Nombres()[0]);
+
+    void OnEnable()
+    {
+        if (sigue != null)
+            sigue.Cambio += Seguir;
+    }
+
+    void OnDisable()
+    {
+        if (sigue != null)
+            sigue.Cambio -= Seguir;
+    }
+
+    void Seguir(string nuevo)
+    {
+        bool normal = nuevo == sigue.Nombres()[0];
+        Poner(normal ? (string.IsNullOrEmpty(estadoNormal) ? Nombres()[0] : estadoNormal) : nuevo);
+    }
 
     /// <summary>Pasa al mundo siguiente (en el 4B, de la abstinencia al efecto y de vuelta).</summary>
     public void Alternar()

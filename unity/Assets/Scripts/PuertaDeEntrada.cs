@@ -4,8 +4,8 @@ using UnityEngine;
 
 /// <summary>
 /// La puerta de entrada del 4B en la Noche 1: después de los golpes y de la voz («Eli, ábreme»),
-/// Elías la abre y aparece el pasillo. Por ahora, la Noche 2 todavía no existe: agarra la
-/// perilla, la gira y corte a negro (sección 5).
+/// Elías la abre y aparece el pasillo: agarra la perilla, la gira, corte a negro y empieza la
+/// Noche 2 (NocheDos), con la puerta abierta (sección 5).
 ///
 /// No hay un clip para esta puerta: se usa el comienzo de abrir_puerta (hecho para la puerta del
 /// dormitorio), movido para que la perilla de aquella caiga en la de esta. Va en la puerta.
@@ -29,6 +29,9 @@ public class PuertaDeEntrada : Interactuable
     /// <summary>Solo se puede abrir cuando la noche lo permite (después de los golpes).</summary>
     public bool habilitada;
 
+    [Tooltip("Lo que sigue al abrir: la Noche 2. Sin esto, se queda a oscuras.")]
+    public NocheDos siguiente;
+
     /// <summary>Avisa cuando la pantalla ya está a oscuras.</summary>
     public event Action Abrio;
 
@@ -48,7 +51,13 @@ public class PuertaDeEntrada : Interactuable
         yield return elias.Reproducir(clip, espacio, false, new Elias.OpcionesClip { hasta = hasta, reubicar = Reubicar() });
         yield return Fundido.A(1f, 0.6f);
         Abrio?.Invoke();
-        // Fin de la Noche 1 por ahora: se queda a oscuras, sin volver a responder.
+        habilitada = false;
+        if (siguiente != null)
+        {
+            yield return siguiente.Empezar();
+            yield break;
+        }
+        // Sin Noche 2: se queda a oscuras, sin volver a responder.
         while (true)
             yield return null;
     }

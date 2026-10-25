@@ -86,6 +86,15 @@ public class GolpesEnLaPuerta : MonoBehaviour
 
     public void Empezar() => StartCoroutine(Tocar());
 
+    /// <summary>Ya no hay nadie: Elías abrió la puerta (empieza la Noche 2). Se van las sombras de los pies.</summary>
+    public void Terminar()
+    {
+        StopAllCoroutines();
+        alguien = false;
+        if (sombras != null && sombras.Length > 0)
+            sombras[0].transform.parent.gameObject.SetActive(false);
+    }
+
     IEnumerator Tocar()
     {
         alguien = true;

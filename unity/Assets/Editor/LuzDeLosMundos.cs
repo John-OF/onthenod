@@ -29,9 +29,10 @@ public static class LuzDeLosMundos
     {
         if (Lightmapping.isRunning)
             return "Ya se está precalculando la luz.";
-        mundo = Object.FindFirstObjectByType<EstadosDelMundo>();
+        // El escenario con luz precalculada (el 4B); el pasillo del 4º piso tiene sus propios mundos, sin ella.
+        mundo = Object.FindObjectsByType<EstadosDelMundo>(FindObjectsSortMode.None).FirstOrDefault(m => m.tieneLuzPrecalculada);
         if (mundo == null)
-            return "La escena abierta no tiene el componente EstadosDelMundo.";
+            return "La escena abierta no tiene un EstadosDelMundo con luz precalculada.";
         var nombres = mundo.Nombres();
         orden = nombres.Skip(1).Append(nombres[0]).ToArray(); // el del FBX, al final
         paso = 0;
